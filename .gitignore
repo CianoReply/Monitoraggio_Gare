@@ -1,0 +1,30 @@
+# Segreti e configurazione locale
+.env
+.env.*
+!.env.example
+.claude/settings.local.json
+
+# Dati scaricati (documenti di gara, database locali)
+/data/
+
+# Cache Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# Ambienti virtuali
+.venv/
+venv/
+env/
+
+# Editor e sistema operativo
+.vscode/
+.idea/
+.DS_Store
