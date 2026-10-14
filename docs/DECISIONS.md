@@ -2,15 +2,20 @@
 
 > Ogni decisione architetturale si registra qui con una PR approvata da tutti e tre i dev.
 > Formato: contesto, decisione, motivazione, conseguenze. Numerazione progressiva, mai riusata.
-> Le decisioni ADR-001…005 provengono da [docs/source/PIANO_BACKEND.md](source/PIANO_BACKEND.md) e vanno confermate in T0.4.
+> Le decisioni ADR-001…005 provengono da [docs/source/PIANO_BACKEND.md](source/PIANO_BACKEND.md) e sono state confermate in T0.4; ADR-006…010 sono le decisioni D1–D7 di T0.4 ([ARCHITECTURE.md](ARCHITECTURE.md), sezione 5.2).
 
 | ADR | Titolo | Stato |
 |---|---|---|
-| ADR-001 | API di TED invece dello scraping | Proposta |
-| ADR-002 | Nessun agente LLM nel backend | Proposta |
-| ADR-003 | Il repository è l'unica memoria condivisa | Proposta |
-| ADR-004 | Contratto API scritto prima del codice | Proposta |
-| ADR-005 | Punteggio a regole configurabili | Proposta |
+| ADR-001 | API di TED invece dello scraping | Accettata |
+| ADR-002 | Nessun agente LLM nel backend | Accettata |
+| ADR-003 | Il repository è l'unica memoria condivisa | Accettata |
+| ADR-004 | Contratto API scritto prima del codice | Accettata |
+| ADR-005 | Punteggio a regole configurabili | Accettata |
+| ADR-006 | `TenderCreate` vive nel modulo domain | Accettata |
+| ADR-007 | `cpv_codes` come colonna JSON portabile | Accettata |
+| ADR-008 | Al massimo un report per gara | Accettata |
+| ADR-009 | Recupero dei giorni falliti con `run_date` | Accettata |
+| ADR-010 | Punteggio per ogni gara salvata | Accettata |
 
 ---
 
@@ -43,3 +48,33 @@
 - **Decisione:** `compute_score` somma punti per CPV, parole chiave, importo e scadenza, e li converte in un voto da 1 a 5; pesi, parole chiave, CPV core e soglie stanno in `backend/domain/config.yaml`.
 - **Motivazione:** regole trasparenti e modificabili senza toccare il codice.
 - **Conseguenze:** le regole sono documentate in `backend/domain/CLAUDE.md`; ogni modifica dei pesi si verifica con i test delle 10 gare di esempio (T2.3).
+
+## ADR-006 – `TenderCreate` vive nel modulo domain
+- **Contesto:** il parser di DEV-1 (T1.3) restituisce un `TenderCreate`, che il repository di DEV-2 salva (T1.4, T2.1). Il piano non dice in quale modulo stia lo schema.
+- **Decisione:** `TenderCreate` è uno schema Pydantic in `backend/domain/schemas.py`, creato da DEV-2 in T2.1, con gli stessi campi di `tenders` esclusi quelli calcolati (`id`, `relevance_score`, `is_relevant`, `discard_reason`, `created_at`, `updated_at`).
+- **Motivazione:** `domain` è il proprietario del modello dati e non importa gli altri moduli; `ingestion` dipende da `domain`, non il contrario.
+- **Conseguenze:** T1.3 dipende anche da T2.1 (nel calendario T2.1 è in settimana 1, T1.3 in settimana 2). Pydantic è già incluso in FastAPI: nessuna nuova dipendenza.
+
+## ADR-007 – `cpv_codes` come colonna JSON portabile
+- **Contesto:** una gara ha più CPV (procedura e lotti). PostgreSQL ha il tipo array, SQLite (usato nei test) no.
+- **Decisione:** `cpv_codes` è una colonna JSON con una lista di string a 8 cifre, senza duplicati.
+- **Motivazione:** lo stesso modello funziona in produzione e nei test; resta una sola tabella per la gara, come nel piano.
+- **Conseguenze:** il filtro `cpv` per prefisso di `GET /tenders` si implementa in `repository.list_tenders` (T2.1) e va testato su SQLite e PostgreSQL. Se diventa lento, si valuterà una tabella di associazione con un nuovo ADR.
+
+## ADR-008 – Al massimo un report per gara
+- **Contesto:** l'API espone `GET /tenders/{id}/report` al singolare; una rettifica può cambiare i dati di un report già prodotto.
+- **Decisione:** `reports.tender_id` è univoco. Un secondo `POST /tenders/{id}/report` risponde `409`. Dopo una rettifica il report esistente torna `to_review` (T1.4).
+- **Motivazione:** un solo report per gara è sufficiente per la prima versione e semplifica API, revisione e frontend.
+- **Conseguenze:** la sostituzione di un report non è prevista in questa versione; se servirà, si aggiungerà con un nuovo ADR e una modifica del contratto API.
+
+## ADR-009 – Recupero dei giorni falliti con `run_date`
+- **Contesto:** T1.5 chiede che, dopo un'esecuzione fallita, la successiva recuperi anche i giorni mancanti; `ingestion_runs` non registrava quale giorno era stato elaborato.
+- **Decisione:** nuovo campo `ingestion_runs.run_date` (giorno di pubblicazione TED elaborato). Il job elabora, in ordine, ogni giorno fino a ieri che non ha un'esecuzione `success`, partendo dall'ultimo `run_date` riuscito.
+- **Motivazione:** il recupero si basa su dati salvati, non su supposizioni sull'orario dell'ultima esecuzione.
+- **Conseguenze:** un'esecuzione per giorno elaborato; il primo avvio in assoluto elabora solo ieri. Indice su `run_date`.
+
+## ADR-010 – Punteggio per ogni gara salvata
+- **Contesto:** T2.3 chiede che ogni gara salvata abbia un punteggio da 1 a 5; i filtri (T2.2) possono scartare una gara.
+- **Decisione:** il punteggio si calcola per tutte le gare salvate, anche quelle scartate. `is_relevant` è `true` solo se la gara non è scartata e il voto è ≥ soglia.
+- **Motivazione:** il criterio di T2.3 resta verificabile su tutte le righe e si può spiegare perché una gara scartata avrebbe avuto un certo voto.
+- **Conseguenze:** le gare scartate restano in `tenders` con `discard_reason`; se e come esporle nell'API si decide in T0.5.

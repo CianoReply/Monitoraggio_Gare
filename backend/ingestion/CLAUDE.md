@@ -5,7 +5,7 @@
 
 ## Cosa espone agli altri moduli
 - `ted_client.fetch_notices(publication_date) -> list[dict]` (T1.2)
-- `parser.parse_notice(raw: dict) -> TenderCreate` (T1.3; modulo di `TenderCreate`: domanda D1 di ARCHITECTURE)
+- `parser.parse_notice(raw: dict) -> TenderCreate` (T1.3; `TenderCreate` importato da `backend/domain/schemas.py`, ADR-006)
 - `pipeline.run_daily_ingestion(date)` (T1.5), chiamata da `POST /runs` di DEV-3
 
 ## Task del modulo

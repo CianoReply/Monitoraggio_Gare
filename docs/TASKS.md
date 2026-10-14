@@ -22,7 +22,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 |---|---|
 | T0.4 – Modello dati e architettura | tutto lo sviluppo parallelo |
 | T0.5 – Contratto API | tutto lo sviluppo parallelo |
-| T2.1 – Schema del database | T1.4 di DEV-1 e T3.2 di DEV-3 |
+| T2.1 – Schema del database | T1.3 e T1.4 di DEV-1, T3.2 di DEV-3 |
 | T2.2 – Filtri automatici | T1.5 (job giornaliero) |
 | T2.3 – Punteggio di pertinenza | T1.5 (job giornaliero) |
 
@@ -73,16 +73,16 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T0.4 – Modello dati e architettura
 - Responsabile: DEV-1 guida, tutti partecipano
-- Stato: [ ] da fare
+- Stato: [x] fatto
 - Dipende da: T0.1
 - Branch: setup/architecture
 - Durata stimata: 1 giorno
 - Obiettivo: concordare com'è fatta una gara nel nostro sistema; è il primo accordo tra i moduli.
 - Finito quando:
-  - [ ] tutti e tre i dev hanno approvato la PR
-  - [ ] ogni campo ha tipo e significato chiari
-  - [ ] i dubbi aperti sono elencati come domande da chiudere in T1.1
-- Note: la bozza è già in [ARCHITECTURE.md](ARCHITECTURE.md); decisioni da registrare in [DECISIONS.md](DECISIONS.md).
+  - [x] tutti e tre i dev hanno approvato la PR
+  - [x] ogni campo ha tipo e significato chiari
+  - [x] i dubbi aperti sono elencati come domande da chiudere in T1.1
+- Note: approvazione = merge della PR `setup/architecture` (i tre ruoli sono coperti dalla stessa persona). Decisioni D1–D7 in [ARCHITECTURE.md](ARCHITECTURE.md) sezione 5.2 e ADR-006…010 in [DECISIONS.md](DECISIONS.md); prima sintesi TED in sezione 5.1.
 
 ### T0.5 – Contratto API
 - Responsabile: DEV-3 scrive, DEV-1 e DEV-2 approvano
@@ -152,10 +152,11 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 ### T1.3 – Parser: dal formato TED al nostro modello
 - Responsabile: DEV-1
 - Stato: [ ] da fare
-- Dipende da: T1.2, T0.4
+- Dipende da: T1.2, T0.4, T2.1
 - Branch: feat/ted-parser
 - Durata stimata: 2 giorni
 - Obiettivo: trasformare ogni avviso TED in un oggetto `Tender` conforme al modello dati.
+- Note: dipendenza da T2.1 aggiunta in T0.4 (ADR-006: `TenderCreate` vive in `backend/domain/schemas.py`).
 - Finito quando:
   - [ ] tutte le fixture vengono convertite senza errori
   - [ ] un avviso privo di importo e scadenza restituisce `null` per quei campi
@@ -176,7 +177,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 ### T1.5 – Job giornaliero
 - Responsabile: DEV-1
 - Stato: [ ] da fare
-- Dipende da: T1.4, T2.2, T2.3
+- Dipende da: T1.4, T2.2, T2.3, T2.4
 - Branch: feat/scheduler
 - Durata stimata: 1 giorno
 - Obiettivo: eseguire tutto il flusso automaticamente ogni mattina.
@@ -184,7 +185,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
   - [ ] il job parte all'orario configurato (testabile impostando un orario vicino)
   - [ ] una seconda esecuzione contemporanea viene rifiutata
   - [ ] simulando un giorno fallito, il giorno dopo vengono recuperati entrambi
-- Note: il passo 6 della pipeline usa T2.4; la dipendenza è la domanda aperta D3 in [ARCHITECTURE.md](ARCHITECTURE.md).
+- Note: dipendenza da T2.4 aggiunta in T0.4 (decisione D3). Recupero dei giorni falliti basato su `ingestion_runs.run_date` (ADR-009).
 
 ### T1.6 – Registro delle esecuzioni e log
 - Responsabile: DEV-1
@@ -213,7 +214,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
   - [ ] `alembic downgrade base` le rimuove senza errori
   - [ ] `seed.py` popola il database
   - [ ] i test del repository passano
-- Note: include l'inizializzazione di Alembic (`alembic init`) e i comandi delle migrazioni in `CLAUDE.md`.
+- Note: include `backend/domain/schemas.py` con `TenderCreate` (ADR-006), l'inizializzazione di Alembic (`alembic init`) e i comandi delle migrazioni in `CLAUDE.md`.
 
 ### T2.2 – Filtri automatici
 - Responsabile: DEV-2
