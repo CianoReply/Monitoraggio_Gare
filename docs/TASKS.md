@@ -38,22 +38,22 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 - Durata stimata: 0,5 giorni
 - Obiettivo: dare a tutti la stessa struttura di partenza.
 - Finito quando:
-  - [ ] i 3 dev hanno clonato il repository
-  - [ ] `pytest` e `ruff check` si eseguono senza errori (anche senza test)
+  - [x] i 3 dev hanno clonato il repository
+  - [x] `pytest` e `ruff check` si eseguono senza errori (anche senza test)
   - [ ] `main` è protetto
 - Note: struttura, `pyproject.toml`, `.gitignore`, `.env.example` creati in `setup/init`. La protezione di `main` si attiva nelle impostazioni GitHub del repository.
 
 ### T0.2 – Scrittura di `CLAUDE.md`
 - Responsabile: DEV-1 (rivedono DEV-2 e DEV-3)
-- Stato: [~] in corso
+- Stato: [x] fatto
 - Dipende da: T0.1
 - Branch: setup/init
 - Durata stimata: 0,5 giorni
 - Obiettivo: fare in modo che i tre Claude seguano le stesse regole.
 - Finito quando:
-  - [ ] DEV-2 e DEV-3 hanno approvato la PR
-  - [ ] in una nuova sessione, alla domanda "quali sono le regole del progetto?", Claude risponde correttamente
-- Note: `CLAUDE.md` radice e i 3 di modulo scritti senza `/init`; DEV-1 mostra `/init` nella demo confrontandolo con il file versionato.
+  - [x] DEV-2 e DEV-3 hanno approvato la PR
+  - [x] in una nuova sessione, alla domanda "quali sono le regole del progetto?", Claude risponde correttamente
+- Note: PR #1 unita il 2026-10-14; regole verificate con un subagent a contesto nuovo. `CLAUDE.md` radice e i 3 di modulo scritti senza `/init`; DEV-1 mostra `/init` nella demo confrontandolo con il file versionato.
 
 ### T0.3 – Configurazione condivisa di Claude (`.claude/`)
 - Responsabile: DEV-1 (hook preparati con DEV-3)
@@ -63,9 +63,10 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 - Durata stimata: 1 giorno
 - Obiettivo: dare a tutti gli stessi permessi, hook, subagent e comandi.
 - Finito quando:
-  - [ ] ognuno dei tre dev ha provato `/my-tasks` e ottiene i propri task
+  - [x] ognuno dei tre dev ha provato `/my-tasks` e ottiene i propri task
   - [ ] una modifica a `.env` tramite Claude viene bloccata
-  - [ ] un errore di lint introdotto di proposito viene segnalato dall'hook
+    (2026-10-14: Read ed Edit bloccati; una scrittura con redirect Bash `>` non è stata bloccata nella sessione cloud: DA VERIFICARE in locale)
+  - [x] un errore di lint introdotto di proposito viene segnalato dall'hook
 - Note: creati permessi, hook `PostToolUse` (ruff, script `.claude/hooks/ruff_check.py`), 3 subagent e 3 comandi; sintassi verificata sulla documentazione ufficiale di Claude Code il 2026-10-13.
   DA VERIFICARE: hook e comandi su Windows (usano `python3` e `date`).
   **Hook da configurare (con DEV-3):** `PreToolUse` che blocca le modifiche a `.env`, `docs/API_CONTRACT.yaml`, `docs/ARCHITECTURE.md` (da decidere come conciliarlo con le modifiche richieste esplicitamente) e `Stop` che esegue i test del modulo.
@@ -98,14 +99,14 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T0.6 – Compilazione di `docs/TASKS.md` e dei file di coordinamento
 - Responsabile: DEV-1
-- Stato: [~] in corso
+- Stato: [x] fatto
 - Dipende da: T0.1, T0.2
 - Branch: setup/init
 - Durata stimata: 0,5 giorni
 - Obiettivo: creare il file di riferimento da cui ogni dev e ogni Claude sa cosa fare, più i documenti di supporto.
 - Finito quando:
-  - [ ] `/my-tasks DEV-1`, `/my-tasks DEV-2` e `/my-tasks DEV-3` restituiscono i task corretti
-  - [ ] tutti i link relativi tra i documenti puntano a file esistenti
+  - [x] `/my-tasks DEV-1`, `/my-tasks DEV-2` e `/my-tasks DEV-3` restituiscono i task corretti
+  - [x] tutti i link relativi tra i documenti puntano a file esistenti
 
 ### T0.7 – Ambiente locale con Docker
 - Responsabile: DEV-3
