@@ -4,7 +4,7 @@
 - **Scopo:** passi ④ Filtro e ⑤ Punteggio, schema del database, documenti di gara e report.
 
 ## Cosa espone agli altri moduli
-- `models.py`: modelli SQLAlchemy delle 5 tabelle di `docs/ARCHITECTURE.md` (T2.1)
+- `models.py`: modelli SQLAlchemy delle 5 tabelle; `schemas.py`: `TenderCreate` (T2.1, ADR-006)
 - `repository.py`: `upsert_tender`, `list_tenders` (filtri e paginazione), `get_tender` (T2.1)
 - `filters.py`: una funzione per regola, esito "tenuta" o "scartata con motivo" (T2.2)
 - `scoring.compute_score(tender) -> int` (T2.3)
