@@ -1,0 +1,43 @@
+"""Ambiente Alembic: l'URL del database arriva da `DATABASE_URL` (o da `sqlalchemy.url`)."""
+
+from alembic import context
+from sqlalchemy import Connection, create_engine, pool
+
+from backend.domain.database import get_database_url
+from backend.domain.models import Base
+
+config = context.config
+target_metadata = Base.metadata
+
+
+def _url() -> str:
+    return config.get_main_option("sqlalchemy.url") or get_database_url()
+
+
+def _run(connection: Connection) -> None:
+    context.configure(connection=connection, target_metadata=target_metadata, compare_type=True)
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+def run_migrations_offline() -> None:
+    context.configure(url=_url(), target_metadata=target_metadata, literal_binds=True)
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+def run_migrations_online() -> None:
+    # Una connessione già aperta (usata dai test) ha la precedenza sull'URL.
+    connection = config.attributes.get("connection")
+    if connection is not None:
+        _run(connection)
+        return
+    engine = create_engine(_url(), poolclass=pool.NullPool)
+    with engine.connect() as conn:
+        _run(conn)
+
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()
