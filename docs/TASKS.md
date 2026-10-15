@@ -112,15 +112,16 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T0.7 – Ambiente locale con Docker
 - Responsabile: DEV-3
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge 2b9580b) – avvio con Docker IN ATTESA UMANA
 - Dipende da: T0.1
 - Branch: setup/docker
 - Durata stimata: 0,5 giorni
 - Obiettivo: dare a tutti lo stesso ambiente con un solo comando.
 - Finito quando:
-  - [ ] i 3 dev avviano l'ambiente con `docker compose up` sul proprio computer
-  - [ ] `GET /health` risponde `200`
+  - [ ] IN ATTESA UMANA – i 3 dev avviano l'ambiente con `docker compose up` sul proprio computer (Docker non installato sulla macchina del loop)
+  - [x] `GET /health` risponde `200` (verificato con uvicorn in locale; nel container DA VERIFICARE)
 - Note: produce `docker-compose.yml` (servizi `db` e `api`), completa `.env.example` e documenta l'avvio in `CLAUDE.md` e [ONBOARDING.md](ONBOARDING.md).
+- Esito: `Dockerfile`, `docker-compose.yml` (db PostgreSQL 16 + api con migrazioni all'avvio, porte solo su 127.0.0.1), `.dockerignore`, `.env.example` completato, sezione in [ONBOARDING.md](ONBOARDING.md); 14 test statici.
 
 ---
 
