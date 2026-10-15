@@ -1,15 +1,10 @@
 """Verifica che docs/API_CONTRACT.yaml sia un documento OpenAPI valido (T0.5). Nessuna rete."""
 
 from collections.abc import Iterator
-from pathlib import Path
 from typing import Any
 
-import pytest
 from openapi_schema_validator import OAS31Validator, oas31_format_checker
 from openapi_spec_validator import validate
-from openapi_spec_validator.readers import read_from_filename
-
-CONTRACT = Path(__file__).resolve().parents[2] / "docs" / "API_CONTRACT.yaml"
 
 EXPECTED_OPERATIONS = {
     ("get", "/tenders"),
@@ -25,12 +20,6 @@ EXPECTED_OPERATIONS = {
     ("get", "/health"),
 }
 HTTP_METHODS = {"get", "post", "put", "patch", "delete"}
-
-
-@pytest.fixture(scope="module")
-def spec() -> dict:
-    data, _ = read_from_filename(str(CONTRACT))
-    return data
 
 
 def test_contract_is_valid_openapi(spec: dict) -> None:

@@ -13,13 +13,17 @@ T0.5 contratto · T0.7 Docker · T3.1 scheletro · T3.2 elenco gare · T3.3 dett
 ## Regole specifiche
 - Il contratto viene prima del codice: gli schemi Pydantic seguono esattamente `docs/API_CONTRACT.yaml`.
 - Per cambiare il contratto serve una PR approvata da tutti e tre i dev.
-- Gli errori usano sempre il formato `{ "error": "codice", "message": "descrizione" }`.
+- Gli errori usano sempre il formato `{ "error": "codice", "message": "descrizione" }`: `backend/api/errors.py` registra gli handler per `ApiError` (404/409/422 applicativi), `RequestValidationError` (422 `validation_error`) e gli errori HTTP di Starlette. Per un errore solleva `ApiError(status, codice, messaggio)`, mai `HTTPException`.
+- Gli schemi Pydantic stanno in `schemas.py`; `tests/test_api_skeleton.py` verifica che `/openapi.json` coincida con il contratto (percorsi, parametri, codici di risposta) e che le risposte rispettino gli schemi del contratto.
+- Il parametro `from` di `/deadlines` è `from_` in Python con `alias="from"`.
 - I dati si leggono solo tramite `backend/domain/repository.py`; nessuna regola di business nell'API.
 - L'avvio manuale (`POST /runs`) chiama `run_daily_ingestion` di DEV-1 in background: `202`, oppure `409` se già in corso.
 - `page_size` predefinito 20, massimo 100; parametri non validi → `422` con messaggio chiaro.
 - `/security-review` su ogni PR che tocca input esterni (client TED, download, endpoint).
 
 ## Da completare
-- Comando di avvio dell'API e dell'ambiente Docker (T3.1, T0.7).
-- Configurazione CORS per il frontend (T3.1).
+- Ambiente Docker (T0.7).
+- Avvio locale dell'API (T3.1): `uvicorn backend.api.main:app --reload`, documentazione su `/docs`. Da riportare nel `CLAUDE.md` radice (file condiviso: proposta al lead).
+- CORS (T3.1): origini da `CORS_ORIGINS` (separate da virgola), predefinite `http://localhost:3000` e `http://localhost:5173`; l'indirizzo reale del frontend è DA VERIFICARE.
+- Stato: i router restituiscono i dati di prova di `sample_data.py` (T3.1); T3.2-T3.5 li sostituiscono con il repository.
 - Pipeline CI e test di conformità al contratto (T3.6).
