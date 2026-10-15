@@ -398,13 +398,15 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T4.3 – Revisione incrociata finale
 - Responsabile: Tutti
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge 1358289)
 - Dipende da: T4.2
 - Branch: docs/final-review
 - Durata stimata: 1 giorno
 - Obiettivo: rivedere a turno il modulo di un altro dev e aggiornare la documentazione con quanto imparato.
 - Finito quando:
-  - [ ] non restano segnalazioni critiche aperte
+  - [x] non restano segnalazioni critiche aperte
+- Esito: Revisione a rotazione (DEV-1 → domain, DEV-2 → api, DEV-3 → ingestion) più security review dell'intero backend: 0 segnalazioni critiche. Correzioni unite: ingestion (9e6c34f, e9a6d45), api (5e7f2d3, 1358289), domain (05775ee). Limiti accettati da far decidere all'utente: API senza autenticazione (ADR-015 proposta), hook di `.claude/` su Windows, versioni delle dipendenze non fissate, `maxLength` e `local_path` nel contratto.
+
 
 ---
 
