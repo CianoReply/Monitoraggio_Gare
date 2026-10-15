@@ -86,3 +86,4 @@ Per le regole di coordinamento prevale il prompt del loop; per il contenuto tecn
 | 2026-10-15 | MERGED T3.1 – 1cd7ba0 – develop 144 + 1 saltato (2 giri). SBLOCCATI T3.2 (in corso) e T3.6 (DEV-3). Revisione T2.2: MODIFICHE RICHIESTE giro 1. ADR-013 (TOML). T1.1: fixture reali TED raccolte (avvisi IT del 2026-10-14 e change notice). |
 | 2026-10-15 | MERGED T1.1 – 58008a5 – develop 151 + 1 saltato. T1.2 in corso (DEV-1). DEV-2: PRONTO T2.2 giro 2. DEV-3: PRONTO T3.2 (revisione avviata). |
 | 2026-10-15 | MERGED T2.2 – 10513aa – develop 222 + 1 saltato (2 giri). SBLOCCATO T2.3 (DEV-2, in corso). Revisione T3.2: MODIFICHE RICHIESTE giro 1 (test del fuso, deps, q, cpv). DEV-1: T1.2 pronto (e47f50c), revisione avviata. |
+| 2026-10-15 | MERGED T3.2 – a453b32 (DEV-3) e T1.2 – 8e30217 (DEV-1); develop 316 + 1 saltato. In corso: T2.3 (DEV-2), T3.6 (DEV-3), T1.3 (DEV-1). |

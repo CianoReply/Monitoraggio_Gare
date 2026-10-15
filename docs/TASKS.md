@@ -142,19 +142,21 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T1.2 – Client API di TED
 - Responsabile: DEV-1
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge 8e30217)
 - Dipende da: T1.1
 - Branch: feat/ted-client
 - Durata stimata: 2 giorni
 - Obiettivo: avere una funzione che, data una data, restituisce tutte le gare italiane IT pubblicate in quel giorno.
 - Finito quando:
-  - [ ] i test passano senza connessione a internet (usano le fixture)
-  - [ ] un test simula un errore 500 e verifica i 3 tentativi
-  - [ ] un'esecuzione reale su un giorno recente restituisce gare
+  - [x] i test passano senza connessione a internet (usano le fixture)
+  - [x] un test simula un errore 500 e verifica i 3 tentativi
+  - [x] un'esecuzione reale su un giorno recente restituisce gare
+- Esito: revisione con code-reviewer (1 giro: risposte 200 non valide, fine paginazione robusta); esecuzione reale 2026-10-15: 16 avvisi del 2026-10-13, 9 del 2026-10-14. Ritentativi: prima richiesta + 3 (attese 1, 2, 4 s), anche su 429.
+
 
 ### T1.3 – Parser: dal formato TED al nostro modello
 - Responsabile: DEV-1
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T1.2, T0.4, T2.1
 - Branch: feat/ted-parser
 - Durata stimata: 2 giorni
@@ -286,14 +288,16 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T3.2 – Elenco delle gare (`GET /tenders`)
 - Responsabile: DEV-3
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge a453b32)
 - Dipende da: T3.1, T2.1
 - Branch: feat/api-tenders-list
 - Durata stimata: 1,5 giorni
 - Obiettivo: restituire l'elenco delle gare dal database reale, con filtri, ordinamento e paginazione.
 - Finito quando:
-  - [ ] ogni filtro ha un test
-  - [ ] con i dati di `seed.py` la risposta è conforme al contratto
+  - [x] ogni filtro ha un test
+  - [x] con i dati di `seed.py` la risposta è conforme al contratto
+- Esito: 2 giri di revisione; test del fuso con attese indipendenti, `q` con escape di `%`/`_`, `cpv` per prefisso; `ValueError` del repository → 422.
+
 
 ### T3.3 – Dettaglio, documenti e report
 - Responsabile: DEV-3
@@ -330,7 +334,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T3.6 – Qualità, sicurezza e CI
 - Responsabile: DEV-3
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T0.3
 - Branch: setup/ci
 - Durata stimata: 1,5 giorni (poi continuativo)
