@@ -241,9 +241,18 @@ def list_tenders(
 DEFAULT_RUNS_LIMIT = 20
 
 
+def _as_utc(moment: datetime | None) -> datetime:
+    """Istante in UTC (SQLite non conserva il fuso): `None` = adesso, naive = ValueError."""
+    if moment is None:
+        return utcnow()
+    if moment.tzinfo is None:
+        raise ValueError("now deve avere il fuso orario (datetime aware)")
+    return moment.astimezone(UTC)
+
+
 def start_run(session: Session, run_date: date, now: datetime | None = None) -> IngestionRun:
     """Registra l'inizio dell'elaborazione del giorno `run_date` (stato `running`)."""
-    run = IngestionRun(run_date=run_date, started_at=now or utcnow(), status=RunStatus.RUNNING)
+    run = IngestionRun(run_date=run_date, started_at=_as_utc(now), status=RunStatus.RUNNING)
     session.add(run)
     session.flush()
     return run
@@ -267,8 +276,9 @@ def finish_run(
     counts = (fetched_count, new_count, updated_count, relevant_count)
     if any(count < 0 for count in counts):
         raise ValueError("i conteggi devono essere >= 0")
+    finished_at = _as_utc(now)
     run.status = status
-    run.finished_at = now or utcnow()
+    run.finished_at = finished_at
     run.fetched_count = fetched_count
     run.new_count = new_count
     run.updated_count = updated_count
