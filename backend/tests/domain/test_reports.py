@@ -133,6 +133,15 @@ REPORT_CASES: list[tuple[str, Any]] = [
     ("field is_critical string", with_field(is_critical="si")),
     ("field is_critical missing", with_field(is_critical="__remove__")),
     ("field not object", report_payload(fields=["x"])),
+    ("generated_at null", report_payload(generated_at=None)),
+    ("generated_at number", report_payload(generated_at=1760000000)),
+    ("summary null", report_payload(summary=None)),
+    ("field value null", with_field(value=None)),
+    ("field label null", with_field(label=None)),
+    ("field source_doc null", with_field(source_doc=None)),
+    ("field is_critical null", with_field(is_critical=None)),
+    ("field source_page null", with_field(source_page=None)),
+    ("field source_page missing", with_field(source_page="__remove__")),
     ("not an object", ["x"]),
 ]
 
@@ -148,6 +157,10 @@ REVIEW_CASES: list[tuple[str, Any]] = [
     ("empty reviewer", {"action": "confirm", "reviewer": ""}),
     ("extra key", {"action": "confirm", "reviewer": "G", "x": 1}),
     ("reviewer not string", {"action": "confirm", "reviewer": 3}),
+    ("reviewer null", {"action": "confirm", "reviewer": None}),
+    ("value null with correct", {"action": "correct", "value": None, "reviewer": "G"}),
+    ("action null", {"action": None, "reviewer": "G"}),
+    ("confirm with value null", {"action": "confirm", "value": None, "reviewer": "G"}),
 ]
 
 

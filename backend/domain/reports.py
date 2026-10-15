@@ -11,8 +11,9 @@ Regole:
   `original_value` (solo la prima correzione lo imposta);
 - dopo ogni revisione lo stato del report è ricalcolato: `verified` solo se TUTTI i campi critici
   sono `verified` (un report senza campi critici diventa quindi `verified` alla prima revisione);
-- quando il report è `verified`, `ai_label` riporta l'ultimo revisore e la data (AAAA-MM-GG, UTC);
+- quando il report è `verified`, `ai_label` riporta l'ultimo revisore e la data (AAAA-MM-GG);
   se torna `to_review` (es. dopo una rettifica) l'etichetta resta l'ultima fino alla riverifica.
+  La data è quella di Europe/Rome; gli orari si salvano in UTC e `now` deve avere il fuso orario.
 
 Le funzioni fanno solo `flush`. Gli errori sono eccezioni dedicate con `code` e `message`:
 404 (`TenderNotFoundError`, `ReportNotFoundError`, `FieldNotFoundError`), 409
@@ -23,9 +24,10 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any, Literal, Self
+from zoneinfo import ZoneInfo
 
 from pydantic import (
     AwareDatetime,
@@ -36,9 +38,11 @@ from pydantic import (
     StrictInt,
     StrictStr,
     ValidationError,
+    field_validator,
     model_validator,
 )
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from backend.domain.models import (
@@ -52,6 +56,13 @@ from backend.domain.models import (
 
 REPORT_SCHEMA_PATH = Path(__file__).with_name("report_schema.json")
 LABEL_TO_REVIEW = "Contenuto generato con IA – da revisionare"
+ROME = ZoneInfo("Europe/Rome")  # la data dell'etichetta è quella italiana, come in /deadlines
+
+# Lunghezze massime delle colonne (models.py). Il contratto non le dichiara (proposta per T4.3:
+# aggiungere maxLength), quindi si controllano qui, dopo lo schema, per rispondere 422 e non 500.
+MAX_LABEL_LENGTH = 200
+MAX_SOURCE_DOC_LENGTH = 500
+MAX_REVIEWER_LENGTH = 200
 
 
 def label_verified(reviewer: str, day: date) -> str:
@@ -90,9 +101,6 @@ class ReportNotFoundError(ReportError):
     """404: il report (o la gara senza report) non esiste."""
 
     code = "report_not_found"
-
-    def __init__(self, message: str) -> None:
-        super().__init__(message)
 
 
 class FieldNotFoundError(ReportError):
@@ -147,6 +155,16 @@ class ReportCreate(BaseModel):
     generated_at: AwareDatetime | None = None
     fields: list[ReportFieldCreate] = Field(min_length=1)
 
+    @field_validator("generated_at", mode="before")
+    @classmethod
+    def _only_iso_string(cls, value: Any) -> Any:
+        """Come nello schema (`type: string`): niente null esplicito né numeri."""
+        if value is None:
+            raise ValueError("non può essere null")
+        if not isinstance(value, str | datetime):
+            raise ValueError("deve essere una stringa ISO 8601")
+        return value
+
 
 class FieldReview(BaseModel):
     """Revisione di un campo (corpo di `PATCH /reports/{id}/fields/{field_id}`)."""
@@ -156,6 +174,14 @@ class FieldReview(BaseModel):
     action: Literal["confirm", "correct"]
     value: StrictStr | None = Field(default=None, min_length=1)
     reviewer: StrictStr = Field(min_length=1)
+
+    @field_validator("value", mode="before")
+    @classmethod
+    def _value_not_null(cls, value: Any) -> Any:
+        """Come nello schema (`type: string`): se c'è, `value` non può essere null."""
+        if value is None:
+            raise ValueError("non può essere null")
+        return value
 
     @model_validator(mode="after")
     def _correct_needs_value(self) -> Self:
@@ -177,6 +203,10 @@ _MESSAGES = {
     "dict_type": "deve essere un oggetto",
     "literal_error": "valore non ammesso (usa confirm o correct)",
     "model_type": "deve essere un oggetto",
+    "timezone_aware": "deve includere il fuso orario (es. +01:00)",
+    "datetime_type": "deve essere una data e ora in formato ISO 8601",
+    "datetime_parsing": "data e ora non valide (usa ISO 8601, es. 2026-10-14T09:15:00+00:00)",
+    "datetime_from_date_parsing": "data non valida (usa ISO 8601, es. 2026-10-14T09:15:00+00:00)",
 }
 
 
@@ -205,6 +235,33 @@ def validate_report(payload: Mapping[str, Any] | ReportCreate) -> ReportCreate:
 def validate_field_review(payload: Mapping[str, Any] | FieldReview) -> FieldReview:
     """Valida una revisione di campo; solleva `ReportValidationError`."""
     return _validate(FieldReview, payload, "Revisione")
+
+
+def _check_lengths(what: str, checks: list[tuple[str, str, int]]) -> None:
+    """Controlla le lunghezze massime delle colonne: 422 chiaro invece di un errore del database.
+
+    `checks` contiene (percorso del campo, valore, massimo).
+    """
+    errors = [
+        f"{where}: troppo lungo ({len(value)} caratteri, massimo {maximum})"
+        for where, value, maximum in checks
+        if len(value) > maximum
+    ]
+    if errors:
+        raise ReportValidationError(what, errors)
+
+
+def _aware(moment: datetime | None) -> datetime:
+    """Istante in UTC (SQLite non conserva il fuso): `None` = adesso, naive = ValueError."""
+    if moment is None:
+        return utcnow()
+    if moment.tzinfo is None:
+        raise ValueError("now deve avere il fuso orario (datetime aware)")
+    return moment.astimezone(UTC)
+
+
+def _report_exists(session: Session, tender_id: int) -> bool:
+    return session.scalar(select(Report.id).where(Report.tender_id == tender_id)) is not None
 
 
 # --- Funzioni per l'API ---
@@ -242,15 +299,27 @@ def create_report(
     e l'etichetta "da revisionare"; `generated_at` è quello della Skill o l'istante di `now`.
     """
     data = validate_report(payload)
+    _check_lengths(
+        "Report",
+        [
+            (f"fields.{i}.{name}", getattr(f, name), maximum)
+            for i, f in enumerate(data.fields)
+            for name, maximum in (
+                ("label", MAX_LABEL_LENGTH),
+                ("source_doc", MAX_SOURCE_DOC_LENGTH),
+            )
+        ],
+    )
+    created_at = _aware(now)
     if session.get(Tender, tender_id) is None:
         raise TenderNotFoundError(tender_id)
-    if session.scalar(select(Report.id).where(Report.tender_id == tender_id)) is not None:
+    if _report_exists(session, tender_id):
         raise ReportAlreadyExistsError(tender_id)
     report = Report(
         tender_id=tender_id,
         summary=data.summary,
         status=ReportStatus.TO_REVIEW,
-        generated_at=data.generated_at or now or utcnow(),
+        generated_at=data.generated_at.astimezone(UTC) if data.generated_at else created_at,
         ai_label=LABEL_TO_REVIEW,
         fields=[
             ReportField(
@@ -264,8 +333,15 @@ def create_report(
             for f in data.fields
         ],
     )
-    session.add(report)
-    session.flush()
+    try:
+        # savepoint: se una richiesta concorrente ha creato il report, la sessione resta usabile
+        with session.begin_nested():
+            session.add(report)
+            session.flush()
+    except IntegrityError as exc:
+        if _report_exists(session, tender_id):
+            raise ReportAlreadyExistsError(tender_id) from exc
+        raise
     return report
 
 
@@ -293,12 +369,13 @@ def review_field(
     Errori: `ReportValidationError` (422), `ReportNotFoundError` / `FieldNotFoundError` (404).
     """
     data = validate_field_review(review)
+    _check_lengths("Revisione", [("reviewer", data.reviewer, MAX_REVIEWER_LENGTH)])
+    moment = _aware(now)
     report = get_report(session, report_id)
     field = next((f for f in report.fields if f.id == field_id), None)
     if field is None:
         raise FieldNotFoundError(report_id, field_id)
 
-    moment = now or utcnow()
     if data.action == "correct":
         if field.original_value is None:
             field.original_value = field.value
@@ -309,6 +386,6 @@ def review_field(
 
     report.status = compute_report_status(report)
     if report.status == ReportStatus.VERIFIED:
-        report.ai_label = label_verified(data.reviewer, moment.date())
+        report.ai_label = label_verified(data.reviewer, moment.astimezone(ROME).date())
     session.flush()
     return report
