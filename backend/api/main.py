@@ -23,7 +23,8 @@ def create_app() -> FastAPI:
         description="Gare IT con ente appaltante italiano raccolte da TED. "
         "Contratto: docs/API_CONTRACT.yaml.",
     )
-    origins = os.environ.get("CORS_ORIGINS", DEFAULT_CORS_ORIGINS).split(",")
+    # Variabile assente o vuota (es. `CORS_ORIGINS=` nel file locale): valgono le predefinite.
+    origins = (os.environ.get("CORS_ORIGINS") or DEFAULT_CORS_ORIGINS).split(",")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[o.strip() for o in origins if o.strip()],

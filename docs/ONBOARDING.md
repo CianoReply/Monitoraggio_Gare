@@ -17,7 +17,21 @@ Guida per DEV-2 e DEV-3. Tempo stimato: 30 minuti. Se un passo non funziona, scr
 | 9 | Leggi le regole | [CLAUDE.md](../CLAUDE.md) radice, poi il `CLAUDE.md` del tuo modulo |
 | 10 | Prendi il primo task | vedi la sezione del tuo ruolo qui sotto |
 
-L'ambiente Docker (`docker compose up`) arriva con T0.7: fino ad allora si lavora con l'ambiente virtuale.
+### Ambiente Docker (T0.7)
+
+Per avere PostgreSQL e API con un solo comando serve Docker con Compose v2 (DA VERIFICARE sui computer dei dev: il compose non è stato provato).
+
+| Azione | Comando |
+|---|---|
+| Avvio (database, migrazioni, API) | `docker compose up --build` |
+| Verifica | `curl http://localhost:8000/health` risponde `{"status":"ok"}`; documentazione su `http://localhost:8000/docs` |
+| Dati fittizi | `docker compose exec api python -m backend.domain.seed` |
+| Stop | `docker compose down` (con `-v` cancella anche il database e i documenti) |
+
+- Il compose legge le variabili dal file `.env` (passo 5); se manca o i valori sono vuoti valgono i predefiniti di sviluppo, quindi `docker compose up` funziona anche subito dopo il clone. Variabili: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_PORT`, `API_PORT`, `CORS_ORIGINS`, `TED_API_URL`, `TED_CPV_PREFIXES`.
+- Le migrazioni (`alembic -c backend/domain/alembic.ini upgrade head`) si applicano a ogni avvio dell'API.
+- Database e API sono raggiungibili solo da `localhost`. Il database ha dati persistenti nel volume `db_data`.
+- Senza Docker si lavora con l'ambiente virtuale e `uvicorn backend.api.main:app --reload`, con `DATABASE_URL` impostata (es. `sqlite:///radar.db`).
 
 ## 2. Cosa leggere, in ordine
 
