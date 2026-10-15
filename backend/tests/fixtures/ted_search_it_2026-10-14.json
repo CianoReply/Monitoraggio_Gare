@@ -1,0 +1,1748 @@
+{
+  "request": {
+    "query": "buyer-country=ITA AND classification-cpv IN (72* 48* 302* 324* 642*) AND publication-date=20261014",
+    "fields": [
+      "publication-number",
+      "notice-identifier",
+      "notice-version",
+      "notice-type",
+      "form-type",
+      "procedure-type",
+      "contract-nature-main-proc",
+      "publication-date",
+      "dispatch-date",
+      "notice-title",
+      "title-proc",
+      "title-lot",
+      "description-proc",
+      "buyer-name",
+      "buyer-city",
+      "buyer-country",
+      "organisation-name-buyer",
+      "organisation-city-buyer",
+      "classification-cpv",
+      "main-classification-proc",
+      "main-classification-lot",
+      "estimated-value-proc",
+      "estimated-value-cur-proc",
+      "estimated-value-lot",
+      "estimated-value-cur-lot",
+      "estimated-value-glo",
+      "estimated-value-cur-glo",
+      "deadline-receipt-tender-date-lot",
+      "deadline-receipt-tender-time-lot",
+      "deadline-date-lot",
+      "deadline",
+      "document-url-lot",
+      "submission-url-lot",
+      "identifier-lot",
+      "procedure-identifier",
+      "change-notice-version-identifier",
+      "change-description",
+      "change-reason-code",
+      "change-previous-notice-section-identifier",
+      "previous-notice-id-proc",
+      "links"
+    ],
+    "limit": 200,
+    "page": 1
+  },
+  "response": {
+    "notices": [
+      {
+        "deadline-receipt-tender-date-lot": [
+          "2026-11-16+02:00"
+        ],
+        "notice-type": "cn-standard",
+        "publication-number": "707611-2026",
+        "main-classification-lot": [
+          "72500000"
+        ],
+        "main-classification-proc": [
+          "72500000"
+        ],
+        "submission-url-lot": [
+          "https://pizzo.tuttogare.it/gare/dettaglio.php?codice=249"
+        ],
+        "procedure-identifier": "5c70e0d3-e514-41d4-a993-1927e3e7870d",
+        "document-url-lot": [
+          "https://pizzo.tuttogare.it/gare/dettaglio.php?codice=249"
+        ],
+        "publication-date": "2026-10-14+02:00",
+        "estimated-value-proc": "293278.68",
+        "contract-nature-main-proc": "services",
+        "links": {
+          "xml": {
+            "MUL": "https://ted.europa.eu/en/notice/707611-2026/xml"
+          },
+          "pdf": {
+            "BUL": "https://ted.europa.eu/bg/notice/707611-2026/pdf",
+            "SPA": "https://ted.europa.eu/es/notice/707611-2026/pdf",
+            "CES": "https://ted.europa.eu/cs/notice/707611-2026/pdf",
+            "DAN": "https://ted.europa.eu/da/notice/707611-2026/pdf",
+            "DEU": "https://ted.europa.eu/de/notice/707611-2026/pdf",
+            "EST": "https://ted.europa.eu/et/notice/707611-2026/pdf",
+            "ELL": "https://ted.europa.eu/el/notice/707611-2026/pdf",
+            "ENG": "https://ted.europa.eu/en/notice/707611-2026/pdf",
+            "FRA": "https://ted.europa.eu/fr/notice/707611-2026/pdf",
+            "GLE": "https://ted.europa.eu/ga/notice/707611-2026/pdf",
+            "HRV": "https://ted.europa.eu/hr/notice/707611-2026/pdf",
+            "ITA": "https://ted.europa.eu/it/notice/707611-2026/pdf",
+            "LAV": "https://ted.europa.eu/lv/notice/707611-2026/pdf",
+            "LIT": "https://ted.europa.eu/lt/notice/707611-2026/pdf",
+            "HUN": "https://ted.europa.eu/hu/notice/707611-2026/pdf",
+            "MLT": "https://ted.europa.eu/mt/notice/707611-2026/pdf",
+            "NLD": "https://ted.europa.eu/nl/notice/707611-2026/pdf",
+            "POL": "https://ted.europa.eu/pl/notice/707611-2026/pdf",
+            "POR": "https://ted.europa.eu/pt/notice/707611-2026/pdf",
+            "RON": "https://ted.europa.eu/ro/notice/707611-2026/pdf",
+            "SLK": "https://ted.europa.eu/sk/notice/707611-2026/pdf",
+            "SLV": "https://ted.europa.eu/sl/notice/707611-2026/pdf",
+            "FIN": "https://ted.europa.eu/fi/notice/707611-2026/pdf",
+            "SWE": "https://ted.europa.eu/sv/notice/707611-2026/pdf"
+          },
+          "pdfs": {
+            "ITA": "https://ted.europa.eu/it/notice/707611-2026/pdfs"
+          },
+          "html": {
+            "BUL": "https://ted.europa.eu/bg/notice/-/detail/707611-2026",
+            "SPA": "https://ted.europa.eu/es/notice/-/detail/707611-2026",
+            "CES": "https://ted.europa.eu/cs/notice/-/detail/707611-2026",
+            "DAN": "https://ted.europa.eu/da/notice/-/detail/707611-2026",
+            "DEU": "https://ted.europa.eu/de/notice/-/detail/707611-2026",
+            "EST": "https://ted.europa.eu/et/notice/-/detail/707611-2026",
+            "ELL": "https://ted.europa.eu/el/notice/-/detail/707611-2026",
+            "ENG": "https://ted.europa.eu/en/notice/-/detail/707611-2026",
+            "FRA": "https://ted.europa.eu/fr/notice/-/detail/707611-2026",
+            "GLE": "https://ted.europa.eu/ga/notice/-/detail/707611-2026",
+            "HRV": "https://ted.europa.eu/hr/notice/-/detail/707611-2026",
+            "ITA": "https://ted.europa.eu/it/notice/-/detail/707611-2026",
+            "LAV": "https://ted.europa.eu/lv/notice/-/detail/707611-2026",
+            "LIT": "https://ted.europa.eu/lt/notice/-/detail/707611-2026",
+            "HUN": "https://ted.europa.eu/hu/notice/-/detail/707611-2026",
+            "MLT": "https://ted.europa.eu/mt/notice/-/detail/707611-2026",
+            "NLD": "https://ted.europa.eu/nl/notice/-/detail/707611-2026",
+            "POL": "https://ted.europa.eu/pl/notice/-/detail/707611-2026",
+            "POR": "https://ted.europa.eu/pt/notice/-/detail/707611-2026",
+            "RON": "https://ted.europa.eu/ro/notice/-/detail/707611-2026",
+            "SLK": "https://ted.europa.eu/sk/notice/-/detail/707611-2026",
+            "SLV": "https://ted.europa.eu/sl/notice/-/detail/707611-2026",
+            "FIN": "https://ted.europa.eu/fi/notice/-/detail/707611-2026",
+            "SWE": "https://ted.europa.eu/sv/notice/-/detail/707611-2026"
+          },
+          "htmlDirect": {
+            "BUL": "https://ted.europa.eu/bg/notice/707611-2026/html",
+            "SPA": "https://ted.europa.eu/es/notice/707611-2026/html",
+            "CES": "https://ted.europa.eu/cs/notice/707611-2026/html",
+            "DAN": "https://ted.europa.eu/da/notice/707611-2026/html",
+            "DEU": "https://ted.europa.eu/de/notice/707611-2026/html",
+            "EST": "https://ted.europa.eu/et/notice/707611-2026/html",
+            "ELL": "https://ted.europa.eu/el/notice/707611-2026/html",
+            "ENG": "https://ted.europa.eu/en/notice/707611-2026/html",
+            "FRA": "https://ted.europa.eu/fr/notice/707611-2026/html",
+            "GLE": "https://ted.europa.eu/ga/notice/707611-2026/html",
+            "HRV": "https://ted.europa.eu/hr/notice/707611-2026/html",
+            "ITA": "https://ted.europa.eu/it/notice/707611-2026/html",
+            "LAV": "https://ted.europa.eu/lv/notice/707611-2026/html",
+            "LIT": "https://ted.europa.eu/lt/notice/707611-2026/html",
+            "HUN": "https://ted.europa.eu/hu/notice/707611-2026/html",
+            "MLT": "https://ted.europa.eu/mt/notice/707611-2026/html",
+            "NLD": "https://ted.europa.eu/nl/notice/707611-2026/html",
+            "POL": "https://ted.europa.eu/pl/notice/707611-2026/html",
+            "POR": "https://ted.europa.eu/pt/notice/707611-2026/html",
+            "RON": "https://ted.europa.eu/ro/notice/707611-2026/html",
+            "SLK": "https://ted.europa.eu/sk/notice/707611-2026/html",
+            "SLV": "https://ted.europa.eu/sl/notice/707611-2026/html",
+            "FIN": "https://ted.europa.eu/fi/notice/707611-2026/html",
+            "SWE": "https://ted.europa.eu/sv/notice/707611-2026/html"
+          }
+        },
+        "organisation-name-buyer": {
+          "ita": [
+            "Comune di Pizzo"
+          ]
+        },
+        "organisation-city-buyer": [
+          "Pizzo Calabro"
+        ],
+        "identifier-lot": [
+          "LOT-0001"
+        ],
+        "deadline": [
+          "2026-11-06T12:00:00+02:00"
+        ],
+        "buyer-city": {
+          "mul": [
+            "Pizzo Calabro"
+          ]
+        },
+        "notice-identifier": "5c70e0d3-e514-41d4-a993-1927e3e7870d",
+        "title-proc": {
+          "ita": "Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale"
+        },
+        "estimated-value-lot": [
+          "293278.68"
+        ],
+        "deadline-date-lot": [
+          "2026-11-06+02:00"
+        ],
+        "dispatch-date": "2026-10-13+02:00",
+        "estimated-value-cur-lot": [
+          "EUR"
+        ],
+        "estimated-value-cur-proc": "EUR",
+        "buyer-country": [
+          "ITA"
+        ],
+        "procedure-type": "open",
+        "deadline-receipt-tender-time-lot": [
+          "12:00:00+02:00"
+        ],
+        "classification-cpv": [
+          "72500000",
+          "72500000"
+        ],
+        "buyer-name": {
+          "ita": [
+            "Comune di Pizzo"
+          ]
+        },
+        "notice-version": 1,
+        "notice-title": {
+          "hun": "Olaszország – Számítógépekkel kapcsolatos szolgáltatások – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "lav": "Itāija – Datorsaistītie pakalpojumi – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "swe": "Italien – Datortjänster – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "gle": "An Iodáil – Computer-related services – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "ell": "Ιταλία – Υπηρεσίες πληροφορικής – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "spa": "Italia – Servicios informáticos – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "est": "Itaalia – Arvutiga seotud teenused – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "nld": "Italië – Informaticadiensten – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "fin": "Italia – Tietokonepalvelut – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "pol": "Włochy – Komputerowe usługi pokrewne – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "hrv": "Italija – Usluge povezane s računalom – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "ces": "Itálie – Výpočetní služby – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "dan": "Italien – Servicevirksomhed i forbindelse med datamater – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "ron": "Italia – Servicii informatice – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "por": "Itália – Serviços relacionados com a informática – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "slk": "Taliansko – Služby súvisiace s počítačmi – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "fra": "Italie – Services informatiques – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "mlt": "L-Italja – Servizzi relatati mal-kompjuter – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "deu": "Italien – Datenverarbeitungsdienste – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "lit": "Italija – Su kompiuteriais susijusios paslaugos – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "ita": "Italia – Servizi informatici – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "bul": "Итaлия – Услуги, свързани с използване на компютри – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "slv": "Italija – Z računalniki povezane storitve – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale",
+          "eng": "Italy – Computer-related services – Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale"
+        },
+        "title-lot": {
+          "ita": [
+            "Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attivit&#224; di controdeduzione, supporto e assistenza legale"
+          ]
+        },
+        "form-type": "competition",
+        "description-proc": {
+          "ita": "Affidamento del servizio di gestione degli atti provenienti dal Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;, comprensivo di attività; di controdeduzione, supporto e assistenza legale"
+        }
+      },
+      {
+        "notice-type": "can-standard",
+        "publication-number": "707979-2026",
+        "main-classification-lot": [
+          "72253200"
+        ],
+        "main-classification-proc": [
+          "72253200"
+        ],
+        "procedure-identifier": "672a4780-b51b-4e45-a83a-ab88e1524f04",
+        "publication-date": "2026-10-14+02:00",
+        "estimated-value-proc": "1155807.90",
+        "contract-nature-main-proc": "services",
+        "links": {
+          "xml": {
+            "MUL": "https://ted.europa.eu/en/notice/707979-2026/xml"
+          },
+          "pdf": {
+            "BUL": "https://ted.europa.eu/bg/notice/707979-2026/pdf",
+            "SPA": "https://ted.europa.eu/es/notice/707979-2026/pdf",
+            "CES": "https://ted.europa.eu/cs/notice/707979-2026/pdf",
+            "DAN": "https://ted.europa.eu/da/notice/707979-2026/pdf",
+            "DEU": "https://ted.europa.eu/de/notice/707979-2026/pdf",
+            "EST": "https://ted.europa.eu/et/notice/707979-2026/pdf",
+            "ELL": "https://ted.europa.eu/el/notice/707979-2026/pdf",
+            "ENG": "https://ted.europa.eu/en/notice/707979-2026/pdf",
+            "FRA": "https://ted.europa.eu/fr/notice/707979-2026/pdf",
+            "GLE": "https://ted.europa.eu/ga/notice/707979-2026/pdf",
+            "HRV": "https://ted.europa.eu/hr/notice/707979-2026/pdf",
+            "ITA": "https://ted.europa.eu/it/notice/707979-2026/pdf",
+            "LAV": "https://ted.europa.eu/lv/notice/707979-2026/pdf",
+            "LIT": "https://ted.europa.eu/lt/notice/707979-2026/pdf",
+            "HUN": "https://ted.europa.eu/hu/notice/707979-2026/pdf",
+            "MLT": "https://ted.europa.eu/mt/notice/707979-2026/pdf",
+            "NLD": "https://ted.europa.eu/nl/notice/707979-2026/pdf",
+            "POL": "https://ted.europa.eu/pl/notice/707979-2026/pdf",
+            "POR": "https://ted.europa.eu/pt/notice/707979-2026/pdf",
+            "RON": "https://ted.europa.eu/ro/notice/707979-2026/pdf",
+            "SLK": "https://ted.europa.eu/sk/notice/707979-2026/pdf",
+            "SLV": "https://ted.europa.eu/sl/notice/707979-2026/pdf",
+            "FIN": "https://ted.europa.eu/fi/notice/707979-2026/pdf",
+            "SWE": "https://ted.europa.eu/sv/notice/707979-2026/pdf"
+          },
+          "pdfs": {
+            "ITA": "https://ted.europa.eu/it/notice/707979-2026/pdfs"
+          },
+          "html": {
+            "BUL": "https://ted.europa.eu/bg/notice/-/detail/707979-2026",
+            "SPA": "https://ted.europa.eu/es/notice/-/detail/707979-2026",
+            "CES": "https://ted.europa.eu/cs/notice/-/detail/707979-2026",
+            "DAN": "https://ted.europa.eu/da/notice/-/detail/707979-2026",
+            "DEU": "https://ted.europa.eu/de/notice/-/detail/707979-2026",
+            "EST": "https://ted.europa.eu/et/notice/-/detail/707979-2026",
+            "ELL": "https://ted.europa.eu/el/notice/-/detail/707979-2026",
+            "ENG": "https://ted.europa.eu/en/notice/-/detail/707979-2026",
+            "FRA": "https://ted.europa.eu/fr/notice/-/detail/707979-2026",
+            "GLE": "https://ted.europa.eu/ga/notice/-/detail/707979-2026",
+            "HRV": "https://ted.europa.eu/hr/notice/-/detail/707979-2026",
+            "ITA": "https://ted.europa.eu/it/notice/-/detail/707979-2026",
+            "LAV": "https://ted.europa.eu/lv/notice/-/detail/707979-2026",
+            "LIT": "https://ted.europa.eu/lt/notice/-/detail/707979-2026",
+            "HUN": "https://ted.europa.eu/hu/notice/-/detail/707979-2026",
+            "MLT": "https://ted.europa.eu/mt/notice/-/detail/707979-2026",
+            "NLD": "https://ted.europa.eu/nl/notice/-/detail/707979-2026",
+            "POL": "https://ted.europa.eu/pl/notice/-/detail/707979-2026",
+            "POR": "https://ted.europa.eu/pt/notice/-/detail/707979-2026",
+            "RON": "https://ted.europa.eu/ro/notice/-/detail/707979-2026",
+            "SLK": "https://ted.europa.eu/sk/notice/-/detail/707979-2026",
+            "SLV": "https://ted.europa.eu/sl/notice/-/detail/707979-2026",
+            "FIN": "https://ted.europa.eu/fi/notice/-/detail/707979-2026",
+            "SWE": "https://ted.europa.eu/sv/notice/-/detail/707979-2026"
+          },
+          "htmlDirect": {
+            "BUL": "https://ted.europa.eu/bg/notice/707979-2026/html",
+            "SPA": "https://ted.europa.eu/es/notice/707979-2026/html",
+            "CES": "https://ted.europa.eu/cs/notice/707979-2026/html",
+            "DAN": "https://ted.europa.eu/da/notice/707979-2026/html",
+            "DEU": "https://ted.europa.eu/de/notice/707979-2026/html",
+            "EST": "https://ted.europa.eu/et/notice/707979-2026/html",
+            "ELL": "https://ted.europa.eu/el/notice/707979-2026/html",
+            "ENG": "https://ted.europa.eu/en/notice/707979-2026/html",
+            "FRA": "https://ted.europa.eu/fr/notice/707979-2026/html",
+            "GLE": "https://ted.europa.eu/ga/notice/707979-2026/html",
+            "HRV": "https://ted.europa.eu/hr/notice/707979-2026/html",
+            "ITA": "https://ted.europa.eu/it/notice/707979-2026/html",
+            "LAV": "https://ted.europa.eu/lv/notice/707979-2026/html",
+            "LIT": "https://ted.europa.eu/lt/notice/707979-2026/html",
+            "HUN": "https://ted.europa.eu/hu/notice/707979-2026/html",
+            "MLT": "https://ted.europa.eu/mt/notice/707979-2026/html",
+            "NLD": "https://ted.europa.eu/nl/notice/707979-2026/html",
+            "POL": "https://ted.europa.eu/pl/notice/707979-2026/html",
+            "POR": "https://ted.europa.eu/pt/notice/707979-2026/html",
+            "RON": "https://ted.europa.eu/ro/notice/707979-2026/html",
+            "SLK": "https://ted.europa.eu/sk/notice/707979-2026/html",
+            "SLV": "https://ted.europa.eu/sl/notice/707979-2026/html",
+            "FIN": "https://ted.europa.eu/fi/notice/707979-2026/html",
+            "SWE": "https://ted.europa.eu/sv/notice/707979-2026/html"
+          }
+        },
+        "organisation-name-buyer": {
+          "ita": [
+            "S.A.C. Società Aeroporto Catania S.p.A."
+          ]
+        },
+        "organisation-city-buyer": [
+          "CATANIA (CT)"
+        ],
+        "identifier-lot": [
+          "LOT-0001"
+        ],
+        "buyer-city": {
+          "mul": [
+            "CATANIA (CT)"
+          ]
+        },
+        "notice-identifier": "5718715d-0c07-4c47-a612-1fda7cf3b807",
+        "title-proc": {
+          "ita": "Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM"
+        },
+        "estimated-value-lot": [
+          "1155807.90"
+        ],
+        "dispatch-date": "2026-10-13+02:00",
+        "estimated-value-cur-lot": [
+          "EUR"
+        ],
+        "estimated-value-cur-proc": "EUR",
+        "buyer-country": [
+          "ITA"
+        ],
+        "procedure-type": "open",
+        "classification-cpv": [
+          "72253200",
+          "72253200"
+        ],
+        "buyer-name": {
+          "ita": [
+            "S.A.C. Società Aeroporto Catania S.p.A."
+          ]
+        },
+        "notice-version": 1,
+        "notice-title": {
+          "hun": "Olaszország – Rendszer-támogatási szolgáltatások – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "lav": "Itāija – Sistēmu atbalsta pakalpojumi – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "swe": "Italien – Stödtjänster för system – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "gle": "An Iodáil – Systems support services – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "ell": "Ιταλία – Υπηρεσίες υποστήριξης συστημάτων πληροφορικής – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "spa": "Italia – Servicios de apoyo a sistemas – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "est": "Itaalia – Süsteemi tugiteenused – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "nld": "Italië – Systeemondersteuningsdiensten – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "fin": "Italia – Järjestelmien tukipalvelut – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "pol": "Włochy – Usługi w zakresie wsparcia systemu – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "hrv": "Italija – Usluge sistemske podrške – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "ces": "Itálie – Systémová podpora – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "dan": "Italien – Systemsupport – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "ron": "Italia – Servicii de asistenţă pentru sisteme – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "por": "Itália – Serviços de apoio a sistemas – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "slk": "Taliansko – Systémové podporné služby – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "fra": "Italie – Services d'assistance relative aux systèmes – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "mlt": "L-Italja – Servizzi ta' l-appoġġ tas-sistema – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "deu": "Italien – Systemunterstützung – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "lit": "Italija – Sistemų palaikymo paslaugos – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "ita": "Italia – Servizi di assistenza sistemi – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "bul": "Итaлия – Поддържане на системи – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "slv": "Italija – Storitve podpore sistemov – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM",
+          "eng": "Italy – Systems support services – Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM"
+        },
+        "title-lot": {
+          "ita": [
+            "Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM"
+          ]
+        },
+        "form-type": "result",
+        "description-proc": {
+          "ita": "Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk PRM"
+        }
+      },
+      {
+        "deadline-receipt-tender-date-lot": [
+          "2026-11-23+01:00"
+        ],
+        "notice-type": "cn-standard",
+        "publication-number": "708163-2026",
+        "main-classification-lot": [
+          "72500000"
+        ],
+        "main-classification-proc": [
+          "72500000"
+        ],
+        "submission-url-lot": [
+          "https://www.sintel.regione.lombardia.it"
+        ],
+        "procedure-identifier": "63985294-d264-4666-ae42-ad74fdb85c76",
+        "document-url-lot": [
+          "http://www.sintel.regione.lombardia.it"
+        ],
+        "publication-date": "2026-10-14+02:00",
+        "estimated-value-proc": "2664750",
+        "contract-nature-main-proc": "services",
+        "links": {
+          "xml": {
+            "MUL": "https://ted.europa.eu/en/notice/708163-2026/xml"
+          },
+          "pdf": {
+            "BUL": "https://ted.europa.eu/bg/notice/708163-2026/pdf",
+            "SPA": "https://ted.europa.eu/es/notice/708163-2026/pdf",
+            "CES": "https://ted.europa.eu/cs/notice/708163-2026/pdf",
+            "DAN": "https://ted.europa.eu/da/notice/708163-2026/pdf",
+            "DEU": "https://ted.europa.eu/de/notice/708163-2026/pdf",
+            "EST": "https://ted.europa.eu/et/notice/708163-2026/pdf",
+            "ELL": "https://ted.europa.eu/el/notice/708163-2026/pdf",
+            "ENG": "https://ted.europa.eu/en/notice/708163-2026/pdf",
+            "FRA": "https://ted.europa.eu/fr/notice/708163-2026/pdf",
+            "GLE": "https://ted.europa.eu/ga/notice/708163-2026/pdf",
+            "HRV": "https://ted.europa.eu/hr/notice/708163-2026/pdf",
+            "ITA": "https://ted.europa.eu/it/notice/708163-2026/pdf",
+            "LAV": "https://ted.europa.eu/lv/notice/708163-2026/pdf",
+            "LIT": "https://ted.europa.eu/lt/notice/708163-2026/pdf",
+            "HUN": "https://ted.europa.eu/hu/notice/708163-2026/pdf",
+            "MLT": "https://ted.europa.eu/mt/notice/708163-2026/pdf",
+            "NLD": "https://ted.europa.eu/nl/notice/708163-2026/pdf",
+            "POL": "https://ted.europa.eu/pl/notice/708163-2026/pdf",
+            "POR": "https://ted.europa.eu/pt/notice/708163-2026/pdf",
+            "RON": "https://ted.europa.eu/ro/notice/708163-2026/pdf",
+            "SLK": "https://ted.europa.eu/sk/notice/708163-2026/pdf",
+            "SLV": "https://ted.europa.eu/sl/notice/708163-2026/pdf",
+            "FIN": "https://ted.europa.eu/fi/notice/708163-2026/pdf",
+            "SWE": "https://ted.europa.eu/sv/notice/708163-2026/pdf"
+          },
+          "pdfs": {
+            "ITA": "https://ted.europa.eu/it/notice/708163-2026/pdfs"
+          },
+          "html": {
+            "BUL": "https://ted.europa.eu/bg/notice/-/detail/708163-2026",
+            "SPA": "https://ted.europa.eu/es/notice/-/detail/708163-2026",
+            "CES": "https://ted.europa.eu/cs/notice/-/detail/708163-2026",
+            "DAN": "https://ted.europa.eu/da/notice/-/detail/708163-2026",
+            "DEU": "https://ted.europa.eu/de/notice/-/detail/708163-2026",
+            "EST": "https://ted.europa.eu/et/notice/-/detail/708163-2026",
+            "ELL": "https://ted.europa.eu/el/notice/-/detail/708163-2026",
+            "ENG": "https://ted.europa.eu/en/notice/-/detail/708163-2026",
+            "FRA": "https://ted.europa.eu/fr/notice/-/detail/708163-2026",
+            "GLE": "https://ted.europa.eu/ga/notice/-/detail/708163-2026",
+            "HRV": "https://ted.europa.eu/hr/notice/-/detail/708163-2026",
+            "ITA": "https://ted.europa.eu/it/notice/-/detail/708163-2026",
+            "LAV": "https://ted.europa.eu/lv/notice/-/detail/708163-2026",
+            "LIT": "https://ted.europa.eu/lt/notice/-/detail/708163-2026",
+            "HUN": "https://ted.europa.eu/hu/notice/-/detail/708163-2026",
+            "MLT": "https://ted.europa.eu/mt/notice/-/detail/708163-2026",
+            "NLD": "https://ted.europa.eu/nl/notice/-/detail/708163-2026",
+            "POL": "https://ted.europa.eu/pl/notice/-/detail/708163-2026",
+            "POR": "https://ted.europa.eu/pt/notice/-/detail/708163-2026",
+            "RON": "https://ted.europa.eu/ro/notice/-/detail/708163-2026",
+            "SLK": "https://ted.europa.eu/sk/notice/-/detail/708163-2026",
+            "SLV": "https://ted.europa.eu/sl/notice/-/detail/708163-2026",
+            "FIN": "https://ted.europa.eu/fi/notice/-/detail/708163-2026",
+            "SWE": "https://ted.europa.eu/sv/notice/-/detail/708163-2026"
+          },
+          "htmlDirect": {
+            "BUL": "https://ted.europa.eu/bg/notice/708163-2026/html",
+            "SPA": "https://ted.europa.eu/es/notice/708163-2026/html",
+            "CES": "https://ted.europa.eu/cs/notice/708163-2026/html",
+            "DAN": "https://ted.europa.eu/da/notice/708163-2026/html",
+            "DEU": "https://ted.europa.eu/de/notice/708163-2026/html",
+            "EST": "https://ted.europa.eu/et/notice/708163-2026/html",
+            "ELL": "https://ted.europa.eu/el/notice/708163-2026/html",
+            "ENG": "https://ted.europa.eu/en/notice/708163-2026/html",
+            "FRA": "https://ted.europa.eu/fr/notice/708163-2026/html",
+            "GLE": "https://ted.europa.eu/ga/notice/708163-2026/html",
+            "HRV": "https://ted.europa.eu/hr/notice/708163-2026/html",
+            "ITA": "https://ted.europa.eu/it/notice/708163-2026/html",
+            "LAV": "https://ted.europa.eu/lv/notice/708163-2026/html",
+            "LIT": "https://ted.europa.eu/lt/notice/708163-2026/html",
+            "HUN": "https://ted.europa.eu/hu/notice/708163-2026/html",
+            "MLT": "https://ted.europa.eu/mt/notice/708163-2026/html",
+            "NLD": "https://ted.europa.eu/nl/notice/708163-2026/html",
+            "POL": "https://ted.europa.eu/pl/notice/708163-2026/html",
+            "POR": "https://ted.europa.eu/pt/notice/708163-2026/html",
+            "RON": "https://ted.europa.eu/ro/notice/708163-2026/html",
+            "SLK": "https://ted.europa.eu/sk/notice/708163-2026/html",
+            "SLV": "https://ted.europa.eu/sl/notice/708163-2026/html",
+            "FIN": "https://ted.europa.eu/fi/notice/708163-2026/html",
+            "SWE": "https://ted.europa.eu/sv/notice/708163-2026/html"
+          }
+        },
+        "organisation-name-buyer": {
+          "ita": [
+            "ASST PAPA GIOVANNI XXIII"
+          ]
+        },
+        "organisation-city-buyer": [
+          "BERGAMO"
+        ],
+        "identifier-lot": [
+          "LOT-0001"
+        ],
+        "buyer-city": {
+          "mul": [
+            "BERGAMO"
+          ]
+        },
+        "notice-identifier": "9ddd421b-5246-4cf1-886b-17ad356baec9",
+        "title-proc": {
+          "ita": "Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale"
+        },
+        "estimated-value-lot": [
+          "2664750"
+        ],
+        "dispatch-date": "2026-10-13+02:00",
+        "estimated-value-cur-lot": [
+          "EUR"
+        ],
+        "estimated-value-cur-proc": "EUR",
+        "buyer-country": [
+          "ITA"
+        ],
+        "procedure-type": "open",
+        "deadline-receipt-tender-time-lot": [
+          "10:00:00+01:00"
+        ],
+        "classification-cpv": [
+          "72500000",
+          "72500000",
+          "72500000"
+        ],
+        "buyer-name": {
+          "ita": [
+            "ASST PAPA GIOVANNI XXIII"
+          ]
+        },
+        "notice-version": 1,
+        "notice-title": {
+          "hun": "Olaszország – Számítógépekkel kapcsolatos szolgáltatások – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "lav": "Itāija – Datorsaistītie pakalpojumi – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "swe": "Italien – Datortjänster – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "gle": "An Iodáil – Computer-related services – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "ell": "Ιταλία – Υπηρεσίες πληροφορικής – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "spa": "Italia – Servicios informáticos – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "est": "Itaalia – Arvutiga seotud teenused – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "nld": "Italië – Informaticadiensten – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "fin": "Italia – Tietokonepalvelut – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "pol": "Włochy – Komputerowe usługi pokrewne – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "hrv": "Italija – Usluge povezane s računalom – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "ces": "Itálie – Výpočetní služby – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "dan": "Italien – Servicevirksomhed i forbindelse med datamater – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "ron": "Italia – Servicii informatice – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "por": "Itália – Serviços relacionados com a informática – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "slk": "Taliansko – Služby súvisiace s počítačmi – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "fra": "Italie – Services informatiques – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "mlt": "L-Italja – Servizzi relatati mal-kompjuter – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "deu": "Italien – Datenverarbeitungsdienste – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "lit": "Italija – Su kompiuteriais susijusios paslaugos – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "ita": "Italia – Servizi informatici – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "bul": "Итaлия – Услуги, свързани с използване на компютри – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "slv": "Italija – Z računalniki povezane storitve – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale",
+          "eng": "Italy – Computer-related services – Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale"
+        },
+        "title-lot": {
+          "ita": [
+            "Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale"
+          ]
+        },
+        "form-type": "competition",
+        "description-proc": {
+          "ita": "Assistenza tecnica e manutenzione evolutiva sistema di conservazione digitale"
+        }
+      },
+      {
+        "deadline-receipt-tender-date-lot": [
+          "2026-10-29+01:00"
+        ],
+        "notice-type": "cn-standard",
+        "publication-number": "708865-2026",
+        "main-classification-lot": [
+          "30210000"
+        ],
+        "main-classification-proc": [
+          "30210000"
+        ],
+        "submission-url-lot": [
+          "https://cnpadc.acquistitelematici.it/list/tender/esiti"
+        ],
+        "procedure-identifier": "6f710667-9c7b-4054-9fc0-6d8ddc404221",
+        "document-url-lot": [
+          "https://cnpadc.acquistitelematici.it/list/tender/esiti"
+        ],
+        "publication-date": "2026-10-14+02:00",
+        "estimated-value-proc": "1609833.34",
+        "contract-nature-main-proc": "supplies",
+        "links": {
+          "xml": {
+            "MUL": "https://ted.europa.eu/en/notice/708865-2026/xml"
+          },
+          "pdf": {
+            "BUL": "https://ted.europa.eu/bg/notice/708865-2026/pdf",
+            "SPA": "https://ted.europa.eu/es/notice/708865-2026/pdf",
+            "CES": "https://ted.europa.eu/cs/notice/708865-2026/pdf",
+            "DAN": "https://ted.europa.eu/da/notice/708865-2026/pdf",
+            "DEU": "https://ted.europa.eu/de/notice/708865-2026/pdf",
+            "EST": "https://ted.europa.eu/et/notice/708865-2026/pdf",
+            "ELL": "https://ted.europa.eu/el/notice/708865-2026/pdf",
+            "ENG": "https://ted.europa.eu/en/notice/708865-2026/pdf",
+            "FRA": "https://ted.europa.eu/fr/notice/708865-2026/pdf",
+            "GLE": "https://ted.europa.eu/ga/notice/708865-2026/pdf",
+            "HRV": "https://ted.europa.eu/hr/notice/708865-2026/pdf",
+            "ITA": "https://ted.europa.eu/it/notice/708865-2026/pdf",
+            "LAV": "https://ted.europa.eu/lv/notice/708865-2026/pdf",
+            "LIT": "https://ted.europa.eu/lt/notice/708865-2026/pdf",
+            "HUN": "https://ted.europa.eu/hu/notice/708865-2026/pdf",
+            "MLT": "https://ted.europa.eu/mt/notice/708865-2026/pdf",
+            "NLD": "https://ted.europa.eu/nl/notice/708865-2026/pdf",
+            "POL": "https://ted.europa.eu/pl/notice/708865-2026/pdf",
+            "POR": "https://ted.europa.eu/pt/notice/708865-2026/pdf",
+            "RON": "https://ted.europa.eu/ro/notice/708865-2026/pdf",
+            "SLK": "https://ted.europa.eu/sk/notice/708865-2026/pdf",
+            "SLV": "https://ted.europa.eu/sl/notice/708865-2026/pdf",
+            "FIN": "https://ted.europa.eu/fi/notice/708865-2026/pdf",
+            "SWE": "https://ted.europa.eu/sv/notice/708865-2026/pdf"
+          },
+          "pdfs": {
+            "ITA": "https://ted.europa.eu/it/notice/708865-2026/pdfs"
+          },
+          "html": {
+            "BUL": "https://ted.europa.eu/bg/notice/-/detail/708865-2026",
+            "SPA": "https://ted.europa.eu/es/notice/-/detail/708865-2026",
+            "CES": "https://ted.europa.eu/cs/notice/-/detail/708865-2026",
+            "DAN": "https://ted.europa.eu/da/notice/-/detail/708865-2026",
+            "DEU": "https://ted.europa.eu/de/notice/-/detail/708865-2026",
+            "EST": "https://ted.europa.eu/et/notice/-/detail/708865-2026",
+            "ELL": "https://ted.europa.eu/el/notice/-/detail/708865-2026",
+            "ENG": "https://ted.europa.eu/en/notice/-/detail/708865-2026",
+            "FRA": "https://ted.europa.eu/fr/notice/-/detail/708865-2026",
+            "GLE": "https://ted.europa.eu/ga/notice/-/detail/708865-2026",
+            "HRV": "https://ted.europa.eu/hr/notice/-/detail/708865-2026",
+            "ITA": "https://ted.europa.eu/it/notice/-/detail/708865-2026",
+            "LAV": "https://ted.europa.eu/lv/notice/-/detail/708865-2026",
+            "LIT": "https://ted.europa.eu/lt/notice/-/detail/708865-2026",
+            "HUN": "https://ted.europa.eu/hu/notice/-/detail/708865-2026",
+            "MLT": "https://ted.europa.eu/mt/notice/-/detail/708865-2026",
+            "NLD": "https://ted.europa.eu/nl/notice/-/detail/708865-2026",
+            "POL": "https://ted.europa.eu/pl/notice/-/detail/708865-2026",
+            "POR": "https://ted.europa.eu/pt/notice/-/detail/708865-2026",
+            "RON": "https://ted.europa.eu/ro/notice/-/detail/708865-2026",
+            "SLK": "https://ted.europa.eu/sk/notice/-/detail/708865-2026",
+            "SLV": "https://ted.europa.eu/sl/notice/-/detail/708865-2026",
+            "FIN": "https://ted.europa.eu/fi/notice/-/detail/708865-2026",
+            "SWE": "https://ted.europa.eu/sv/notice/-/detail/708865-2026"
+          },
+          "htmlDirect": {
+            "BUL": "https://ted.europa.eu/bg/notice/708865-2026/html",
+            "SPA": "https://ted.europa.eu/es/notice/708865-2026/html",
+            "CES": "https://ted.europa.eu/cs/notice/708865-2026/html",
+            "DAN": "https://ted.europa.eu/da/notice/708865-2026/html",
+            "DEU": "https://ted.europa.eu/de/notice/708865-2026/html",
+            "EST": "https://ted.europa.eu/et/notice/708865-2026/html",
+            "ELL": "https://ted.europa.eu/el/notice/708865-2026/html",
+            "ENG": "https://ted.europa.eu/en/notice/708865-2026/html",
+            "FRA": "https://ted.europa.eu/fr/notice/708865-2026/html",
+            "GLE": "https://ted.europa.eu/ga/notice/708865-2026/html",
+            "HRV": "https://ted.europa.eu/hr/notice/708865-2026/html",
+            "ITA": "https://ted.europa.eu/it/notice/708865-2026/html",
+            "LAV": "https://ted.europa.eu/lv/notice/708865-2026/html",
+            "LIT": "https://ted.europa.eu/lt/notice/708865-2026/html",
+            "HUN": "https://ted.europa.eu/hu/notice/708865-2026/html",
+            "MLT": "https://ted.europa.eu/mt/notice/708865-2026/html",
+            "NLD": "https://ted.europa.eu/nl/notice/708865-2026/html",
+            "POL": "https://ted.europa.eu/pl/notice/708865-2026/html",
+            "POR": "https://ted.europa.eu/pt/notice/708865-2026/html",
+            "RON": "https://ted.europa.eu/ro/notice/708865-2026/html",
+            "SLK": "https://ted.europa.eu/sk/notice/708865-2026/html",
+            "SLV": "https://ted.europa.eu/sl/notice/708865-2026/html",
+            "FIN": "https://ted.europa.eu/fi/notice/708865-2026/html",
+            "SWE": "https://ted.europa.eu/sv/notice/708865-2026/html"
+          }
+        },
+        "organisation-name-buyer": {
+          "ita": [
+            "Cassa Nazionale di Previdenza e Assistenza Dottori Commercialisti"
+          ]
+        },
+        "organisation-city-buyer": [
+          "ROMA"
+        ],
+        "identifier-lot": [
+          "LOT-0001"
+        ],
+        "deadline": [
+          "2026-10-19T12:00:00+02:00"
+        ],
+        "buyer-city": {
+          "mul": [
+            "ROMA"
+          ]
+        },
+        "notice-identifier": "4632ea91-b2d6-4b45-8d6d-c62ae570cdf8",
+        "title-proc": {
+          "ita": "FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO"
+        },
+        "estimated-value-lot": [
+          "1609833.34"
+        ],
+        "deadline-date-lot": [
+          "2026-10-19+02:00"
+        ],
+        "dispatch-date": "2026-10-13+02:00",
+        "estimated-value-cur-lot": [
+          "EUR"
+        ],
+        "estimated-value-cur-proc": "EUR",
+        "buyer-country": [
+          "ITA"
+        ],
+        "procedure-type": "open",
+        "deadline-receipt-tender-time-lot": [
+          "12:00:00+01:00"
+        ],
+        "classification-cpv": [
+          "30210000",
+          "30210000"
+        ],
+        "buyer-name": {
+          "ita": [
+            "Cassa Nazionale di Previdenza e Assistenza Dottori Commercialisti"
+          ]
+        },
+        "notice-version": 1,
+        "notice-title": {
+          "hun": "Olaszország – Adatfeldolgozó gépek (hardver) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "lav": "Itāija – Datu apstrādes iekārtas (aparatūra) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "swe": "Italien – Databehandlingsmaskiner (maskinvara) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "gle": "An Iodáil – Data-processing machines (hardware) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "ell": "Ιταλία – Μηχανές επεξεργασίας δεδομένων (υλισμικό) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "spa": "Italia – Máquinas procesadoras de datos (hardware) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "est": "Itaalia – Andmetöötlusmasinad (riistvara) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "nld": "Italië – Machines voor dataprocessing (hardware) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "fin": "Italia – Tietojenkäsittelylaitteet (laitteisto) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "pol": "Włochy – Maszyny do przetwarzania danych (sprzęt) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "hrv": "Italija – Strojevi za obradu podataka (hardware) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "ces": "Itálie – Stroje na zpracování dat (technické vybavení) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "dan": "Italien – Databehandlingsmaskiner (hardware) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "ron": "Italia – Maşini de procesare a datelor (hardware) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "por": "Itália – Máquinas de processamento de dados (hardware) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "slk": "Taliansko – Stroje na spracovanie údajov (hardvér) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "fra": "Italie – Machines de traitement des données (matériel) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "mlt": "L-Italja – Magni għall-ipproċessar tad-dejta (ħardwer) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "deu": "Italien – Datenverarbeitungsgeräte (Hardware) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "lit": "Italija – Duomenų apdorojimo mašinos (techninė įranga) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "ita": "Italia – Macchine per l'elaborazione di dati (hardware) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "bul": "Итaлия – Машини за обработване на данни (хардуер) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "slv": "Italija – Naprave za obdelavo podatkov (strojna oprema) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+          "eng": "Italy – Data-processing machines (hardware) – FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO"
+        },
+        "title-lot": {
+          "ita": [
+            "FORNITURA DELL’AMPLIAMENTO E AMMODERNAMENTO DELL' INFRASTRUTTURA FLEXPOD CISCO-NETAPP DELL’AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO"
+          ]
+        },
+        "form-type": "competition",
+        "description-proc": {
+          "ita": "Si rimanda ai documenti di gara"
+        }
+      },
+      {
+        "notice-type": "cn-standard",
+        "publication-number": "709110-2026",
+        "main-classification-lot": [
+          "48517000"
+        ],
+        "main-classification-proc": [
+          "48517000"
+        ],
+        "submission-url-lot": [
+          "https://www.suar.regione.liguria.it"
+        ],
+        "procedure-identifier": "9a129627-67e5-48f8-9835-d97803ef1531",
+        "document-url-lot": [
+          "https://www.suar.regione.liguria.it"
+        ],
+        "publication-date": "2026-10-14+02:00",
+        "estimated-value-proc": "20000000.00",
+        "contract-nature-main-proc": "supplies",
+        "links": {
+          "xml": {
+            "MUL": "https://ted.europa.eu/en/notice/709110-2026/xml"
+          },
+          "pdf": {
+            "BUL": "https://ted.europa.eu/bg/notice/709110-2026/pdf",
+            "SPA": "https://ted.europa.eu/es/notice/709110-2026/pdf",
+            "CES": "https://ted.europa.eu/cs/notice/709110-2026/pdf",
+            "DAN": "https://ted.europa.eu/da/notice/709110-2026/pdf",
+            "DEU": "https://ted.europa.eu/de/notice/709110-2026/pdf",
+            "EST": "https://ted.europa.eu/et/notice/709110-2026/pdf",
+            "ELL": "https://ted.europa.eu/el/notice/709110-2026/pdf",
+            "ENG": "https://ted.europa.eu/en/notice/709110-2026/pdf",
+            "FRA": "https://ted.europa.eu/fr/notice/709110-2026/pdf",
+            "GLE": "https://ted.europa.eu/ga/notice/709110-2026/pdf",
+            "HRV": "https://ted.europa.eu/hr/notice/709110-2026/pdf",
+            "ITA": "https://ted.europa.eu/it/notice/709110-2026/pdf",
+            "LAV": "https://ted.europa.eu/lv/notice/709110-2026/pdf",
+            "LIT": "https://ted.europa.eu/lt/notice/709110-2026/pdf",
+            "HUN": "https://ted.europa.eu/hu/notice/709110-2026/pdf",
+            "MLT": "https://ted.europa.eu/mt/notice/709110-2026/pdf",
+            "NLD": "https://ted.europa.eu/nl/notice/709110-2026/pdf",
+            "POL": "https://ted.europa.eu/pl/notice/709110-2026/pdf",
+            "POR": "https://ted.europa.eu/pt/notice/709110-2026/pdf",
+            "RON": "https://ted.europa.eu/ro/notice/709110-2026/pdf",
+            "SLK": "https://ted.europa.eu/sk/notice/709110-2026/pdf",
+            "SLV": "https://ted.europa.eu/sl/notice/709110-2026/pdf",
+            "FIN": "https://ted.europa.eu/fi/notice/709110-2026/pdf",
+            "SWE": "https://ted.europa.eu/sv/notice/709110-2026/pdf"
+          },
+          "pdfs": {
+            "ITA": "https://ted.europa.eu/it/notice/709110-2026/pdfs"
+          },
+          "html": {
+            "BUL": "https://ted.europa.eu/bg/notice/-/detail/709110-2026",
+            "SPA": "https://ted.europa.eu/es/notice/-/detail/709110-2026",
+            "CES": "https://ted.europa.eu/cs/notice/-/detail/709110-2026",
+            "DAN": "https://ted.europa.eu/da/notice/-/detail/709110-2026",
+            "DEU": "https://ted.europa.eu/de/notice/-/detail/709110-2026",
+            "EST": "https://ted.europa.eu/et/notice/-/detail/709110-2026",
+            "ELL": "https://ted.europa.eu/el/notice/-/detail/709110-2026",
+            "ENG": "https://ted.europa.eu/en/notice/-/detail/709110-2026",
+            "FRA": "https://ted.europa.eu/fr/notice/-/detail/709110-2026",
+            "GLE": "https://ted.europa.eu/ga/notice/-/detail/709110-2026",
+            "HRV": "https://ted.europa.eu/hr/notice/-/detail/709110-2026",
+            "ITA": "https://ted.europa.eu/it/notice/-/detail/709110-2026",
+            "LAV": "https://ted.europa.eu/lv/notice/-/detail/709110-2026",
+            "LIT": "https://ted.europa.eu/lt/notice/-/detail/709110-2026",
+            "HUN": "https://ted.europa.eu/hu/notice/-/detail/709110-2026",
+            "MLT": "https://ted.europa.eu/mt/notice/-/detail/709110-2026",
+            "NLD": "https://ted.europa.eu/nl/notice/-/detail/709110-2026",
+            "POL": "https://ted.europa.eu/pl/notice/-/detail/709110-2026",
+            "POR": "https://ted.europa.eu/pt/notice/-/detail/709110-2026",
+            "RON": "https://ted.europa.eu/ro/notice/-/detail/709110-2026",
+            "SLK": "https://ted.europa.eu/sk/notice/-/detail/709110-2026",
+            "SLV": "https://ted.europa.eu/sl/notice/-/detail/709110-2026",
+            "FIN": "https://ted.europa.eu/fi/notice/-/detail/709110-2026",
+            "SWE": "https://ted.europa.eu/sv/notice/-/detail/709110-2026"
+          },
+          "htmlDirect": {
+            "BUL": "https://ted.europa.eu/bg/notice/709110-2026/html",
+            "SPA": "https://ted.europa.eu/es/notice/709110-2026/html",
+            "CES": "https://ted.europa.eu/cs/notice/709110-2026/html",
+            "DAN": "https://ted.europa.eu/da/notice/709110-2026/html",
+            "DEU": "https://ted.europa.eu/de/notice/709110-2026/html",
+            "EST": "https://ted.europa.eu/et/notice/709110-2026/html",
+            "ELL": "https://ted.europa.eu/el/notice/709110-2026/html",
+            "ENG": "https://ted.europa.eu/en/notice/709110-2026/html",
+            "FRA": "https://ted.europa.eu/fr/notice/709110-2026/html",
+            "GLE": "https://ted.europa.eu/ga/notice/709110-2026/html",
+            "HRV": "https://ted.europa.eu/hr/notice/709110-2026/html",
+            "ITA": "https://ted.europa.eu/it/notice/709110-2026/html",
+            "LAV": "https://ted.europa.eu/lv/notice/709110-2026/html",
+            "LIT": "https://ted.europa.eu/lt/notice/709110-2026/html",
+            "HUN": "https://ted.europa.eu/hu/notice/709110-2026/html",
+            "MLT": "https://ted.europa.eu/mt/notice/709110-2026/html",
+            "NLD": "https://ted.europa.eu/nl/notice/709110-2026/html",
+            "POL": "https://ted.europa.eu/pl/notice/709110-2026/html",
+            "POR": "https://ted.europa.eu/pt/notice/709110-2026/html",
+            "RON": "https://ted.europa.eu/ro/notice/709110-2026/html",
+            "SLK": "https://ted.europa.eu/sk/notice/709110-2026/html",
+            "SLV": "https://ted.europa.eu/sl/notice/709110-2026/html",
+            "FIN": "https://ted.europa.eu/fi/notice/709110-2026/html",
+            "SWE": "https://ted.europa.eu/sv/notice/709110-2026/html"
+          }
+        },
+        "organisation-name-buyer": {
+          "ita": [
+            "LIGURIA DIGITALE S.P.A."
+          ]
+        },
+        "organisation-city-buyer": [
+          "Genova"
+        ],
+        "identifier-lot": [
+          "LOT-0001"
+        ],
+        "buyer-city": {
+          "mul": [
+            "Genova"
+          ]
+        },
+        "notice-identifier": "f3af8b21-37c4-4c8e-88c1-48d7d24bc8ee",
+        "title-proc": {
+          "ita": "BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2"
+        },
+        "estimated-value-lot": [
+          "20000000.00"
+        ],
+        "dispatch-date": "2026-10-13+02:00",
+        "estimated-value-cur-lot": [
+          "EUR"
+        ],
+        "estimated-value-cur-proc": "EUR",
+        "buyer-country": [
+          "ITA"
+        ],
+        "procedure-type": "restricted",
+        "classification-cpv": [
+          "48517000",
+          "48517000"
+        ],
+        "buyer-name": {
+          "ita": [
+            "LIGURIA DIGITALE S.P.A."
+          ]
+        },
+        "notice-version": 1,
+        "notice-title": {
+          "hun": "Olaszország – IT-szoftvercsomag – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "lav": "Itāija – IT programmatūras pakotne – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "swe": "Italien – IT-programvara – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "gle": "An Iodáil – IT software package – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "ell": "Ιταλία – Πακέτα λογισμικού τεχνολογίας των πληροφοριών – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "spa": "Italia – Paquetes de software de TI – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "est": "Itaalia – IT-tarkvarapakett – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "nld": "Italië – IT-software – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "fin": "Italia – IT-ohjelmatuotteet – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "pol": "Włochy – Pakiety oprogramowania informatycznego – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "hrv": "Italija – Programski paket za informacijsku tehnologiju – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "ces": "Itálie – Balík programů pro IT – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "dan": "Italien – It-programpakke – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "ron": "Italia – Pachete software IT – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "por": "Itália – Pacote de software para TI – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "slk": "Taliansko – Softvérový balík pre informačné technológie – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "fra": "Italie – Logiciels de TI – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "mlt": "L-Italja – Pakkett ta' softwer għall-IT – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "deu": "Italien – IT-Softwarepaket – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "lit": "Italija – Informacinių technologijų programinės įrangos paketai – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "ita": "Italia – Pacchetti software IT – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "bul": "Итaлия – Софтуерни пакети за информационни технологии (ИТ) – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "slv": "Italija – Programski paket za informacijsko tehnologijo – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2",
+          "eng": "Italy – IT software package – BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2"
+        },
+        "title-lot": {
+          "ita": [
+            "BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2"
+          ]
+        },
+        "form-type": "competition",
+        "description-proc": {
+          "ita": "BANDO PER L’ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE AI SENSI DELL’ART. 32 DEL D.LGS. N. 36/2023 PER L’AFFIDAMENTO DELLE FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI – EDIZIONE 2"
+        }
+      },
+      {
+        "deadline-receipt-tender-date-lot": [
+          "2026-11-20+01:00"
+        ],
+        "notice-type": "cn-standard",
+        "publication-number": "709116-2026",
+        "main-classification-lot": [
+          "48218000"
+        ],
+        "main-classification-proc": [
+          "48218000"
+        ],
+        "submission-url-lot": [
+          "https://acquistionline.trenord.it"
+        ],
+        "procedure-identifier": "46f31ffa-2953-4ca2-aac6-3a00b9114747",
+        "document-url-lot": [
+          "http://acquistionline.trenord.it"
+        ],
+        "publication-date": "2026-10-14+02:00",
+        "estimated-value-proc": "2260500.48",
+        "contract-nature-main-proc": "supplies",
+        "links": {
+          "xml": {
+            "MUL": "https://ted.europa.eu/en/notice/709116-2026/xml"
+          },
+          "pdf": {
+            "BUL": "https://ted.europa.eu/bg/notice/709116-2026/pdf",
+            "SPA": "https://ted.europa.eu/es/notice/709116-2026/pdf",
+            "CES": "https://ted.europa.eu/cs/notice/709116-2026/pdf",
+            "DAN": "https://ted.europa.eu/da/notice/709116-2026/pdf",
+            "DEU": "https://ted.europa.eu/de/notice/709116-2026/pdf",
+            "EST": "https://ted.europa.eu/et/notice/709116-2026/pdf",
+            "ELL": "https://ted.europa.eu/el/notice/709116-2026/pdf",
+            "ENG": "https://ted.europa.eu/en/notice/709116-2026/pdf",
+            "FRA": "https://ted.europa.eu/fr/notice/709116-2026/pdf",
+            "GLE": "https://ted.europa.eu/ga/notice/709116-2026/pdf",
+            "HRV": "https://ted.europa.eu/hr/notice/709116-2026/pdf",
+            "ITA": "https://ted.europa.eu/it/notice/709116-2026/pdf",
+            "LAV": "https://ted.europa.eu/lv/notice/709116-2026/pdf",
+            "LIT": "https://ted.europa.eu/lt/notice/709116-2026/pdf",
+            "HUN": "https://ted.europa.eu/hu/notice/709116-2026/pdf",
+            "MLT": "https://ted.europa.eu/mt/notice/709116-2026/pdf",
+            "NLD": "https://ted.europa.eu/nl/notice/709116-2026/pdf",
+            "POL": "https://ted.europa.eu/pl/notice/709116-2026/pdf",
+            "POR": "https://ted.europa.eu/pt/notice/709116-2026/pdf",
+            "RON": "https://ted.europa.eu/ro/notice/709116-2026/pdf",
+            "SLK": "https://ted.europa.eu/sk/notice/709116-2026/pdf",
+            "SLV": "https://ted.europa.eu/sl/notice/709116-2026/pdf",
+            "FIN": "https://ted.europa.eu/fi/notice/709116-2026/pdf",
+            "SWE": "https://ted.europa.eu/sv/notice/709116-2026/pdf"
+          },
+          "pdfs": {
+            "ITA": "https://ted.europa.eu/it/notice/709116-2026/pdfs"
+          },
+          "html": {
+            "BUL": "https://ted.europa.eu/bg/notice/-/detail/709116-2026",
+            "SPA": "https://ted.europa.eu/es/notice/-/detail/709116-2026",
+            "CES": "https://ted.europa.eu/cs/notice/-/detail/709116-2026",
+            "DAN": "https://ted.europa.eu/da/notice/-/detail/709116-2026",
+            "DEU": "https://ted.europa.eu/de/notice/-/detail/709116-2026",
+            "EST": "https://ted.europa.eu/et/notice/-/detail/709116-2026",
+            "ELL": "https://ted.europa.eu/el/notice/-/detail/709116-2026",
+            "ENG": "https://ted.europa.eu/en/notice/-/detail/709116-2026",
+            "FRA": "https://ted.europa.eu/fr/notice/-/detail/709116-2026",
+            "GLE": "https://ted.europa.eu/ga/notice/-/detail/709116-2026",
+            "HRV": "https://ted.europa.eu/hr/notice/-/detail/709116-2026",
+            "ITA": "https://ted.europa.eu/it/notice/-/detail/709116-2026",
+            "LAV": "https://ted.europa.eu/lv/notice/-/detail/709116-2026",
+            "LIT": "https://ted.europa.eu/lt/notice/-/detail/709116-2026",
+            "HUN": "https://ted.europa.eu/hu/notice/-/detail/709116-2026",
+            "MLT": "https://ted.europa.eu/mt/notice/-/detail/709116-2026",
+            "NLD": "https://ted.europa.eu/nl/notice/-/detail/709116-2026",
+            "POL": "https://ted.europa.eu/pl/notice/-/detail/709116-2026",
+            "POR": "https://ted.europa.eu/pt/notice/-/detail/709116-2026",
+            "RON": "https://ted.europa.eu/ro/notice/-/detail/709116-2026",
+            "SLK": "https://ted.europa.eu/sk/notice/-/detail/709116-2026",
+            "SLV": "https://ted.europa.eu/sl/notice/-/detail/709116-2026",
+            "FIN": "https://ted.europa.eu/fi/notice/-/detail/709116-2026",
+            "SWE": "https://ted.europa.eu/sv/notice/-/detail/709116-2026"
+          },
+          "htmlDirect": {
+            "BUL": "https://ted.europa.eu/bg/notice/709116-2026/html",
+            "SPA": "https://ted.europa.eu/es/notice/709116-2026/html",
+            "CES": "https://ted.europa.eu/cs/notice/709116-2026/html",
+            "DAN": "https://ted.europa.eu/da/notice/709116-2026/html",
+            "DEU": "https://ted.europa.eu/de/notice/709116-2026/html",
+            "EST": "https://ted.europa.eu/et/notice/709116-2026/html",
+            "ELL": "https://ted.europa.eu/el/notice/709116-2026/html",
+            "ENG": "https://ted.europa.eu/en/notice/709116-2026/html",
+            "FRA": "https://ted.europa.eu/fr/notice/709116-2026/html",
+            "GLE": "https://ted.europa.eu/ga/notice/709116-2026/html",
+            "HRV": "https://ted.europa.eu/hr/notice/709116-2026/html",
+            "ITA": "https://ted.europa.eu/it/notice/709116-2026/html",
+            "LAV": "https://ted.europa.eu/lv/notice/709116-2026/html",
+            "LIT": "https://ted.europa.eu/lt/notice/709116-2026/html",
+            "HUN": "https://ted.europa.eu/hu/notice/709116-2026/html",
+            "MLT": "https://ted.europa.eu/mt/notice/709116-2026/html",
+            "NLD": "https://ted.europa.eu/nl/notice/709116-2026/html",
+            "POL": "https://ted.europa.eu/pl/notice/709116-2026/html",
+            "POR": "https://ted.europa.eu/pt/notice/709116-2026/html",
+            "RON": "https://ted.europa.eu/ro/notice/709116-2026/html",
+            "SLK": "https://ted.europa.eu/sk/notice/709116-2026/html",
+            "SLV": "https://ted.europa.eu/sl/notice/709116-2026/html",
+            "FIN": "https://ted.europa.eu/fi/notice/709116-2026/html",
+            "SWE": "https://ted.europa.eu/sv/notice/709116-2026/html"
+          }
+        },
+        "organisation-name-buyer": {
+          "ita": [
+            "Trenord S.r.l."
+          ]
+        },
+        "organisation-city-buyer": [
+          "Milano"
+        ],
+        "identifier-lot": [
+          "LOT-0001"
+        ],
+        "deadline": [
+          "2026-11-09T12:00:00+01:00"
+        ],
+        "buyer-city": {
+          "mul": [
+            "Milano"
+          ]
+        },
+        "notice-identifier": "3dffc294-9b7b-4413-9b81-dd168de779e1",
+        "title-proc": {
+          "ita": "866-2026 FORNITURA LICENZE SOFTWARE"
+        },
+        "estimated-value-lot": [
+          "2260500.48"
+        ],
+        "deadline-date-lot": [
+          "2026-11-09+01:00"
+        ],
+        "dispatch-date": "2026-10-12+02:00",
+        "estimated-value-cur-lot": [
+          "EUR"
+        ],
+        "estimated-value-cur-proc": "EUR",
+        "buyer-country": [
+          "ITA"
+        ],
+        "procedure-type": "open",
+        "deadline-receipt-tender-time-lot": [
+          "12:00:00+01:00"
+        ],
+        "classification-cpv": [
+          "48218000",
+          "48218000"
+        ],
+        "buyer-name": {
+          "ita": [
+            "Trenord S.r.l."
+          ]
+        },
+        "notice-version": 1,
+        "notice-title": {
+          "hun": "Olaszország – Licenckezelő szoftvercsomag – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "lav": "Itāija – Licenču pārvaldības programmatūras pakotne – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "swe": "Italien – Programvara för licenshantering – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "gle": "An Iodáil – License management software package – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "ell": "Ιταλία – Πακέτα λογισμικού διαχείρισης αδειών – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "spa": "Italia – Paquetes de software de gestión de licencias – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "est": "Itaalia – Litsentside haldamise tarkvarapakett – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "nld": "Italië – Software voor licentiemanagement – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "fin": "Italia – Käyttöoikeuksien hallintaohjelmatuotteet – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "pol": "Włochy – Pakiety oprogramowania zarządzającego licencjami – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "hrv": "Italija – Programski paket za upravljanje dozvolama – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "ces": "Itálie – Balík programů pro správu licencí – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "dan": "Italien – Programpakke til licensforvaltning – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "ron": "Italia – Pachete software pentru gestionarea licenţelor – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "por": "Itália – Pacote de software para gestão de licenças – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "slk": "Taliansko – Softvérový balík na riadenie licencií – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "fra": "Italie – Logiciels de gestion des licences – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "mlt": "L-Italja – Pakkett ta' softwer għall-ġestjoni tal-liċenzji – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "deu": "Italien – Lizenzverwaltungssoftwarepaket – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "lit": "Italija – Licencijų valdymo programinės įrangos paketai – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "ita": "Italia – Pacchetti software per la gestione di licenze – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "bul": "Итaлия – Софтуерни пакети за управление на лицензи – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "slv": "Italija – Programski paket za upravljanje licenc – 866-2026 FORNITURA LICENZE SOFTWARE",
+          "eng": "Italy – License management software package – 866-2026 FORNITURA LICENZE SOFTWARE"
+        },
+        "title-lot": {
+          "ita": [
+            "866-2026 FORNITURA LICENZE SOFTWARE"
+          ]
+        },
+        "form-type": "competition",
+        "description-proc": {
+          "ita": "866-2026 FORNITURA LICENZE SOFTWARE"
+        }
+      },
+      {
+        "notice-type": "can-standard",
+        "publication-number": "710118-2026",
+        "main-classification-lot": [
+          "72510000"
+        ],
+        "main-classification-proc": [
+          "72510000"
+        ],
+        "procedure-identifier": "67c5b998-7e16-4611-be76-4c2f11cbebc3",
+        "publication-date": "2026-10-14+02:00",
+        "estimated-value-proc": "853741.50",
+        "contract-nature-main-proc": "services",
+        "links": {
+          "xml": {
+            "MUL": "https://ted.europa.eu/en/notice/710118-2026/xml"
+          },
+          "pdf": {
+            "BUL": "https://ted.europa.eu/bg/notice/710118-2026/pdf",
+            "SPA": "https://ted.europa.eu/es/notice/710118-2026/pdf",
+            "CES": "https://ted.europa.eu/cs/notice/710118-2026/pdf",
+            "DAN": "https://ted.europa.eu/da/notice/710118-2026/pdf",
+            "DEU": "https://ted.europa.eu/de/notice/710118-2026/pdf",
+            "EST": "https://ted.europa.eu/et/notice/710118-2026/pdf",
+            "ELL": "https://ted.europa.eu/el/notice/710118-2026/pdf",
+            "ENG": "https://ted.europa.eu/en/notice/710118-2026/pdf",
+            "FRA": "https://ted.europa.eu/fr/notice/710118-2026/pdf",
+            "GLE": "https://ted.europa.eu/ga/notice/710118-2026/pdf",
+            "HRV": "https://ted.europa.eu/hr/notice/710118-2026/pdf",
+            "ITA": "https://ted.europa.eu/it/notice/710118-2026/pdf",
+            "LAV": "https://ted.europa.eu/lv/notice/710118-2026/pdf",
+            "LIT": "https://ted.europa.eu/lt/notice/710118-2026/pdf",
+            "HUN": "https://ted.europa.eu/hu/notice/710118-2026/pdf",
+            "MLT": "https://ted.europa.eu/mt/notice/710118-2026/pdf",
+            "NLD": "https://ted.europa.eu/nl/notice/710118-2026/pdf",
+            "POL": "https://ted.europa.eu/pl/notice/710118-2026/pdf",
+            "POR": "https://ted.europa.eu/pt/notice/710118-2026/pdf",
+            "RON": "https://ted.europa.eu/ro/notice/710118-2026/pdf",
+            "SLK": "https://ted.europa.eu/sk/notice/710118-2026/pdf",
+            "SLV": "https://ted.europa.eu/sl/notice/710118-2026/pdf",
+            "FIN": "https://ted.europa.eu/fi/notice/710118-2026/pdf",
+            "SWE": "https://ted.europa.eu/sv/notice/710118-2026/pdf"
+          },
+          "pdfs": {
+            "ITA": "https://ted.europa.eu/it/notice/710118-2026/pdfs"
+          },
+          "html": {
+            "BUL": "https://ted.europa.eu/bg/notice/-/detail/710118-2026",
+            "SPA": "https://ted.europa.eu/es/notice/-/detail/710118-2026",
+            "CES": "https://ted.europa.eu/cs/notice/-/detail/710118-2026",
+            "DAN": "https://ted.europa.eu/da/notice/-/detail/710118-2026",
+            "DEU": "https://ted.europa.eu/de/notice/-/detail/710118-2026",
+            "EST": "https://ted.europa.eu/et/notice/-/detail/710118-2026",
+            "ELL": "https://ted.europa.eu/el/notice/-/detail/710118-2026",
+            "ENG": "https://ted.europa.eu/en/notice/-/detail/710118-2026",
+            "FRA": "https://ted.europa.eu/fr/notice/-/detail/710118-2026",
+            "GLE": "https://ted.europa.eu/ga/notice/-/detail/710118-2026",
+            "HRV": "https://ted.europa.eu/hr/notice/-/detail/710118-2026",
+            "ITA": "https://ted.europa.eu/it/notice/-/detail/710118-2026",
+            "LAV": "https://ted.europa.eu/lv/notice/-/detail/710118-2026",
+            "LIT": "https://ted.europa.eu/lt/notice/-/detail/710118-2026",
+            "HUN": "https://ted.europa.eu/hu/notice/-/detail/710118-2026",
+            "MLT": "https://ted.europa.eu/mt/notice/-/detail/710118-2026",
+            "NLD": "https://ted.europa.eu/nl/notice/-/detail/710118-2026",
+            "POL": "https://ted.europa.eu/pl/notice/-/detail/710118-2026",
+            "POR": "https://ted.europa.eu/pt/notice/-/detail/710118-2026",
+            "RON": "https://ted.europa.eu/ro/notice/-/detail/710118-2026",
+            "SLK": "https://ted.europa.eu/sk/notice/-/detail/710118-2026",
+            "SLV": "https://ted.europa.eu/sl/notice/-/detail/710118-2026",
+            "FIN": "https://ted.europa.eu/fi/notice/-/detail/710118-2026",
+            "SWE": "https://ted.europa.eu/sv/notice/-/detail/710118-2026"
+          },
+          "htmlDirect": {
+            "BUL": "https://ted.europa.eu/bg/notice/710118-2026/html",
+            "SPA": "https://ted.europa.eu/es/notice/710118-2026/html",
+            "CES": "https://ted.europa.eu/cs/notice/710118-2026/html",
+            "DAN": "https://ted.europa.eu/da/notice/710118-2026/html",
+            "DEU": "https://ted.europa.eu/de/notice/710118-2026/html",
+            "EST": "https://ted.europa.eu/et/notice/710118-2026/html",
+            "ELL": "https://ted.europa.eu/el/notice/710118-2026/html",
+            "ENG": "https://ted.europa.eu/en/notice/710118-2026/html",
+            "FRA": "https://ted.europa.eu/fr/notice/710118-2026/html",
+            "GLE": "https://ted.europa.eu/ga/notice/710118-2026/html",
+            "HRV": "https://ted.europa.eu/hr/notice/710118-2026/html",
+            "ITA": "https://ted.europa.eu/it/notice/710118-2026/html",
+            "LAV": "https://ted.europa.eu/lv/notice/710118-2026/html",
+            "LIT": "https://ted.europa.eu/lt/notice/710118-2026/html",
+            "HUN": "https://ted.europa.eu/hu/notice/710118-2026/html",
+            "MLT": "https://ted.europa.eu/mt/notice/710118-2026/html",
+            "NLD": "https://ted.europa.eu/nl/notice/710118-2026/html",
+            "POL": "https://ted.europa.eu/pl/notice/710118-2026/html",
+            "POR": "https://ted.europa.eu/pt/notice/710118-2026/html",
+            "RON": "https://ted.europa.eu/ro/notice/710118-2026/html",
+            "SLK": "https://ted.europa.eu/sk/notice/710118-2026/html",
+            "SLV": "https://ted.europa.eu/sl/notice/710118-2026/html",
+            "FIN": "https://ted.europa.eu/fi/notice/710118-2026/html",
+            "SWE": "https://ted.europa.eu/sv/notice/710118-2026/html"
+          }
+        },
+        "organisation-name-buyer": {
+          "ita": [
+            "Giunta Regionale della Campania - Ufficio Speciale Centrale Acquisti"
+          ]
+        },
+        "organisation-city-buyer": [
+          "Napoli"
+        ],
+        "identifier-lot": [
+          "LOT-0001"
+        ],
+        "buyer-city": {
+          "mul": [
+            "Napoli"
+          ]
+        },
+        "notice-identifier": "67c5b998-7e16-4611-be76-4c2f11cbebc3",
+        "title-proc": {
+          "ita": "Proc 4389/AP/2026"
+        },
+        "estimated-value-lot": [
+          "853741.50"
+        ],
+        "dispatch-date": "2026-10-13Z",
+        "estimated-value-cur-lot": [
+          "EUR"
+        ],
+        "estimated-value-cur-proc": "EUR",
+        "buyer-country": [
+          "ITA"
+        ],
+        "procedure-type": "open",
+        "classification-cpv": [
+          "72510000",
+          "72510000"
+        ],
+        "buyer-name": {
+          "ita": [
+            "Giunta Regionale della Campania - Ufficio Speciale Centrale Acquisti"
+          ]
+        },
+        "notice-version": 2,
+        "notice-title": {
+          "hun": "Olaszország – Számítógépekkel kapcsolatos ügyintézési szolgáltatások – Proc 4389/AP/2026",
+          "lav": "Itāija – Datorsaistītie vadības pakalpojumi – Proc 4389/AP/2026",
+          "swe": "Italien – Administrativa tjänster för datorer – Proc 4389/AP/2026",
+          "gle": "An Iodáil – Computer-related management services – Proc 4389/AP/2026",
+          "ell": "Ιταλία – Υπηρεσίες διαχείρισης που σχετίζονται με ηλεκτρονικούς υπολογιστές – Proc 4389/AP/2026",
+          "spa": "Italia – Servicios de gestión relacionados con la informática – Proc 4389/AP/2026",
+          "est": "Itaalia – Arvutiga seotud haldamisteenused – Proc 4389/AP/2026",
+          "nld": "Italië – Beheerdiensten in verband met computers – Proc 4389/AP/2026",
+          "fin": "Italia – Tietokoneisiin liittyvät hallintopalvelut – Proc 4389/AP/2026",
+          "pol": "Włochy – Usługi zarządzania wspierane komputerowo – Proc 4389/AP/2026",
+          "hrv": "Italija – Usluge upravljanja povezane s računalom – Proc 4389/AP/2026",
+          "ces": "Itálie – Počítačové řízení – Proc 4389/AP/2026",
+          "dan": "Italien – Servicevirksomhed i forbindelse med drift af datamater – Proc 4389/AP/2026",
+          "ron": "Italia – Servicii de gestionare informatică – Proc 4389/AP/2026",
+          "por": "Itália – Serviços de gestão relacionados com a informática – Proc 4389/AP/2026",
+          "slk": "Taliansko – Služby súvisiace so správou počítačov – Proc 4389/AP/2026",
+          "fra": "Italie – Services de gestion relatifs à l'informatique – Proc 4389/AP/2026",
+          "mlt": "L-Italja – Servizzi ta' amministrazzjoni relatati mal-kompjuter – Proc 4389/AP/2026",
+          "deu": "Italien – Mit der Datenverarbeitung verbundene Verwaltungsdienste – Proc 4389/AP/2026",
+          "lit": "Italija – Su kompiuteriais susijusios valdymo paslaugos – Proc 4389/AP/2026",
+          "ita": "Italia – Servizi di gestione connessi all'informatica – Proc 4389/AP/2026",
+          "bul": "Итaлия – Услуги по управление, свързани с използване на компютри – Proc 4389/AP/2026",
+          "slv": "Italija – Storitve upravljanja, povezane z računalniki – Proc 4389/AP/2026",
+          "eng": "Italy – Computer-related management services – Proc 4389/AP/2026"
+        },
+        "title-lot": {
+          "ita": [
+            "Proc 4389/AP/2026"
+          ]
+        },
+        "form-type": "result",
+        "description-proc": {
+          "ita": "Proc 4389/AP/2026_PROCEDURA APERTA AI SENSI DELL’ART. 71 DEL D.LGS. 36/2023 DA AGGIUDICARSI CON OFFERTA ECONOMICAMENTE PIU’ VANTAGGIOSA PER AFFIDAMENTO DEL SERVIZIO INFORMATICO PER LA GESTIONE E MANUTENZIONE DEL PORTALE REGIONALE S.I.SMI.CA. (SISTEMA INFORMATIVO DELLA SISMICA IN REGIONE CAMPANIA) PER LA PRESENTAZIONE E GESTIONE DELLE ISTANZE DI CUI ALLA LEGGE REGIONALE DELLA CAMPANIA 7 GENNAIO 1983, N.9 – NORME PER L’ESERCIZIO DELLE FUNZIONI REGIONALI IN MATERIA DI DIFESA DEL TERRITORIO DAL RISCHIO SISMICO"
+        }
+      },
+      {
+        "deadline-receipt-tender-date-lot": [
+          "2026-11-13+01:00",
+          "2026-11-13+01:00"
+        ],
+        "notice-type": "cn-standard",
+        "publication-number": "710485-2026",
+        "main-classification-lot": [
+          "72212000",
+          "72212000"
+        ],
+        "main-classification-proc": [
+          "72212000"
+        ],
+        "submission-url-lot": [
+          "https://start.toscana.it/tendering/tenders/035687-2026/view/detail/1",
+          "https://start.toscana.it/tendering/tenders/035687-2026/view/detail/1"
+        ],
+        "procedure-identifier": "db3c8ce4-b3db-46e1-b983-9a50757e9b05",
+        "document-url-lot": [
+          "https://webs.rete.toscana.it/sitat/trasparenza/#/procedura?uuid=START_07aa3102-bc3a-460f-c342-1947d7f618d3",
+          "https://webs.rete.toscana.it/sitat/trasparenza/#/procedura?uuid=START_07aa3102-bc3a-460f-c342-1947d7f618d3"
+        ],
+        "publication-date": "2026-10-14+02:00",
+        "estimated-value-proc": "1373972.76",
+        "contract-nature-main-proc": "services",
+        "links": {
+          "xml": {
+            "MUL": "https://ted.europa.eu/en/notice/710485-2026/xml"
+          },
+          "pdf": {
+            "BUL": "https://ted.europa.eu/bg/notice/710485-2026/pdf",
+            "SPA": "https://ted.europa.eu/es/notice/710485-2026/pdf",
+            "CES": "https://ted.europa.eu/cs/notice/710485-2026/pdf",
+            "DAN": "https://ted.europa.eu/da/notice/710485-2026/pdf",
+            "DEU": "https://ted.europa.eu/de/notice/710485-2026/pdf",
+            "EST": "https://ted.europa.eu/et/notice/710485-2026/pdf",
+            "ELL": "https://ted.europa.eu/el/notice/710485-2026/pdf",
+            "ENG": "https://ted.europa.eu/en/notice/710485-2026/pdf",
+            "FRA": "https://ted.europa.eu/fr/notice/710485-2026/pdf",
+            "GLE": "https://ted.europa.eu/ga/notice/710485-2026/pdf",
+            "HRV": "https://ted.europa.eu/hr/notice/710485-2026/pdf",
+            "ITA": "https://ted.europa.eu/it/notice/710485-2026/pdf",
+            "LAV": "https://ted.europa.eu/lv/notice/710485-2026/pdf",
+            "LIT": "https://ted.europa.eu/lt/notice/710485-2026/pdf",
+            "HUN": "https://ted.europa.eu/hu/notice/710485-2026/pdf",
+            "MLT": "https://ted.europa.eu/mt/notice/710485-2026/pdf",
+            "NLD": "https://ted.europa.eu/nl/notice/710485-2026/pdf",
+            "POL": "https://ted.europa.eu/pl/notice/710485-2026/pdf",
+            "POR": "https://ted.europa.eu/pt/notice/710485-2026/pdf",
+            "RON": "https://ted.europa.eu/ro/notice/710485-2026/pdf",
+            "SLK": "https://ted.europa.eu/sk/notice/710485-2026/pdf",
+            "SLV": "https://ted.europa.eu/sl/notice/710485-2026/pdf",
+            "FIN": "https://ted.europa.eu/fi/notice/710485-2026/pdf",
+            "SWE": "https://ted.europa.eu/sv/notice/710485-2026/pdf"
+          },
+          "pdfs": {
+            "ITA": "https://ted.europa.eu/it/notice/710485-2026/pdfs"
+          },
+          "html": {
+            "BUL": "https://ted.europa.eu/bg/notice/-/detail/710485-2026",
+            "SPA": "https://ted.europa.eu/es/notice/-/detail/710485-2026",
+            "CES": "https://ted.europa.eu/cs/notice/-/detail/710485-2026",
+            "DAN": "https://ted.europa.eu/da/notice/-/detail/710485-2026",
+            "DEU": "https://ted.europa.eu/de/notice/-/detail/710485-2026",
+            "EST": "https://ted.europa.eu/et/notice/-/detail/710485-2026",
+            "ELL": "https://ted.europa.eu/el/notice/-/detail/710485-2026",
+            "ENG": "https://ted.europa.eu/en/notice/-/detail/710485-2026",
+            "FRA": "https://ted.europa.eu/fr/notice/-/detail/710485-2026",
+            "GLE": "https://ted.europa.eu/ga/notice/-/detail/710485-2026",
+            "HRV": "https://ted.europa.eu/hr/notice/-/detail/710485-2026",
+            "ITA": "https://ted.europa.eu/it/notice/-/detail/710485-2026",
+            "LAV": "https://ted.europa.eu/lv/notice/-/detail/710485-2026",
+            "LIT": "https://ted.europa.eu/lt/notice/-/detail/710485-2026",
+            "HUN": "https://ted.europa.eu/hu/notice/-/detail/710485-2026",
+            "MLT": "https://ted.europa.eu/mt/notice/-/detail/710485-2026",
+            "NLD": "https://ted.europa.eu/nl/notice/-/detail/710485-2026",
+            "POL": "https://ted.europa.eu/pl/notice/-/detail/710485-2026",
+            "POR": "https://ted.europa.eu/pt/notice/-/detail/710485-2026",
+            "RON": "https://ted.europa.eu/ro/notice/-/detail/710485-2026",
+            "SLK": "https://ted.europa.eu/sk/notice/-/detail/710485-2026",
+            "SLV": "https://ted.europa.eu/sl/notice/-/detail/710485-2026",
+            "FIN": "https://ted.europa.eu/fi/notice/-/detail/710485-2026",
+            "SWE": "https://ted.europa.eu/sv/notice/-/detail/710485-2026"
+          },
+          "htmlDirect": {
+            "BUL": "https://ted.europa.eu/bg/notice/710485-2026/html",
+            "SPA": "https://ted.europa.eu/es/notice/710485-2026/html",
+            "CES": "https://ted.europa.eu/cs/notice/710485-2026/html",
+            "DAN": "https://ted.europa.eu/da/notice/710485-2026/html",
+            "DEU": "https://ted.europa.eu/de/notice/710485-2026/html",
+            "EST": "https://ted.europa.eu/et/notice/710485-2026/html",
+            "ELL": "https://ted.europa.eu/el/notice/710485-2026/html",
+            "ENG": "https://ted.europa.eu/en/notice/710485-2026/html",
+            "FRA": "https://ted.europa.eu/fr/notice/710485-2026/html",
+            "GLE": "https://ted.europa.eu/ga/notice/710485-2026/html",
+            "HRV": "https://ted.europa.eu/hr/notice/710485-2026/html",
+            "ITA": "https://ted.europa.eu/it/notice/710485-2026/html",
+            "LAV": "https://ted.europa.eu/lv/notice/710485-2026/html",
+            "LIT": "https://ted.europa.eu/lt/notice/710485-2026/html",
+            "HUN": "https://ted.europa.eu/hu/notice/710485-2026/html",
+            "MLT": "https://ted.europa.eu/mt/notice/710485-2026/html",
+            "NLD": "https://ted.europa.eu/nl/notice/710485-2026/html",
+            "POL": "https://ted.europa.eu/pl/notice/710485-2026/html",
+            "POR": "https://ted.europa.eu/pt/notice/710485-2026/html",
+            "RON": "https://ted.europa.eu/ro/notice/710485-2026/html",
+            "SLK": "https://ted.europa.eu/sk/notice/710485-2026/html",
+            "SLV": "https://ted.europa.eu/sl/notice/710485-2026/html",
+            "FIN": "https://ted.europa.eu/fi/notice/710485-2026/html",
+            "SWE": "https://ted.europa.eu/sv/notice/710485-2026/html"
+          }
+        },
+        "organisation-name-buyer": {
+          "ita": [
+            "REGIONE TOSCANA - Settore Attività Faunistico Venatoria, Pesca in Mare e Rapporti con i Gruppi Locali di Azione della Pesca (FLAGS)."
+          ]
+        },
+        "organisation-city-buyer": [
+          "Firenze"
+        ],
+        "identifier-lot": [
+          "LOT-0001",
+          "LOT-0002"
+        ],
+        "buyer-city": {
+          "mul": [
+            "Firenze"
+          ]
+        },
+        "notice-identifier": "db3c8ce4-b3db-46e1-b983-9a50757e9b05",
+        "title-proc": {
+          "ita": "Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti"
+        },
+        "estimated-value-lot": [
+          "329036.47",
+          "1044936.29"
+        ],
+        "dispatch-date": "2026-10-13+02:00",
+        "estimated-value-cur-lot": [
+          "EUR"
+        ],
+        "estimated-value-cur-proc": "EUR",
+        "buyer-country": [
+          "ITA"
+        ],
+        "procedure-type": "open",
+        "deadline-receipt-tender-time-lot": [
+          "13:00:00+01:00",
+          "13:00:00+01:00"
+        ],
+        "classification-cpv": [
+          "72212000",
+          "79824000",
+          "72212000",
+          "72212000",
+          "79824000",
+          "79824000"
+        ],
+        "buyer-name": {
+          "ita": [
+            "REGIONE TOSCANA - Settore Attività Faunistico Venatoria, Pesca in Mare e Rapporti con i Gruppi Locali di Azione della Pesca (FLAGS)."
+          ]
+        },
+        "notice-version": 1,
+        "notice-title": {
+          "hun": "Olaszország – Alkalmazási szoftverek programozási szolgáltatásai – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "lav": "Itāija – Lietojumprogrammu programmēšanas pakalpojumi – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "swe": "Italien – Programmering av tillämpningsprogram – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "gle": "An Iodáil – Programming services of application software – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "ell": "Ιταλία – Υπηρεσίες προγραμματισμού λογισμικού εφαρμογών – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "spa": "Italia – Servicios de programación de software de aplicación – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "est": "Itaalia – Rakendustarkvara programmeerimine – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "nld": "Italië – Programmering van toepassingssoftware – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "fin": "Italia – Sovellusohjelmiston ohjelmointipalvelut – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "pol": "Włochy – Usługi programowania oprogramowania aplikacyjnego – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "hrv": "Italija – Usluge programiranja aplikacijske podrške – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "ces": "Itálie – Programování aplikačního programového vybavení – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "dan": "Italien – Programmeringsservice i forbindelse med applikationsprogrammel – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "ron": "Italia – Servicii de programare de software de aplicaţie – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "por": "Itália – Serviços de programação de software de aplicação – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "slk": "Taliansko – Programovanie aplikačného softvéru – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "fra": "Italie – Services de programmation de logiciels d'application – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "mlt": "L-Italja – Servizzi ta' programmizzar u ta' l-applikazzjoni tas-software – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "deu": "Italien – Programmierung von Anwendersoftware – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "lit": "Italija – Programavimo paslaugos, susijusios su taikomąja programine įranga – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "ita": "Italia – Servizi di programmazione di software applicativi – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "bul": "Итaлия – Услуги по програмиране на приложен софтуер – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "slv": "Italija – Storitve programiranja aplikacijske programske opreme – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti",
+          "eng": "Italy – Programming services of application software – Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti"
+        },
+        "title-lot": {
+          "ita": [
+            "Lotto 1 - SERVIZIO PER LA REALIZZAZIONE DI TESSERINI VENATORI",
+            "Lotto 2 - REALIZZAZIONE DI TESSERINI VENATORI DIGITALI E PORTALI FAUNISTICI"
+          ]
+        },
+        "form-type": "competition",
+        "description-proc": {
+          "ita": "Servizio per la realizzazione di Tesserini venatori e di portali faunistici della Regione Toscana - due Lotti"
+        }
+      },
+      {
+        "notice-type": "can-standard",
+        "publication-number": "711174-2026",
+        "main-classification-lot": [
+          "72411000"
+        ],
+        "main-classification-proc": [
+          "72000000"
+        ],
+        "procedure-identifier": "ac6ceefa-11da-4e48-9721-749ccb984662",
+        "publication-date": "2026-10-14+02:00",
+        "estimated-value-proc": "5229120",
+        "contract-nature-main-proc": "services",
+        "links": {
+          "xml": {
+            "MUL": "https://ted.europa.eu/en/notice/711174-2026/xml"
+          },
+          "pdf": {
+            "BUL": "https://ted.europa.eu/bg/notice/711174-2026/pdf",
+            "SPA": "https://ted.europa.eu/es/notice/711174-2026/pdf",
+            "CES": "https://ted.europa.eu/cs/notice/711174-2026/pdf",
+            "DAN": "https://ted.europa.eu/da/notice/711174-2026/pdf",
+            "DEU": "https://ted.europa.eu/de/notice/711174-2026/pdf",
+            "EST": "https://ted.europa.eu/et/notice/711174-2026/pdf",
+            "ELL": "https://ted.europa.eu/el/notice/711174-2026/pdf",
+            "ENG": "https://ted.europa.eu/en/notice/711174-2026/pdf",
+            "FRA": "https://ted.europa.eu/fr/notice/711174-2026/pdf",
+            "GLE": "https://ted.europa.eu/ga/notice/711174-2026/pdf",
+            "HRV": "https://ted.europa.eu/hr/notice/711174-2026/pdf",
+            "ITA": "https://ted.europa.eu/it/notice/711174-2026/pdf",
+            "LAV": "https://ted.europa.eu/lv/notice/711174-2026/pdf",
+            "LIT": "https://ted.europa.eu/lt/notice/711174-2026/pdf",
+            "HUN": "https://ted.europa.eu/hu/notice/711174-2026/pdf",
+            "MLT": "https://ted.europa.eu/mt/notice/711174-2026/pdf",
+            "NLD": "https://ted.europa.eu/nl/notice/711174-2026/pdf",
+            "POL": "https://ted.europa.eu/pl/notice/711174-2026/pdf",
+            "POR": "https://ted.europa.eu/pt/notice/711174-2026/pdf",
+            "RON": "https://ted.europa.eu/ro/notice/711174-2026/pdf",
+            "SLK": "https://ted.europa.eu/sk/notice/711174-2026/pdf",
+            "SLV": "https://ted.europa.eu/sl/notice/711174-2026/pdf",
+            "FIN": "https://ted.europa.eu/fi/notice/711174-2026/pdf",
+            "SWE": "https://ted.europa.eu/sv/notice/711174-2026/pdf"
+          },
+          "pdfs": {
+            "ITA": "https://ted.europa.eu/it/notice/711174-2026/pdfs"
+          },
+          "html": {
+            "BUL": "https://ted.europa.eu/bg/notice/-/detail/711174-2026",
+            "SPA": "https://ted.europa.eu/es/notice/-/detail/711174-2026",
+            "CES": "https://ted.europa.eu/cs/notice/-/detail/711174-2026",
+            "DAN": "https://ted.europa.eu/da/notice/-/detail/711174-2026",
+            "DEU": "https://ted.europa.eu/de/notice/-/detail/711174-2026",
+            "EST": "https://ted.europa.eu/et/notice/-/detail/711174-2026",
+            "ELL": "https://ted.europa.eu/el/notice/-/detail/711174-2026",
+            "ENG": "https://ted.europa.eu/en/notice/-/detail/711174-2026",
+            "FRA": "https://ted.europa.eu/fr/notice/-/detail/711174-2026",
+            "GLE": "https://ted.europa.eu/ga/notice/-/detail/711174-2026",
+            "HRV": "https://ted.europa.eu/hr/notice/-/detail/711174-2026",
+            "ITA": "https://ted.europa.eu/it/notice/-/detail/711174-2026",
+            "LAV": "https://ted.europa.eu/lv/notice/-/detail/711174-2026",
+            "LIT": "https://ted.europa.eu/lt/notice/-/detail/711174-2026",
+            "HUN": "https://ted.europa.eu/hu/notice/-/detail/711174-2026",
+            "MLT": "https://ted.europa.eu/mt/notice/-/detail/711174-2026",
+            "NLD": "https://ted.europa.eu/nl/notice/-/detail/711174-2026",
+            "POL": "https://ted.europa.eu/pl/notice/-/detail/711174-2026",
+            "POR": "https://ted.europa.eu/pt/notice/-/detail/711174-2026",
+            "RON": "https://ted.europa.eu/ro/notice/-/detail/711174-2026",
+            "SLK": "https://ted.europa.eu/sk/notice/-/detail/711174-2026",
+            "SLV": "https://ted.europa.eu/sl/notice/-/detail/711174-2026",
+            "FIN": "https://ted.europa.eu/fi/notice/-/detail/711174-2026",
+            "SWE": "https://ted.europa.eu/sv/notice/-/detail/711174-2026"
+          },
+          "htmlDirect": {
+            "BUL": "https://ted.europa.eu/bg/notice/711174-2026/html",
+            "SPA": "https://ted.europa.eu/es/notice/711174-2026/html",
+            "CES": "https://ted.europa.eu/cs/notice/711174-2026/html",
+            "DAN": "https://ted.europa.eu/da/notice/711174-2026/html",
+            "DEU": "https://ted.europa.eu/de/notice/711174-2026/html",
+            "EST": "https://ted.europa.eu/et/notice/711174-2026/html",
+            "ELL": "https://ted.europa.eu/el/notice/711174-2026/html",
+            "ENG": "https://ted.europa.eu/en/notice/711174-2026/html",
+            "FRA": "https://ted.europa.eu/fr/notice/711174-2026/html",
+            "GLE": "https://ted.europa.eu/ga/notice/711174-2026/html",
+            "HRV": "https://ted.europa.eu/hr/notice/711174-2026/html",
+            "ITA": "https://ted.europa.eu/it/notice/711174-2026/html",
+            "LAV": "https://ted.europa.eu/lv/notice/711174-2026/html",
+            "LIT": "https://ted.europa.eu/lt/notice/711174-2026/html",
+            "HUN": "https://ted.europa.eu/hu/notice/711174-2026/html",
+            "MLT": "https://ted.europa.eu/mt/notice/711174-2026/html",
+            "NLD": "https://ted.europa.eu/nl/notice/711174-2026/html",
+            "POL": "https://ted.europa.eu/pl/notice/711174-2026/html",
+            "POR": "https://ted.europa.eu/pt/notice/711174-2026/html",
+            "RON": "https://ted.europa.eu/ro/notice/711174-2026/html",
+            "SLK": "https://ted.europa.eu/sk/notice/711174-2026/html",
+            "SLV": "https://ted.europa.eu/sl/notice/711174-2026/html",
+            "FIN": "https://ted.europa.eu/fi/notice/711174-2026/html",
+            "SWE": "https://ted.europa.eu/sv/notice/711174-2026/html"
+          }
+        },
+        "organisation-name-buyer": {
+          "ita": [
+            "Comune di Monza"
+          ]
+        },
+        "organisation-city-buyer": [
+          "MONZA"
+        ],
+        "identifier-lot": [
+          "LOT-0001"
+        ],
+        "buyer-city": {
+          "mul": [
+            "MONZA"
+          ]
+        },
+        "notice-identifier": "0f447cb2-39c6-4602-a6f7-d234a5156aa8",
+        "title-proc": {
+          "ita": "PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA"
+        },
+        "estimated-value-lot": [
+          "5229120"
+        ],
+        "dispatch-date": "2026-10-12+02:00",
+        "estimated-value-cur-lot": [
+          "EUR"
+        ],
+        "estimated-value-cur-proc": "EUR",
+        "buyer-country": [
+          "ITA"
+        ],
+        "procedure-type": "open",
+        "classification-cpv": [
+          "72000000",
+          "72411000",
+          "72411000"
+        ],
+        "buyer-name": {
+          "ita": [
+            "Comune di Monza"
+          ]
+        },
+        "notice-version": 1,
+        "notice-title": {
+          "hun": "Olaszország – IT-szolgáltatások: tanácsadás, szoftverfejlesztés, internet és támogatás – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "lav": "Itāija – IT pakalpojumi konsultēšana, programmatūras izstrāde, internets un atbalsts – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "swe": "Italien – IT-tjänster: konsultverksamhet, programvaruutveckling, Internet och stöd – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "gle": "An Iodáil – IT services: consulting, software development, Internet and support – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "ell": "Ιταλία – Υπηρεσίες τεχνολογίας των πληροφοριών: παροχή συμβουλών, ανάπτυξη λογισμικού, Διαδίκτυο και υποστήριξη – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "spa": "Italia – Servicios TI: consultoría, desarrollo de software, Internet y apoyo – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "est": "Itaalia – IT-teenused: nõuande-, tarkvaraarendus-, Interneti- ja tugiteenused – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "nld": "Italië – IT-diensten: adviezen, softwareontwikkeling, internet en ondersteuning – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "fin": "Italia – Tietotekniset palvelut: neuvonta, ohjelmistojen kehittäminen, Internet ja tuki – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "pol": "Włochy – Usługi informatyczne: konsultacyjne, opracowywania oprogramowania, internetowe i wsparcia – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "hrv": "Italija – Usluge informacijske tehnologije: savjetovanje, razvoj programske podrške, internet i podrška – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "ces": "Itálie – Informační technologie: poradenství, vývoj programového vybavení, internet a podpora – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "dan": "Italien – It-tjenester: rådgivning, programmeludvikling, internet og support – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "ron": "Italia – Servicii IT: consultanţă, dezvoltare de software, internet şi asistenţă – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "por": "Itália – Serviços de TI: consultoria, desenvolvimento de software, Internet e apoio – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "slk": "Taliansko – Služby informačných technológií: konzultácie, vývoj softvéru, internet a podpora – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "fra": "Italie – Services de technologies de l'information, conseil, développement de logiciels, internet et appui – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "mlt": "L-Italja – Servizzi ta' IT: konsulenza, żvilupp ta' softwer, Internet u appoġġ – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "deu": "Italien – IT-Dienste: Beratung, Software-Entwicklung, Internet und Hilfestellung – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "lit": "Italija – IT paslaugos: konsultavimas, programinės įrangos kūrimas, internetas ir aptarnavimo paslaugos – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "ita": "Italia – Servizi informatici: consulenza, sviluppo di software, Internet e supporto – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "bul": "Итaлия – ИТ услуги: консултации, разработване на софтуер, Интернет и поддръжка – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "slv": "Italija – Storitve informacijske tehnologije: svetovanje, razvoj programske opreme, internet in podpora – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
+          "eng": "Italy – IT services: consulting, software development, Internet and support – PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA"
+        },
+        "title-lot": {
+          "ita": [
+            "PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA"
+          ]
+        },
+        "form-type": "result",
+        "description-proc": {
+          "ita": "PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER L’AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA"
+        }
+      }
+    ],
+    "totalNoticeCount": 9,
+    "iterationNextToken": null,
+    "timedOut": false
+  }
+}
