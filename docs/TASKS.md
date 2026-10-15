@@ -316,18 +316,20 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T3.3 – Dettaglio, documenti e report
 - Responsabile: DEV-3
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge 9fb5c35)
 - Dipende da: T3.2, T2.4, T2.5
 - Branch: feat/api-tender-detail
 - Durata stimata: 1,5 giorni
 - Obiettivo: restituire tutte le informazioni di una singola gara.
 - Finito quando:
-  - [ ] i 4 endpoint rispondono come da contratto
-  - [ ] un report non valido inviato con `POST` restituisce `422`
+  - [x] i 4 endpoint rispondono come da contratto
+  - [x] un report non valido inviato con `POST` restituisce `422`
+- Esito: Revisione del lead. Dettaglio, documenti e report dal dominio (`backend.domain.reports`), errori del dominio mappati a 404/409/422 nel formato del contratto.
+
 
 ### T3.4 – Revisione umana dei campi
 - Responsabile: DEV-3
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T3.3
 - Branch: feat/api-review
 - Durata stimata: 1 giorno
