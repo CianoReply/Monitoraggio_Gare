@@ -18,6 +18,14 @@
 
 <!-- Note -->
 
+## 2026-10-15 – T3.5 Scadenze, statistiche ed esecuzioni (nota anche per T3.4)
+- Fatto T3.4: `PATCH /reports/{id}/fields/{field_id}` chiama `domain.reports.review_field` e fa il commit; test in `test_api_review.py`.
+- Fatto T3.5: `GET /deadlines` (gare rilevanti nell'intervallo da `list_tenders`, `days_left` e `urgency` sulla data odierna Europe/Rome), `GET /stats` (quattro indicatori da `list_tenders` e `count_tenders_created_between`), `GET /runs` (`list_runs`), `POST /runs` (thread con `run_pending_days`, 202/409). Tolti i dati di prova (`sample_data.py`). Orologio e dipendenze del job iniettabili (`deps.get_now`, `deps.get_pipeline_deps`).
+- Da fare: T4.2 (test end-to-end) dopo T4.1; la CI e Docker restano da provare su GitHub e sui computer (vedi note T3.6 e T0.7).
+- Decisioni: `POST /runs` senza giorni da recuperare rielabora ieri (così risponde sempre con l'id di una nuova esecuzione); `days_left` è 0 per scadenze già passate (il contratto non ammette valori negativi); `deadlines_next_7_days` conta da oggi a oggi+7 (come `urgency` medium); `reports_to_verify` conta anche i report di gare scartate; in `/deadlines`, con `to` assente il valore è oggi+30 (come da contratto), quindi `from` oltre oggi+30 senza `to` dà 422.
+- Impatto sugli altri dev: DEV-1: `POST /runs` usa `run_pending_days` / `run_daily_ingestion` e si aspetta che il job crei la riga `running` subito; l'API va eseguita con un solo worker. DEV-2: usata la nuova `count_tenders_created_between`.
+
+
 ## 2026-10-15 – T3.3 Dettaglio, documenti e report
 - Fatto: `GET /tenders/{id}`, `GET /tenders/{id}/documents`, `GET` e `POST /tenders/{id}/report` leggono e scrivono tramite `backend/domain` (repository, relazioni, `domain.reports`); gli errori del dominio (`ReportError` e figli) sono mappati in `backend/api/errors.py` a 404/409/422 nel formato `{error, message}`; il commit lo fa l'API. Test in `backend/tests/test_api_detail.py`.
 - Da fare: T3.4 (revisione dei campi, in corso), T3.5 (scadenze, statistiche, esecuzioni), T4.2.
