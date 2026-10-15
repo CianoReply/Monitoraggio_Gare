@@ -77,4 +77,7 @@ Per le regole di coordinamento prevale il prompt del loop; per il contenuto tecn
 | 2026-10-15 | DEV-1: T0.3 hook PreToolUse (.env bloccato anche via Bash; ask su API_CONTRACT/ARCHITECTURE), Stop (test), fallback ruff nel venv, ADR-011 proposta, su setup/claude-hooks (51f9b2c, d5bca24). Merge dopo T0.5 per non interferire con DEV-3; serve OK di DEV-2 e DEV-3 su .claude/. |
 | 2026-10-15 | MERGED T0.5 – ab2f877 – develop 12/12 (2 giri di revisione). ADR-012 proposta. DEV-3 OK sugli hook di T0.3 (osservazioni non bloccanti: durata dello Stop, python3 su Windows). |
 | 2026-10-15 | DEV-2: PRONTO PER MERGE T2.1 (01d30df, 34/34). Revisione avviata. |
-| 2026-10-15 | CHECKPOINT UMANO fine Fase 0: team fermo, nessun turno di merge concesso fino all approvazione dell utente. |
+| 2026-10-15 | CHECKPOINT UMANO fine Fase 0: team fermo, nessun turno di merge concesso fino all'approvazione dell'utente. |
+| 2026-10-15 | Revisione T2.1: MODIFICHE RICHIESTE giro 1 (list_tenders non allineato al contratto; test di database.py; seed). |
+| 2026-10-15 | CHECKPOINT APPROVATO dall'utente: modello dati e contratto; ADR-012 accettata; relevance_score NOT NULL con gara salvata già valutata (stessa transazione); ai_label iniziale approvato; pydantic>=2 da dichiarare in pyproject (in T2.1). T0.5 [x]. Ripresa del loop. |
+| 2026-10-15 | SBLOCCATO T3.1 (DEV-3). |

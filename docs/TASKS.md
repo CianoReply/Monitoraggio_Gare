@@ -86,16 +86,16 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T0.5 – Contratto API
 - Responsabile: DEV-3 scrive, DEV-1 e DEV-2 approvano
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge ab2f877)
 - Dipende da: T0.4
 - Branch: setup/api-contract
 - Durata stimata: 1 giorno
 - Obiettivo: definire prima del codice cosa esporrà il backend; è il secondo accordo tra i moduli e permette di progettare il frontend in anticipo.
 - Finito quando:
   - [x] il file supera la validazione OpenAPI (ad esempio con `openapi-spec-validator`)
-  - [ ] tutti e tre i dev hanno approvato (DEV-1 e DEV-2: OK nel loop; IN ATTESA UMANA: checkpoint di fine Fase 0)
-  - [ ] da questo momento il file si modifica solo con una PR approvata da tutti
-- Note: unito in `develop` il 2026-10-15 (merge ab2f877), 2 giri di revisione; resta `[~]` fino al checkpoint umano. Aggiunte al piano in ADR-012.
+  - [x] tutti e tre i dev hanno approvato (revisione del lead nel loop; approvato dall'utente al checkpoint di fine Fase 0, 2026-10-15)
+  - [x] da questo momento il file si modifica solo con una PR approvata da tutti (hook `PreToolUse` di T0.3 e ADR-011)
+- Note: unito in `develop` il 2026-10-15 (merge ab2f877), 2 giri di revisione; approvato al checkpoint umano. Aggiunte al piano in ADR-012; valore iniziale di `ai_label` "Contenuto generato con IA – da revisionare" approvato dall'utente.
 - Note: produce `docs/API_CONTRACT.yaml` (OpenAPI 3) con gli 11 endpoint del piano, errori `404`/`409`/`422`, formato errore `{ "error": "codice", "message": "descrizione" }` e un esempio per endpoint.
 
 ### T0.6 – Compilazione di `docs/TASKS.md` e dei file di coordinamento
