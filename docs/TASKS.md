@@ -172,15 +172,17 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T1.4 – Deduplica e gestione delle rettifiche
 - Responsabile: DEV-1
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge a3a0298)
 - Dipende da: T1.3, T2.1
 - Branch: feat/dedup
 - Durata stimata: 1,5 giorni
 - Obiettivo: evitare che la stessa gara compaia due volte e collegare le rettifiche alla gara originale.
 - Finito quando:
-  - [ ] importare due volte lo stesso giorno non crea duplicati
-  - [ ] una rettifica aggiorna la scadenza della gara originale
-  - [ ] un report esistente torna `to_review` dopo una rettifica
+  - [x] importare due volte lo stesso giorno non crea duplicati
+  - [x] una rettifica aggiorna la scadenza della gara originale
+  - [x] un report esistente torna `to_review` dopo una rettifica
+- Esito: 2 giri di revisione. Rettifica = aggiornamento della riga dell'originale (ADR-014, Proposta: da approvare dall'utente); catena dei change notice risalita su TED con cache e fermata al primo avviso già salvato; un avviso più vecchio non sovrascrive; errore TED → `ChainLookupError` senza scritture. Limite noto: due righe se l'originale manca nel database.
+
 
 ### T1.5 – Job giornaliero
 - Responsabile: DEV-1
