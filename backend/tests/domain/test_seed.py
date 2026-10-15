@@ -24,3 +24,12 @@ def test_seed_is_idempotent(session: Session) -> None:
     assert seed(session, today=date(2026, 10, 15)) == 0
     assert session.scalar(select(func.count()).select_from(Tender)) == 20
     assert session.scalar(select(func.count()).select_from(Report)) == 2
+
+
+def test_seed_report_labels_follow_contract(session: Session) -> None:
+    seed(session, today=date(2026, 10, 15))
+    labels = {r.status.value: r.ai_label for r in session.scalars(select(Report))}
+    assert labels["to_review"] == "Contenuto generato con IA – da revisionare"
+    assert labels["verified"].startswith("Contenuto generato con IA – revisionato da ")
+    scores = [t.relevance_score for t in session.scalars(select(Tender))]
+    assert None not in scores

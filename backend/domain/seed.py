@@ -29,7 +29,7 @@ from backend.domain.models import (
     VerificationStatus,
 )
 from backend.domain.repository import upsert_tender
-from backend.domain.schemas import TenderCreate
+from backend.domain.schemas import TenderCreate, TenderEvaluation
 
 # (titolo, ente, città, CPV, importo, giorni a scadenza (None = nessuna), punteggio, scarto)
 _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | None]] = [
@@ -235,13 +235,16 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
     ),
 ]
 
-_AI_LABEL = "Contenuto generato con IA – revisionato da Mario Rossi, {d}"
+_LABEL_TO_REVIEW = "Contenuto generato con IA – da revisionare"
+_LABEL_VERIFIED = "Contenuto generato con IA – revisionato da Mario Rossi, {d}"
 
 
 def _build(index: int, row: tuple[Any, ...], today: date) -> TenderCreate:
     title, buyer, city, cpv, value, days, _score, _discard = row
     deadline = (
-        datetime.combine(today + timedelta(days=days), time(12, 0), tzinfo=UTC) if days else None
+        datetime.combine(today + timedelta(days=days), time(12, 0), tzinfo=UTC)
+        if days is not None
+        else None
     )
     number = f"9{index + 1:05d}-2026"
     return TenderCreate(
@@ -270,20 +273,21 @@ def seed(session: Session, today: date | None = None) -> int:
     today = today or date.today()
     created = 0
     for index, row in enumerate(_ROWS):
-        tender, is_new = upsert_tender(session, _build(index, row, today))
+        score, discard = row[6], row[7]
+        evaluation = TenderEvaluation(score, discard is None and score >= 3, discard)
+        tender, is_new = upsert_tender(session, _build(index, row, today), evaluation)
         if not is_new:
             continue
         created += 1
-        score, discard = row[6], row[7]
-        tender.relevance_score = score
-        tender.discard_reason = discard
-        tender.is_relevant = discard is None and score >= 3
         if tender.is_relevant:
             session.add(
                 Document(
                     tender=tender,
                     name="Disciplinare.pdf",
-                    url=f"https://example.invalid/documenti/{tender.publication_number}/disciplinare.pdf",
+                    url=(
+                        "https://example.invalid/documenti/"
+                        f"{tender.publication_number}/disciplinare.pdf"
+                    ),
                     status=DocumentStatus.PENDING,
                 )
             )
@@ -312,7 +316,9 @@ def _seed_reports(session: Session, today: date) -> None:
             tender=tender,
             summary="Report fittizio di esempio: sintesi dell'oggetto e dei requisiti.",
             status=status,
-            ai_label=_AI_LABEL.format(d=today.isoformat()),
+            ai_label=_LABEL_VERIFIED.format(d=today.isoformat())
+            if status is ReportStatus.VERIFIED
+            else _LABEL_TO_REVIEW,
         )
         report.fields = [
             ReportField(

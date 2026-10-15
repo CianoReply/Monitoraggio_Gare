@@ -62,15 +62,15 @@ def upgrade() -> None:
         sa.Column("submission_deadline", sa.DateTime(timezone=True), nullable=True),
         sa.Column("ted_url", sa.String(length=1000), nullable=False),
         sa.Column("documents_url", sa.String(length=1000), nullable=True),
-        sa.Column("relevance_score", sa.Integer(), nullable=True),
-        sa.Column("is_relevant", sa.Boolean(), server_default="0", nullable=False),
+        sa.Column("relevance_score", sa.Integer(), nullable=False),
+        sa.Column("is_relevant", sa.Boolean(), server_default=sa.false(), nullable=False),
         sa.Column("discard_reason", sa.String(length=500), nullable=True),
         sa.Column("parent_publication_number", sa.String(length=50), nullable=True),
         sa.Column("raw_data", sa.JSON(), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.CheckConstraint(
-            "relevance_score IS NULL OR (relevance_score BETWEEN 1 AND 5)",
+            "relevance_score BETWEEN 1 AND 5",
             name=op.f("ck_tenders_relevance_score_range"),
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_tenders")),
@@ -148,7 +148,7 @@ def upgrade() -> None:
         sa.Column("original_value", sa.Text(), nullable=True),
         sa.Column("source_doc", sa.String(length=500), nullable=False),
         sa.Column("source_page", sa.Integer(), nullable=True),
-        sa.Column("is_critical", sa.Boolean(), server_default="0", nullable=False),
+        sa.Column("is_critical", sa.Boolean(), server_default=sa.false(), nullable=False),
         sa.Column(
             "verification_status",
             sa.Enum(

@@ -26,6 +26,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy import Enum as SAEnum
+from sqlalchemy import false as sa_false
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 # Convenzione di denominazione: vincoli e indici hanno nomi stabili (serve ad Alembic).
@@ -89,7 +90,7 @@ class Tender(Base):
     __tablename__ = "tenders"
     __table_args__ = (
         CheckConstraint(
-            "relevance_score IS NULL OR (relevance_score BETWEEN 1 AND 5)",
+            "relevance_score BETWEEN 1 AND 5",
             name="relevance_score_range",
         ),
     )
@@ -110,9 +111,9 @@ class Tender(Base):
     )
     ted_url: Mapped[str] = mapped_column(String(1000))
     documents_url: Mapped[str | None] = mapped_column(String(1000))
-    # Calcolati da filtri (T2.2) e punteggio (T2.3); null finché la gara non è valutata.
-    relevance_score: Mapped[int | None] = mapped_column(Integer, index=True)
-    is_relevant: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
+    # Calcolati da filtri (T2.2) e punteggio (T2.3): la gara si salva solo già valutata.
+    relevance_score: Mapped[int] = mapped_column(Integer, index=True)
+    is_relevant: Mapped[bool] = mapped_column(Boolean, default=False, server_default=sa_false())
     discard_reason: Mapped[str | None] = mapped_column(String(500))
     parent_publication_number: Mapped[str | None] = mapped_column(String(50))
     raw_data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
@@ -180,7 +181,7 @@ class ReportField(Base):
     original_value: Mapped[str | None] = mapped_column(Text)
     source_doc: Mapped[str] = mapped_column(String(500))
     source_page: Mapped[int | None] = mapped_column(Integer)
-    is_critical: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
+    is_critical: Mapped[bool] = mapped_column(Boolean, default=False, server_default=sa_false())
     verification_status: Mapped[VerificationStatus] = mapped_column(
         _enum(VerificationStatus, "verification_status"), default=VerificationStatus.TO_VERIFY
     )

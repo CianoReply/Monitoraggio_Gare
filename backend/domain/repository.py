@@ -6,21 +6,28 @@ possiede la transazione (job di ingestion, endpoint API).
 
 from __future__ import annotations
 
-from datetime import date, datetime
+import re
+from datetime import UTC, date, datetime, time, timedelta
 from decimal import Decimal
 from typing import Literal, NamedTuple
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import String, cast, func, or_, select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import ColumnElement
 
-from backend.domain.models import Report, ReportStatus, Tender, utcnow
-from backend.domain.schemas import TenderCreate
+from backend.domain.models import Report, Tender, utcnow
+from backend.domain.schemas import TenderCreate, TenderEvaluation
 
 DEFAULT_PAGE_SIZE = 20
 MAX_PAGE_SIZE = 100
+MAX_QUERY_LENGTH = 200
+ROME = ZoneInfo("Europe/Rome")
 
-SortKey = Literal["score_desc", "deadline_asc", "publication_date_desc", "value_desc"]
+# Valori di `sort` del contratto API (docs/API_CONTRACT.yaml).
+SortKey = Literal["relevance", "deadline", "published"]
+# Stato del report derivato: `none` se la gara non ha report (ADR-012).
+ReportStatusFilter = Literal["none", "to_review", "verified"]
 
 
 class UpsertResult(NamedTuple):
@@ -28,23 +35,38 @@ class UpsertResult(NamedTuple):
     created: bool
 
 
+class TenderRow(NamedTuple):
+    """Una gara dell'elenco con lo stato derivato del suo report (senza query per gara)."""
+
+    tender: Tender
+    report_status: ReportStatusFilter
+
+
 class TenderPage(NamedTuple):
-    items: list[Tender]
+    items: list[TenderRow]
     total: int
     page: int
     page_size: int
 
 
-def upsert_tender(session: Session, data: TenderCreate) -> UpsertResult:
-    """Inserisce la gara o, se `publication_number` esiste già, ne aggiorna i campi.
+def upsert_tender(
+    session: Session, data: TenderCreate, evaluation: TenderEvaluation
+) -> UpsertResult:
+    """Inserisce la gara o, se `publication_number` esiste già, la aggiorna.
 
-    Non tocca i campi calcolati (`relevance_score`, `is_relevant`, `discard_reason`):
-    li scrivono filtri e punteggio. Restituisce la gara e `created=True` se è nuova.
+    La gara si salva già valutata (ADR-010): `evaluation` (punteggio, rilevanza, motivo di
+    scarto) viene scritto sia in inserimento sia in aggiornamento. La scadenza è salvata in UTC.
+    Restituisce la gara e `created=True` se è nuova.
     """
-    tender = session.scalar(
-        select(Tender).where(Tender.publication_number == data.publication_number)
-    )
     values = data.model_dump()
+    if data.submission_deadline is not None:
+        values["submission_deadline"] = data.submission_deadline.astimezone(UTC)
+    values.update(
+        relevance_score=evaluation.relevance_score,
+        is_relevant=evaluation.is_relevant,
+        discard_reason=evaluation.discard_reason,
+    )
+    tender = get_tender_by_publication_number(session, data.publication_number)
     if tender is None:
         tender = Tender(**values)
         session.add(tender)
@@ -71,23 +93,22 @@ def _escape_like(text: str) -> str:
     return text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
+def _day_start_utc(day: date) -> datetime:
+    """Mezzanotte del giorno in Europe/Rome, espressa in UTC."""
+    return datetime.combine(day, time.min, tzinfo=ROME).astimezone(UTC)
+
+
 def _order_by(sort: SortKey) -> list[ColumnElement]:
-    """Ordinamento con i valori null in fondo, in modo identico su PostgreSQL e SQLite."""
+    """Ordinamento con le gare senza scadenza sempre in fondo (uguale su PostgreSQL e SQLite)."""
     deadline_asc = [Tender.submission_deadline.is_(None), Tender.submission_deadline.asc()]
-    if sort == "score_desc":
-        order = [
-            Tender.relevance_score.is_(None),
-            Tender.relevance_score.desc(),
-            *deadline_asc,
-        ]
-    elif sort == "deadline_asc":
+    if sort == "relevance":
+        order = [Tender.relevance_score.desc(), *deadline_asc]
+    elif sort == "deadline":
         order = deadline_asc
-    elif sort == "publication_date_desc":
-        order = [Tender.publication_date.desc()]
-    elif sort == "value_desc":
-        order = [Tender.estimated_value.is_(None), Tender.estimated_value.desc()]
+    elif sort == "published":
+        order = [Tender.publication_date.desc(), *deadline_asc]
     else:
-        raise ValueError(f"Ordinamento non valido: {sort!r}")
+        raise ValueError(f"sort non valido: {sort!r}")
     return [*order, Tender.id.asc()]
 
 
@@ -95,36 +116,59 @@ def list_tenders(
     session: Session,
     *,
     min_score: int | None = None,
-    is_relevant: bool | None = None,
     cpv: str | None = None,
-    deadline_from: datetime | None = None,
-    deadline_to: datetime | None = None,
-    publication_from: date | None = None,
-    publication_to: date | None = None,
+    deadline_from: date | None = None,
+    deadline_to: date | None = None,
     min_value: Decimal | None = None,
     max_value: Decimal | None = None,
-    report_status: ReportStatus | None = None,
+    report_status: ReportStatusFilter | None = None,
     q: str | None = None,
-    sort: SortKey = "score_desc",
+    include_discarded: bool = False,
+    sort: SortKey = "relevance",
     page: int = 1,
     page_size: int = DEFAULT_PAGE_SIZE,
+    is_relevant: bool | None = None,
+    publication_from: date | None = None,
+    publication_to: date | None = None,
 ) -> TenderPage:
-    """Elenco paginato di gare con filtri; tutti i filtri sono combinati in AND.
+    """Elenco paginato di gare con filtri in AND, come `GET /tenders` del contratto API.
 
-    - `cpv`: prefisso di un CPV (es. "72" o "72267000"); basta un codice della gara che inizi così.
-    - `q`: testo cercato (senza distinzione di maiuscole) in titolo, descrizione ed ente.
-    - `report_status`: gare il cui report ha quello stato.
-    - Ordinamento predefinito: punteggio decrescente, poi scadenza crescente.
-    - `page` parte da 1; `page_size` da 1 a `MAX_PAGE_SIZE`.
+    - `cpv`: prefisso di 2-8 cifre; basta un CPV della gara che inizi così.
+    - `deadline_from`/`deadline_to`: giorni inclusivi in Europe/Rome, cioè
+      scadenza in [da 00:00, a+1 00:00). Le gare senza scadenza sono escluse se il filtro c'è.
+    - `min_value`/`max_value`: le gare senza importo sono escluse se il filtro c'è.
+    - `report_status`: `none` / `to_review` / `verified` (ADR-012).
+    - `q`: testo cercato (senza distinzione di maiuscole) in titolo, descrizione ed ente; max 200.
+    - `include_discarded`: se `False` esclude le gare con `discard_reason` (ADR-012).
+    - `page` da 1; `page_size` da 1 a 100.
+    - `is_relevant`, `publication_from`, `publication_to`: NON fanno parte di `GET /tenders`;
+      uso interno (`/deadlines`, `/stats`).
+    Parametri non validi o intervalli invertiti sollevano `ValueError`.
     """
+    if min_score is not None and not 1 <= min_score <= 5:
+        raise ValueError("min_score deve essere tra 1 e 5")
+    if cpv is not None and not re.fullmatch(r"\d{2,8}", cpv):
+        raise ValueError("cpv deve essere un prefisso di 2-8 cifre")
+    if (min_value is not None and min_value < 0) or (max_value is not None and max_value < 0):
+        raise ValueError("min_value e max_value devono essere >= 0")
+    if min_value is not None and max_value is not None and min_value > max_value:
+        raise ValueError("min_value non può superare max_value")
+    if deadline_from is not None and deadline_to is not None and deadline_from > deadline_to:
+        raise ValueError("deadline_from non può superare deadline_to")
+    if report_status is not None and report_status not in ("none", "to_review", "verified"):
+        raise ValueError(f"report_status non valido: {report_status!r}")
+    if q is not None and len(q) > MAX_QUERY_LENGTH:
+        raise ValueError(f"q non può superare {MAX_QUERY_LENGTH} caratteri")
     if page < 1:
         raise ValueError("page deve essere >= 1")
     if not 1 <= page_size <= MAX_PAGE_SIZE:
         raise ValueError(f"page_size deve essere tra 1 e {MAX_PAGE_SIZE}")
-    if cpv is not None and not cpv.isdigit():
-        raise ValueError("cpv deve contenere solo cifre")
 
+    # Stato del report calcolato nella stessa query (LEFT JOIN: al massimo un report per gara).
+    status_col = func.coalesce(cast(Report.status, String), "none")
     conditions: list[ColumnElement[bool]] = []
+    if not include_discarded:
+        conditions.append(Tender.discard_reason.is_(None))
     if min_score is not None:
         conditions.append(Tender.relevance_score >= min_score)
     if is_relevant is not None:
@@ -134,9 +178,9 @@ def list_tenders(
         # prefisso di un codice si cerca come `"<prefisso>`. Vale su PostgreSQL e SQLite.
         conditions.append(cast(Tender.cpv_codes, String).like(f'%"{cpv}%'))
     if deadline_from is not None:
-        conditions.append(Tender.submission_deadline >= deadline_from)
+        conditions.append(Tender.submission_deadline >= _day_start_utc(deadline_from))
     if deadline_to is not None:
-        conditions.append(Tender.submission_deadline <= deadline_to)
+        conditions.append(Tender.submission_deadline < _day_start_utc(deadline_to + timedelta(1)))
     if publication_from is not None:
         conditions.append(Tender.publication_date >= publication_from)
     if publication_to is not None:
@@ -146,9 +190,7 @@ def list_tenders(
     if max_value is not None:
         conditions.append(Tender.estimated_value <= max_value)
     if report_status is not None:
-        conditions.append(
-            Tender.id.in_(select(Report.tender_id).where(Report.status == report_status))
-        )
+        conditions.append(status_col == report_status)
     if q and q.strip():
         pattern = f"%{_escape_like(q.strip().lower())}%"
         conditions.append(
@@ -159,14 +201,22 @@ def list_tenders(
             )
         )
 
-    total = session.scalar(select(func.count()).select_from(Tender).where(*conditions)) or 0
-    items = list(
-        session.scalars(
-            select(Tender)
+    total = (
+        session.scalar(
+            select(func.count())
+            .select_from(Tender)
+            .outerjoin(Report, Report.tender_id == Tender.id)
             .where(*conditions)
-            .order_by(*_order_by(sort))
-            .limit(page_size)
-            .offset((page - 1) * page_size)
         )
+        or 0
     )
+    rows = session.execute(
+        select(Tender, status_col)
+        .outerjoin(Report, Report.tender_id == Tender.id)
+        .where(*conditions)
+        .order_by(*_order_by(sort))
+        .limit(page_size)
+        .offset((page - 1) * page_size)
+    ).all()
+    items = [TenderRow(tender, status) for tender, status in rows]
     return TenderPage(items, total, page, page_size)

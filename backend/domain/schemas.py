@@ -8,11 +8,12 @@
 from __future__ import annotations
 
 import re
-from datetime import date, datetime
+from dataclasses import dataclass
+from datetime import date
 from decimal import Decimal
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator
 
 _CPV_RE = re.compile(r"^\d{8}$")
 
@@ -32,7 +33,7 @@ class TenderCreate(BaseModel):
     estimated_value: Decimal | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, min_length=3, max_length=3)
     publication_date: date
-    submission_deadline: datetime | None = None
+    submission_deadline: AwareDatetime | None = None
     ted_url: str = Field(min_length=1, max_length=1000)
     documents_url: str | None = Field(default=None, max_length=1000)
     parent_publication_number: str | None = Field(default=None, max_length=50)
@@ -54,3 +55,22 @@ class TenderCreate(BaseModel):
     @classmethod
     def _upper_currency(cls, value: str | None) -> str | None:
         return value.upper() if value else value
+
+
+@dataclass(frozen=True)
+class TenderEvaluation:
+    """Esito di filtri (T2.2) e punteggio (T2.3), da salvare insieme alla gara.
+
+    Una gara si salva solo già valutata (ADR-010): il job calcola l'esito prima di
+    `repository.upsert_tender`. Una gara scartata ha un punteggio ma non è mai rilevante.
+    """
+
+    relevance_score: int
+    is_relevant: bool
+    discard_reason: str | None = None
+
+    def __post_init__(self) -> None:
+        if not 1 <= self.relevance_score <= 5:
+            raise ValueError("relevance_score deve essere tra 1 e 5")
+        if self.is_relevant and self.discard_reason is not None:
+            raise ValueError("una gara scartata non può essere rilevante")

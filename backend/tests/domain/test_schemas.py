@@ -38,3 +38,10 @@ def test_computed_fields_are_not_part_of_the_schema() -> None:
 def test_negative_value_is_rejected() -> None:
     with pytest.raises(ValidationError):
         make_tender(estimated_value="-1")
+
+
+def test_naive_deadline_is_rejected() -> None:
+    from datetime import datetime
+
+    with pytest.raises(ValidationError):
+        make_tender(submission_deadline=datetime(2026, 11, 1, 12, 0))
