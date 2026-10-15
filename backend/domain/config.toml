@@ -64,3 +64,8 @@ direct_file_extensions = [".pdf", ".zip"]
 max_file_mb = 50
 # Tempo massimo di attesa per ogni richiesta, in secondi.
 request_timeout_seconds = 30
+# Tempo massimo complessivo per scaricare un file (redirect inclusi), in secondi: oltre, errore
+# temporaneo (il documento resta pending e si riprova alla chiamata successiva).
+total_timeout_seconds = 300
+# Massimo numero di reindirizzamenti seguiti per un link (ogni salto e' ricontrollato).
+max_redirects = 5

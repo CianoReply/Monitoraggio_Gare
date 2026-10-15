@@ -188,6 +188,8 @@ class DocumentsConfig:
     direct_file_extensions: tuple[str, ...]
     max_file_bytes: int
     request_timeout_seconds: float
+    total_timeout_seconds: float
+    max_redirects: int
 
 
 def load_documents_config(path: Path | None = None) -> DocumentsConfig:
@@ -200,10 +202,16 @@ def load_documents_config(path: Path | None = None) -> DocumentsConfig:
         raise ConfigError(f'{where}.direct_file_extensions: servono estensioni come ".pdf"')
     max_mb = _number(section, "max_file_mb", where, minimum=0)
     timeout = _number(section, "request_timeout_seconds", where, minimum=0)
-    if max_mb <= 0 or timeout <= 0:
-        raise ConfigError(f"{where}: max_file_mb e request_timeout_seconds devono essere > 0")
+    total_timeout = _number(section, "total_timeout_seconds", where, minimum=0)
+    if max_mb <= 0 or timeout <= 0 or total_timeout <= 0:
+        raise ConfigError(
+            f"{where}: max_file_mb, request_timeout_seconds e total_timeout_seconds "
+            "devono essere > 0"
+        )
     return DocumentsConfig(
         direct_file_extensions=extensions,
         max_file_bytes=int(max_mb * 1024 * 1024),
         request_timeout_seconds=float(timeout),
+        total_timeout_seconds=float(total_timeout),
+        max_redirects=_integer(section, "max_redirects", where, minimum=0),
     )

@@ -1,6 +1,7 @@
 """Test dei documenti di gara (T2.4): nessuna rete, solo httpx.MockTransport e tmp_path."""
 
 import logging
+import socket
 from collections.abc import Callable, Iterator
 from pathlib import Path
 
@@ -37,6 +38,25 @@ PDF_URL = "https://ente.example.invalid/gara/Disciplinare.pdf"
 PLATFORM_URL = "https://pizzo.example.invalid/gare/dettaglio.php?codice=249"
 PDF_BYTES = b"%PDF-1.7 contenuto di prova"
 MB = 1024 * 1024
+
+
+PUBLIC_IP = "93.184.216.34"
+DNS: dict[str, list[str]] = {}
+
+
+def fake_getaddrinfo(host: str, port: int, *args: object, **kwargs: object) -> list[tuple]:
+    """DNS finto: ogni host è pubblico salvo quelli elencati in `DNS`."""
+    return [
+        (socket.AF_INET, socket.SOCK_STREAM, 6, "", (ip, port)) for ip in DNS.get(host, [PUBLIC_IP])
+    ]
+
+
+@pytest.fixture(autouse=True)
+def public_dns(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    DNS.clear()
+    monkeypatch.setattr(documents_module.socket, "getaddrinfo", fake_getaddrinfo)
+    yield
+    DNS.clear()
 
 
 @pytest.fixture
@@ -168,14 +188,25 @@ def test_download_accepts_file_exactly_at_limit(tmp_path: Path) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, content=b"x" * 1000)
 
-    destination = tmp_path / "a.pdf"
+    destination = tmp_path / "a.bin"
     assert download_document(make_client(handler), PDF_URL, destination, 1000) == 1000
     with pytest.raises(DocumentTooLargeError):
-        download_document(make_client(handler), PDF_URL, tmp_path / "b.pdf", 999)
+        download_document(make_client(handler), PDF_URL, tmp_path / "b.bin", 999)
 
 
 @pytest.mark.parametrize(
-    ("status", "temporary"), [(404, False), (403, False), (500, True), (503, True)]
+    ("status", "temporary"),
+    [
+        (404, False),
+        (403, False),
+        (410, False),
+        (204, False),
+        (304, False),
+        (408, True),
+        (429, True),
+        (500, True),
+        (503, True),
+    ],
 )
 def test_download_http_errors(tmp_path: Path, status: int, temporary: bool) -> None:
     client = make_client(lambda request: httpx.Response(status))
@@ -243,7 +274,7 @@ def test_direct_pdf_is_downloaded_and_saved(
         DocumentStatus.DOWNLOADED,
     )
     assert doc.downloaded_at is not None
-    assert Path(doc.local_path or "") == tmp_path / "000001-2026" / "Disciplinare.pdf"
+    assert Path(doc.local_path or "") == tmp_path / "000001-2026" / f"{doc.id}_Disciplinare.pdf"
     assert Path(doc.local_path or "").read_bytes() == PDF_BYTES
     assert doc.id is not None and doc.tender_id == tender.id
 
@@ -358,7 +389,7 @@ def test_default_client_is_created_and_closed(
     real_client = httpx.Client
 
     def fake_client(**kwargs: object) -> httpx.Client:
-        assert kwargs["follow_redirects"] is True
+        assert kwargs["follow_redirects"] is False
         assert kwargs["timeout"] == config.request_timeout_seconds
         client = real_client(transport=httpx.MockTransport(pdf_handler))
         created.append(client)
@@ -396,6 +427,8 @@ def test_default_documents_config() -> None:
     assert config.direct_file_extensions == (".pdf", ".zip")
     assert config.max_file_bytes == 50 * MB
     assert config.request_timeout_seconds == 30.0
+    assert config.total_timeout_seconds == 300.0
+    assert config.max_redirects == 5
 
 
 def _write(tmp_path: Path, body: str) -> Path:
@@ -404,7 +437,15 @@ def _write(tmp_path: Path, body: str) -> Path:
     return path
 
 
-VALID = 'direct_file_extensions = [".PDF"]\nmax_file_mb = 1.5\nrequest_timeout_seconds = 10'
+VALID = "\n".join(
+    [
+        'direct_file_extensions = [".PDF"]',
+        "max_file_mb = 1.5",
+        "request_timeout_seconds = 10",
+        "total_timeout_seconds = 20",
+        "max_redirects = 3",
+    ]
+)
 
 
 def test_custom_documents_config(tmp_path: Path) -> None:
@@ -412,6 +453,7 @@ def test_custom_documents_config(tmp_path: Path) -> None:
     assert config.direct_file_extensions == (".pdf",)
     assert config.max_file_bytes == int(1.5 * MB)
     assert config.request_timeout_seconds == 10.0
+    assert (config.total_timeout_seconds, config.max_redirects) == (20.0, 3)
 
 
 @pytest.mark.parametrize(
@@ -428,6 +470,11 @@ def test_custom_documents_config(tmp_path: Path) -> None:
         VALID.replace("= 10", "= true"),
         VALID.replace("max_file_mb = 1.5\n", ""),
         VALID.replace("request_timeout_seconds = 10", ""),
+        VALID.replace("total_timeout_seconds = 20", ""),
+        VALID.replace("total_timeout_seconds = 20", "total_timeout_seconds = 0"),
+        VALID.replace("max_redirects = 3", ""),
+        VALID.replace("max_redirects = 3", "max_redirects = -1"),
+        VALID.replace("max_redirects = 3", "max_redirects = 2.5"),
         "",
     ],
 )
