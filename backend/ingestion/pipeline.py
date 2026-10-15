@@ -17,6 +17,7 @@ from datetime import UTC, date, datetime, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo
 
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
 from backend.domain import repository
@@ -32,6 +33,7 @@ from backend.domain.database import create_db_engine, create_session_factory
 from backend.domain.documents import process_tender_documents
 from backend.domain.filters import apply_filters
 from backend.domain.models import IngestionRun, RunStatus
+from backend.domain.schemas import TenderCreate
 from backend.domain.scoring import evaluate_tender
 from backend.ingestion.dedup import ChainLookupError, NoticeLookup, TedNoticeLookup, save_notice
 from backend.ingestion.parser import parse_notices
@@ -78,19 +80,24 @@ class RunSummary:
     error_message: str | None = None
 
 
-def yesterday(now: datetime) -> date:
-    """Giorno precedente secondo il fuso Europe/Rome."""
-    return now.astimezone(ROME).date() - timedelta(days=1)
-
-
 def days_to_process(last_success: date | None, today_rome: date) -> list[date]:
     """Giorni da elaborare fino a ieri, dal giorno dopo l'ultimo riuscito (ADR-009).
 
-    Al primo avvio (`last_success` assente) solo ieri; al massimo `MAX_RECOVERY_DAYS` giorni.
+    Al primo avvio (`last_success` assente) solo ieri; al massimo `MAX_RECOVERY_DAYS` giorni,
+    con un warning se la finestra taglia giorni più vecchi. Un giorno rimasto senza successo
+    prima dell'ultimo riuscito non viene ripreso (ADR-009: si parte dall'ultimo riuscito).
     """
     end = today_rome - timedelta(days=1)
     start = end if last_success is None else last_success + timedelta(days=1)
-    start = max(start, end - timedelta(days=MAX_RECOVERY_DAYS - 1))
+    window_start = end - timedelta(days=MAX_RECOVERY_DAYS - 1)
+    if start < window_start:
+        logger.warning(
+            "Recupero limitato a %d giorni: i giorni dal %s al %s non saranno elaborati",
+            MAX_RECOVERY_DAYS,
+            start.isoformat(),
+            (window_start - timedelta(days=1)).isoformat(),
+        )
+        start = window_start
     return [start + timedelta(days=n) for n in range((end - start).days + 1)]
 
 
@@ -160,61 +167,70 @@ def _claim_run(session: Session, run_date: date, now: datetime) -> IngestionRun:
     return run
 
 
+def _process_notice(
+    session: Session, tender: TenderCreate, deps: PipelineDeps, now: datetime, summary: RunSummary
+) -> None:
+    """Un avviso: filtri e punteggio prima del salvataggio (servono a `upsert_tender`, ADR-010),
+    poi salvataggio con deduplica e documenti, nello stesso savepoint."""
+    if deps.lookup is None or deps.filters_config is None or deps.scoring_config is None:
+        raise RuntimeError("Dipendenze del job non risolte")
+    filter_result = apply_filters(
+        tender,
+        buyer_country=tender.raw_data.get("buyer-country"),
+        config=deps.filters_config,
+        now=now,
+    )
+    evaluation = evaluate_tender(tender, filter_result, deps.scoring_config, now)
+    with session.begin_nested():
+        outcome = save_notice(session, tender, evaluation, deps.lookup)
+        if not outcome.skipped_as_older and outcome.tender.is_relevant:
+            deps.process_documents(session, outcome.tender, config=deps.documents_config)
+    if outcome.skipped_as_older:
+        return
+    if outcome.created:
+        summary.new_count += 1
+    else:
+        summary.updated_count += 1
+    if outcome.tender.is_relevant:
+        summary.relevant_count += 1
+
+
 def _process_day(session: Session, run_date: date, deps: PipelineDeps, summary: RunSummary) -> None:
-    assert deps.fetch_notices and deps.lookup and deps.filters_config and deps.scoring_config
+    """Raccolta e lettura del giorno, poi un avviso alla volta.
+
+    Un avviso che fallisce (lookup TED, dati anomali, documenti) è saltato e registrato: il giorno
+    fallisce solo per errori di sistema (TED non raggiungibile, database non disponibile).
+    """
+    if deps.fetch_notices is None:
+        raise RuntimeError("Dipendenze del job non risolte")
     raw_notices = deps.fetch_notices(run_date)
     summary.fetched_count = len(raw_notices)
     tenders = parse_notices(raw_notices)
     summary.skipped_count = len(raw_notices) - len(tenders)
     now = deps.now()
     for tender in tenders:
-        buyer_country = tender.raw_data.get("buyer-country")
-        filter_result = apply_filters(
-            tender, buyer_country=buyer_country, config=deps.filters_config, now=now
-        )
-        evaluation = evaluate_tender(tender, filter_result, deps.scoring_config, now)
         try:
-            with session.begin_nested():
-                outcome = save_notice(session, tender, evaluation, deps.lookup)
+            _process_notice(session, tender, deps, now, summary)
         except ChainLookupError as exc:
             # La rettifica si riprova alla prossima esecuzione: nulla è stato salvato.
             summary.skipped_count += 1
             logger.warning("Avviso %s non salvato: %s", tender.publication_number, exc)
-            continue
-        if outcome.skipped_as_older:
-            continue
-        if outcome.created:
-            summary.new_count += 1
-        else:
-            summary.updated_count += 1
-        if outcome.tender.is_relevant:
-            summary.relevant_count += 1
-            deps.process_documents(session, outcome.tender, config=deps.documents_config)
+        except SQLAlchemyError:
+            raise
+        except Exception:
+            summary.skipped_count += 1
+            logger.exception("Avviso %s saltato per un errore inatteso", tender.publication_number)
         session.commit()
 
 
-def run_daily_ingestion(run_date: date, deps: PipelineDeps | None = None) -> RunSummary:
-    """Elabora gli avvisi TED di `run_date` e registra l'esecuzione in `ingestion_runs`.
-
-    Solleva `RunAlreadyRunningError` se un'altra esecuzione è in corso; ogni altro errore
-    chiude l'esecuzione `failed` con un messaggio leggibile e viene restituito nel riepilogo.
-    """
-    resolved = _resolve(deps or PipelineDeps())
-    assert resolved.session_factory is not None
-    with exclusive_run(), resolved.session_factory() as session:
-        run = _claim_run(session, run_date, utc_now(resolved))
-        summary = RunSummary(run_id=run.id, run_date=run_date, status=RunStatus.RUNNING)
-        logger.info("Esecuzione %s avviata per il %s", run.id, run_date.isoformat())
-        try:
-            _process_day(session, run_date, resolved, summary)
-        except Exception as exc:
-            session.rollback()
-            summary.status = RunStatus.FAILED
-            summary.error_message = f"{exc.__class__.__name__}: {exc}"[:2000]
-            logger.exception("Esecuzione %s fallita", run.id)
-        else:
-            summary.status = RunStatus.SUCCESS
-        run = session.get(IngestionRun, summary.run_id) or run
+def _close_run(deps: PipelineDeps, summary: RunSummary) -> None:
+    """Chiude la riga dell'esecuzione con una sessione nuova (anche se quella del job è rotta)."""
+    if deps.session_factory is None:
+        raise RuntimeError("Dipendenze del job non risolte")
+    with deps.session_factory() as session:
+        run = session.get(IngestionRun, summary.run_id)
+        if run is None:  # pragma: no cover - la riga è stata creata e salvata da _claim_run
+            return
         repository.finish_run(
             session,
             run,
@@ -224,17 +240,56 @@ def run_daily_ingestion(run_date: date, deps: PipelineDeps | None = None) -> Run
             updated_count=summary.updated_count,
             relevant_count=summary.relevant_count,
             error_message=summary.error_message,
-            now=utc_now(resolved),
+            now=utc_now(deps),
         )
         session.commit()
+
+
+def run_daily_ingestion(run_date: date, deps: PipelineDeps | None = None) -> RunSummary:
+    """Elabora gli avvisi TED di `run_date` e registra l'esecuzione in `ingestion_runs`.
+
+    Solleva `RunAlreadyRunningError` se un'altra esecuzione è in corso e `ValueError` per un
+    giorno non ancora concluso (oggi o futuro, Europe/Rome). Ogni altro errore chiude
+    l'esecuzione `failed` con un messaggio leggibile, restituito nel riepilogo; la riga si chiude
+    anche se il processo viene interrotto (`finally`).
+    Limite: il lock vale nel singolo processo e la riga `running` non ha un vincolo univoco,
+    quindi l'applicazione va eseguita con un solo worker (backend/ingestion/CLAUDE.md).
+    """
+    resolved = _resolve(deps or PipelineDeps())
+    if resolved.session_factory is None:
+        raise RuntimeError("Dipendenze del job non risolte")
+    if run_date >= resolved.now().astimezone(ROME).date():
+        raise ValueError(f"Il giorno {run_date.isoformat()} non è ancora concluso (Europe/Rome).")
+    with exclusive_run():
+        with resolved.session_factory() as session:
+            run = _claim_run(session, run_date, utc_now(resolved))
+            run_id = run.id
+        summary = RunSummary(run_id=run_id, run_date=run_date, status=RunStatus.FAILED)
+        logger.info("Esecuzione %s avviata per il %s", run_id, run_date.isoformat())
+        try:
+            with resolved.session_factory() as session:
+                _process_day(session, run_date, resolved, summary)
+            summary.status = RunStatus.SUCCESS
+        except Exception as exc:
+            summary.error_message = f"{exc.__class__.__name__}: {exc}"[:2000]
+            logger.exception("Esecuzione %s fallita", run_id)
+        finally:
+            if summary.status is not RunStatus.SUCCESS and summary.error_message is None:
+                summary.error_message = "Esecuzione interrotta prima della fine."
+            try:
+                _close_run(resolved, summary)
+            except Exception:
+                logger.exception("Impossibile chiudere l'esecuzione %s", run_id)
         logger.info(
-            "Esecuzione %s terminata: %s (raccolti %d, nuovi %d, aggiornati %d, rilevanti %d)",
-            run.id,
+            "Esecuzione %s terminata: %s (raccolti %d, nuovi %d, aggiornati %d, rilevanti %d, "
+            "saltati %d)",
+            run_id,
             summary.status.value,
             summary.fetched_count,
             summary.new_count,
             summary.updated_count,
             summary.relevant_count,
+            summary.skipped_count,
         )
         return summary
 
@@ -242,16 +297,22 @@ def run_daily_ingestion(run_date: date, deps: PipelineDeps | None = None) -> Run
 def run_pending_days(deps: PipelineDeps | None = None) -> list[RunSummary]:
     """Esegue il job per ogni giorno mancante fino a ieri (recupero dei giorni falliti).
 
-    Si ferma al primo giorno fallito, che verrà ripreso alla prossima esecuzione.
+    Si ferma al primo giorno fallito, che verrà ripreso alla prossima esecuzione, e se un'altra
+    esecuzione è in corso (restituisce comunque i riepiloghi già ottenuti).
     """
     resolved = _resolve(deps or PipelineDeps())
-    assert resolved.session_factory is not None
+    if resolved.session_factory is None:
+        raise RuntimeError("Dipendenze del job non risolte")
     with resolved.session_factory() as session:
         last_success = repository.last_successful_run_date(session)
     pending = days_to_process(last_success, resolved.now().astimezone(ROME).date())
-    summaries = []
+    summaries: list[RunSummary] = []
     for day in pending:
-        summary = run_daily_ingestion(day, resolved)
+        try:
+            summary = run_daily_ingestion(day, resolved)
+        except RunAlreadyRunningError as exc:
+            logger.warning("Recupero interrotto: %s", exc)
+            break
         summaries.append(summary)
         if summary.status is RunStatus.FAILED:
             break

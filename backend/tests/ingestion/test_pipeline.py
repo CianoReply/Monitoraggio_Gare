@@ -26,13 +26,14 @@ from backend.ingestion.pipeline import (
     exclusive_run,
     run_daily_ingestion,
     run_pending_days,
-    yesterday,
+    utc_now,
 )
 from backend.ingestion.scheduler import (
     JOB_ID,
     create_scheduler,
     daily_job,
     parse_schedule,
+    start_scheduler,
 )
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
@@ -95,9 +96,9 @@ def tender_count(factory: sessionmaker[Session]) -> int:
         return session.scalar(select(func.count()).select_from(Tender)) or 0
 
 
-def test_yesterday_uses_rome_time() -> None:
-    assert yesterday(datetime(2026, 10, 14, 22, 30, tzinfo=UTC)) == date(2026, 10, 14)
-    assert yesterday(datetime(2026, 10, 14, 21, 30, tzinfo=UTC)) == date(2026, 10, 13)
+def test_utc_now_converts_to_utc() -> None:
+    deps = PipelineDeps(now=lambda: NOW)
+    assert utc_now(deps) == datetime(2026, 10, 15, 4, 0, tzinfo=UTC)
 
 
 def test_days_to_process() -> None:
@@ -109,8 +110,13 @@ def test_days_to_process() -> None:
         date(2026, 10, 13),
         date(2026, 10, 14),
     ]
-    long_gap = days_to_process(date(2026, 1, 1), today)
-    assert len(long_gap) == MAX_RECOVERY_DAYS and long_gap[-1] == date(2026, 10, 14)
+
+
+def test_days_to_process_is_limited_and_warns(caplog: pytest.LogCaptureFixture) -> None:
+    with caplog.at_level("WARNING"):
+        days = days_to_process(date(2026, 1, 1), date(2026, 10, 15))
+    assert len(days) == MAX_RECOVERY_DAYS and days[-1] == date(2026, 10, 14)
+    assert "Recupero limitato" in caplog.text
 
 
 def test_run_daily_ingestion_saves_tenders_and_records_run(factory: sessionmaker[Session]) -> None:
@@ -180,6 +186,7 @@ def test_two_threads_only_one_runs(factory: sessionmaker[Session]) -> None:
         errors.append(exc)
     release.set()
     first.join(5)
+    assert not first.is_alive()
     assert len(errors) == 1
     assert [r.status for r in runs(factory)] == [RunStatus.SUCCESS]
 
@@ -279,9 +286,11 @@ def test_scheduler_next_run_is_six_in_rome() -> None:
     trigger = scheduler.get_job(JOB_ID).trigger
     next_fire = trigger.get_next_fire_time(None, datetime(2026, 10, 15, 7, 0, tzinfo=ROME))
     assert next_fire == datetime(2026, 10, 16, 6, 0, tzinfo=ROME)
-    # al cambio dell'ora legale resta alle 06:00 locali (+01:00 dal 25 ottobre)
-    after_dst = trigger.get_next_fire_time(None, datetime(2026, 10, 25, 7, 0, tzinfo=ROME))
-    assert after_dst.utcoffset() == timedelta(hours=1)
+    # ai cambi dell'ora legale resta alle 06:00 locali
+    autumn = trigger.get_next_fire_time(None, datetime(2026, 10, 24, 7, 0, tzinfo=ROME))
+    assert autumn == datetime(2026, 10, 25, 5, 0, tzinfo=UTC)
+    spring = trigger.get_next_fire_time(None, datetime(2026, 3, 28, 7, 0, tzinfo=ROME))
+    assert spring == datetime(2026, 3, 29, 4, 0, tzinfo=UTC)
 
 
 def test_job_starts_at_the_configured_time() -> None:
@@ -308,3 +317,69 @@ def test_daily_job_propagates_other_errors() -> None:
 
     with pytest.raises(RuntimeError):
         daily_job(broken)
+
+
+def test_start_scheduler_reads_schedule_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    started: list[bool] = []
+    monkeypatch.setenv("INGESTION_SCHEDULE", "07:15")
+    monkeypatch.setattr(
+        "apscheduler.schedulers.background.BackgroundScheduler.start",
+        lambda self, *args, **kwargs: started.append(True),
+    )
+    scheduler = start_scheduler()
+    trigger = scheduler.get_job(JOB_ID).trigger
+    next_fire = trigger.get_next_fire_time(None, datetime(2026, 10, 15, 8, 0, tzinfo=ROME))
+    assert next_fire == datetime(2026, 10, 16, 7, 15, tzinfo=ROME)
+    assert started == [True]
+
+
+def test_run_for_today_or_future_is_rejected(factory: sessionmaker[Session]) -> None:
+    with pytest.raises(ValueError):
+        run_daily_ingestion(date(2026, 10, 15), make_deps(factory))
+    assert runs(factory) == []
+
+
+def test_unexpected_error_on_one_notice_skips_only_that_notice(
+    factory: sessionmaker[Session],
+) -> None:
+    poisoned = day_notices()[0]["publication-number"]
+
+    class FailingRecorder(Recorder):
+        def __call__(self, session: Session, tender: Tender, **kwargs: Any) -> list[Any]:
+            if tender.publication_number == poisoned:
+                raise RuntimeError("documenti illeggibili")
+            return super().__call__(session, tender, **kwargs)
+
+    summary = run_daily_ingestion(DAY, make_deps(factory, recorder=FailingRecorder()))
+    assert summary.status is RunStatus.SUCCESS
+    assert summary.skipped_count == 1
+    with factory() as session:
+        saved = session.scalars(select(Tender.publication_number)).all()
+    assert poisoned not in saved and len(saved) == 8
+
+
+def test_recovery_stops_when_another_run_is_in_progress(
+    factory: sessionmaker[Session], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def busy(day: date, deps: PipelineDeps) -> Any:
+        raise RunAlreadyRunningError("in corso")
+
+    monkeypatch.setattr(pipeline, "run_daily_ingestion", busy)
+    assert run_pending_days(make_deps(factory)) == []
+
+
+def test_recovery_stops_at_first_failed_day(factory: sessionmaker[Session]) -> None:
+    calls: list[date] = []
+
+    def fetch(day: date) -> list[dict[str, Any]]:
+        calls.append(day)
+        raise TimeoutError("TED lento")
+
+    with factory() as session:
+        repository.finish_run(
+            session, repository.start_run(session, date(2026, 10, 11)), status=RunStatus.SUCCESS
+        )
+        session.commit()
+    summaries = run_pending_days(make_deps(factory, fetch))
+    assert [s.run_date for s in summaries] == [date(2026, 10, 12)]
+    assert calls == [date(2026, 10, 12)]
