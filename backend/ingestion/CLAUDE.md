@@ -23,6 +23,6 @@ T1.1 studio API TED · T1.2 client · T1.3 parser · T1.4 deduplica e rettifiche
 - Rettifiche (`dedup.py`, ADR-014): si risale la catena e si aggiorna il primo avviso già salvato (report → `to_review`); un avviso più vecchio non sovrascrive; errore TED → `ChainLookupError`, nulla salvato.
 - I test usano le fixture in `backend/tests/fixtures/`, mai la rete.
 
-## Da completare
-- Formato dei log JSON (T1.6).
+## Log ed esecuzioni
+- Log JSON (`logging_config.configure_logging`): `level`, `time`, `module`, `message`, `exception`; ogni esecuzione lascia una riga completa in `ingestion_runs` (T1.6).
 - Job (`pipeline.py`, `scheduler.py`): `run_pending_days` alle 06:00 Europe/Rome (`INGESTION_SCHEDULE`); lo scheduler si avvia con `start_scheduler()` dall'app (T4.1), con un solo worker (lock solo nel processo).
