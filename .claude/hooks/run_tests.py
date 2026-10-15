@@ -43,12 +43,33 @@ def select_test_targets(project_dir: Path, changed: list[str]) -> list[str]:
     return targets
 
 
+def main_checkout_dir(project_dir: Path) -> Path | None:
+    """Restituisce la cartella del checkout principale quando `project_dir` è un worktree git."""
+    result = subprocess.run(
+        ["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+        cwd=project_dir,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0 or not result.stdout.strip():
+        return None
+    return Path(result.stdout.strip()).parent
+
+
 def python_executable(project_dir: Path) -> str:
-    """Restituisce il Python dell'ambiente virtuale del progetto, se esiste."""
-    for candidate in (".venv/Scripts/python.exe", ".venv/bin/python"):
-        path = project_dir / candidate
-        if path.exists():
-            return str(path)
+    """Restituisce il Python dell'ambiente virtuale del progetto, se esiste.
+
+    Nei worktree l'ambiente virtuale di solito è solo nel checkout principale: si cerca anche lì.
+    """
+    roots = [project_dir]
+    main_dir = main_checkout_dir(project_dir)
+    if main_dir is not None and main_dir != project_dir:
+        roots.append(main_dir)
+    for root in roots:
+        for candidate in (".venv/Scripts/python.exe", ".venv/bin/python"):
+            path = root / candidate
+            if path.exists():
+                return str(path)
     return sys.executable
 
 

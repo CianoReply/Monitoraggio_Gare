@@ -5,6 +5,7 @@ Gli script non fanno parte del pacchetto `backend`: si caricano dal percorso del
 
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -134,3 +135,29 @@ def test_run_tests_skips_when_stop_hook_active() -> None:
         text=True,
     )
     assert result.returncode == 0
+
+
+def test_main_checkout_dir_outside_git_is_none(tmp_path: Path) -> None:
+    assert run_tests.main_checkout_dir(tmp_path) is None
+
+
+def test_python_executable_finds_venv_of_main_checkout(tmp_path: Path) -> None:
+    main_dir = tmp_path / "main"
+    worktree = tmp_path / "worktree"
+    subprocess.run(["git", "init", "-q", str(main_dir)], check=True)
+    subprocess.run(
+        ["git", "-C", str(main_dir), "commit", "-q", "--allow-empty", "-m", "init"],
+        check=True,
+        env={
+            **os.environ,
+            "GIT_AUTHOR_NAME": "t",
+            "GIT_AUTHOR_EMAIL": "t@t",
+            "GIT_COMMITTER_NAME": "t",
+            "GIT_COMMITTER_EMAIL": "t@t",
+        },
+    )
+    subprocess.run(["git", "-C", str(main_dir), "worktree", "add", "-q", str(worktree)], check=True)
+    venv_python = main_dir / ".venv" / "bin" / "python"
+    venv_python.parent.mkdir(parents=True)
+    venv_python.touch()
+    assert Path(run_tests.python_executable(worktree)) == venv_python.resolve()
