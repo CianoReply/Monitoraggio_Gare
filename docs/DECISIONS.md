@@ -16,6 +16,7 @@
 | ADR-008 | Al massimo un report per gara | Accettata |
 | ADR-009 | Recupero dei giorni falliti con `run_date` | Accettata |
 | ADR-010 | Punteggio per ogni gara salvata | Accettata |
+| ADR-011 | Integrazione su `develop` con revisione del lead e una sola persona | Accettata |
 | ADR-012 | Gare scartate e stato del report nell'API | Accettata |
 
 ---
@@ -79,6 +80,12 @@
 - **Decisione:** il punteggio si calcola per tutte le gare salvate, anche quelle scartate. `is_relevant` è `true` solo se la gara non è scartata e il voto è ≥ soglia.
 - **Motivazione:** il criterio di T2.3 resta verificabile su tutte le righe e si può spiegare perché una gara scartata avrebbe avuto un certo voto.
 - **Conseguenze:** le gare scartate restano in `tenders` con `discard_reason`; se e come esporle nell'API si decide in T0.5.
+
+## ADR-011 – Integrazione su `develop` con revisione del lead e una sola persona
+- **Contesto:** i ruoli DEV-1, DEV-2 e DEV-3 sono coperti da una sola persona con un solo account GitHub, che non può approvare le proprie PR; dal 2026-10-15 lo sviluppo del backend procede con un agent team (lead DEV-1 e due subagent) senza accesso al remote.
+- **Decisione:** i task si integrano nel branch locale `develop` con `git merge --no-ff`, uno alla volta, dopo l'approvazione del lead (revisione con il subagent `code-reviewer`). Una dipendenza è soddisfatta quando il task è unito in `develop`. Lo stato in `docs/TASKS.md` lo aggiorna solo il lead. Le modifiche ai file condivisi (`docs/ARCHITECTURE.md`, `docs/API_CONTRACT.yaml`, `CLAUDE.md` radice, `.claude/`) richiedono l'OK dei tre agenti e, tramite l'hook `PreToolUse`, la conferma dell'utente per i due documenti di accordo. `develop → main` passa da una PR che rivede e unisce l'utente: per `main` l'approvazione coincide con il merge della PR.
+- **Motivazione:** la regola "approvazione su GitHub di entrambi gli altri due dev" ([WORKFLOW.md](WORKFLOW.md)) non è applicabile con una sola persona; la revisione resta obbligatoria, ma la fa il lead e la conferma l'utente sulla PR finale.
+- **Conseguenze:** prevale su [WORKFLOW.md](WORKFLOW.md) (merge in `main` solo tramite PR approvata) e su [TASKS.md](TASKS.md) regole 1 e 2 per la durata del loop; il diario è in [team/LOOP_LOG.md](team/LOOP_LOG.md). Commit nel formato `<tipo>(<modulo>): <descrizione> [<task>]`. Approvata dall'utente al checkpoint di fine Fase 0 (2026-10-15).
 
 ## ADR-012 – Gare scartate e stato del report nell'API
 - **Contesto:** ADR-010 rimandava a T0.5 la scelta su come esporre le gare scartate; il piano prevede il filtro `report_status` su `GET /tenders`, ma il modello dati non ha uno stato del report nella gara.
