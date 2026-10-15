@@ -18,6 +18,18 @@
 
 <!-- Note -->
 
+## 2026-10-15 – FINALE del loop (stato di DEV-3)
+- Fatto: tutti i task di DEV-3 sono uniti su `develop`: T0.5 contratto, T0.7 Docker, T3.1-T3.5 API, T3.6 CI, T4.2 end-to-end, la parte api di T4.1 (ciclo di vita e scheduler opzionale), le correzioni della revisione T4.3 e il follow-up `InvalidQueryError`. Dettagli del modulo in [backend/api/NOTES.md](../../backend/api/NOTES.md).
+- Da fare (passi umani, in ordine):
+  1. GitHub: caricare il repository, attivare Actions e aprire una PR di prova (anche con un test volutamente fallito) per far girare `ci.yml`; i controlli `Lint (ruff)`, `Test (pytest, SQLite)`, `Test (pytest, PostgreSQL)` compaiono solo dopo la prima esecuzione. Controllare che il test PostgreSQL sul filtro CPV passi (non è mai stato eseguito) e che i 4 scenari `e2e` passino.
+  2. GitHub: creare la protezione di `main` (T0.1) con PR obbligatoria e quei tre controlli obbligatori; verificare che la PR con il test fallito non sia unibile. `Build immagine Docker` va reso obbligatorio solo dopo una prima esecuzione riuscita.
+  3. `@claude`: installare la GitHub App, fissare lo SHA di `anthropics/claude-code-action` al posto di `@v1`, creare il secret (`CLAUDE_CODE_OAUTH_TOKEN` per l'abbonamento, alternativa `ANTHROPIC_API_KEY`; quale funzioni con gli account Pro è DA VERIFICARE) e la variabile `CLAUDE_ENABLED=true`; poi scrivere `@claude` in una PR di prova. `claude.yml` deve stare sul branch predefinito (DA VERIFICARE).
+  4. Docker: su ogni computer `docker compose up --build`, poi `curl http://localhost:8000/health`; segnalare nel proprio handoff ogni errore (build, healthcheck con `$${POSTGRES_USER}`, migrazioni all'avvio, `command: >-`).
+  5. Frontend: confermare l'indirizzo reale e aggiornare `CORS_ORIGINS` (e `ALLOWED_HOSTS` se serve) nel file di variabili locale.
+  6. Prima del rilascio al management: pianificare l'autenticazione (oggi nessuna).
+- Decisioni e limiti noti: API senza autenticazione, solo `127.0.0.1` o rete fidata, e `reviewer` non è un'identità verificata; un solo worker (i lock di job e scheduler valgono solo nel processo); `POST /runs` deduce l'id dal database (limite documentato, callback `on_run_started` solo se serve); senza giorni da recuperare `POST /runs` rielabora ieri; `days_left` vale 0 per scadenze già passate; contratto invariato (`local_path` e `maxLength` sono proposte per l'utente); versioni delle action GitHub non fissate a SHA.
+- Impatto sugli altri dev: nessuno aperto. Il contratto si cambia solo con PR approvata da tutti; chi modifica client TED, job o endpoint ha i test `e2e` e `contract` come rete di sicurezza.
+
 ## 2026-10-15 – Follow-up InvalidQueryError
 - Fatto: `tenders.py` e `runs.py` catturano solo `repository.InvalidQueryError` (422 `validation_error`); un altro `ValueError` diventa un 500 `internal_error`, perché è un bug del server e non un errore del client. Test in `test_api_tenders.py` e `test_api_runs.py`.
 - Da fare: nulla di aperto per il modulo api, a parte i passi umani (GitHub per T3.6, `docker compose up` per T0.7).
