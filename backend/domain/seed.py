@@ -33,6 +33,7 @@ from backend.domain.models import (
 from backend.domain.repository import upsert_tender
 from backend.domain.schemas import TenderCreate
 from backend.domain.scoring import evaluate_tender
+from backend.domain.timeutil import ROME
 
 # (titolo, ente, città, CPV, importo, giorni a scadenza (None = nessuna), scarto)
 # Il voto salvato lo calcola scoring.evaluate_tender.
@@ -238,7 +239,7 @@ def _build(index: int, row: tuple[Any, ...], today: date) -> TenderCreate:
         buyer_name=buyer,
         buyer_city=city,
         cpv_codes=cpv,
-        notice_type="bando di gara",
+        notice_type="cn-standard",
         estimated_value=Decimal(value) if value else None,
         currency="EUR" if value else None,
         publication_date=today - timedelta(days=index % 7),
@@ -254,7 +255,7 @@ def seed(session: Session, today: date | None = None) -> int:
 
     Restituisce il numero di gare create. Non fa commit.
     """
-    today = today or date.today()
+    today = today or datetime.now(ROME).date()
     now = datetime.combine(today, time(12, 0), tzinfo=UTC)
     scoring_config = load_scoring_config()
     created = 0
@@ -295,11 +296,10 @@ def _seed_reports(session: Session, today: date) -> None:
         tender = session.scalar(select(Tender).where(Tender.publication_number == number))
         if tender is None or tender.report is not None:
             continue
-        verified = (
-            VerificationStatus.VERIFIED
-            if status is ReportStatus.VERIFIED
-            else VerificationStatus.TO_VERIFY
-        )
+        is_verified = status is ReportStatus.VERIFIED
+        verified = VerificationStatus.VERIFIED if is_verified else VerificationStatus.TO_VERIFY
+        reviewer = "Mario Rossi" if is_verified else None
+        reviewed_at = datetime.combine(today, time(12, 0), tzinfo=ROME) if is_verified else None
         report = Report(
             tender=tender,
             summary="Report fittizio di esempio: sintesi dell'oggetto e dei requisiti.",
@@ -311,13 +311,15 @@ def _seed_reports(session: Session, today: date) -> None:
         report.fields = [
             ReportField(
                 label="Scadenza offerte",
-                value=str(tender.submission_deadline.date())
+                value=str(tender.submission_deadline.astimezone(ROME).date())
                 if tender.submission_deadline
                 else "n.d.",
                 source_doc="Disciplinare.pdf",
                 source_page=3,
                 is_critical=True,
                 verification_status=verified,
+                reviewer=reviewer,
+                reviewed_at=reviewed_at,
             ),
             ReportField(
                 label="Fatturato minimo richiesto",
@@ -326,6 +328,8 @@ def _seed_reports(session: Session, today: date) -> None:
                 source_page=7,
                 is_critical=True,
                 verification_status=verified,
+                reviewer=reviewer,
+                reviewed_at=reviewed_at,
             ),
             ReportField(
                 label="Criterio di aggiudicazione",

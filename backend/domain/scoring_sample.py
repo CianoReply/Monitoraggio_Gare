@@ -16,6 +16,7 @@ import sys
 from datetime import UTC, datetime
 from typing import TextIO
 
+from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -78,7 +79,6 @@ def print_sample(
     out = out or sys.stdout
     tenders = select_sample(session, limit=limit, per_score=per_score)
     for tender in tenders:
-        breakdown = score_breakdown(_to_create(tender), config, now)
         status = "SCARTATA: " + tender.discard_reason if tender.discard_reason else "tenuta"
         print(f"[{tender.relevance_score}] {tender.publication_number} - {tender.title}", file=out)
         print(
@@ -87,6 +87,16 @@ def print_sample(
             f"scadenza: {tender.submission_deadline} | {status}",
             file=out,
         )
+        try:
+            breakdown = score_breakdown(_to_create(tender), config, now)
+        except ValidationError as exc:  # dati salvati che oggi non passerebbero la validazione
+            first = exc.errors()[0]
+            print(
+                f"    ATTENZIONE: dati non validi, punteggio non ricalcolabile "
+                f"({'.'.join(str(p) for p in first['loc'])}: {first['msg']})",
+                file=out,
+            )
+            continue
         reasons = "; ".join(f"{c.rule} {c.points:+d} ({c.detail})" for c in breakdown.components)
         print(f"    criteri: {reasons or 'nessuno'} | totale {breakdown.total}", file=out)
         if breakdown.score != tender.relevance_score:
