@@ -1,6 +1,6 @@
 """Parser degli avvisi TED (T1.3): dal JSON della Search API a `TenderCreate`.
 
-Mappatura dei campi in backend/ingestion/CLAUDE.md; forma dei dati in docs/TED_API_NOTES.md.
+Mappatura dei campi in backend/ingestion/MAPPING.md; forma dei dati in docs/TED_API_NOTES.md.
 Regole:
 - un campo mancante o non interpretabile diventa `None` con un warning nel log, mai un'eccezione;
 - testi: italiano, altrimenti inglese, altrimenti la prima lingua disponibile;
@@ -8,7 +8,8 @@ Regole:
 - scadenza: la più vicina tra quelle dei lotti (data + ora con fuso);
 - CPV a 8 cifre senza duplicati; `raw_data` conserva l'avviso originale.
 `parse_notice` solleva `NoticeParseError` solo se manca un dato senza cui la gara non esiste
-(numero o data di pubblicazione); `parse_notices` non solleva mai e salta quegli avvisi.
+(numero o data di pubblicazione validi); `parse_notices` non solleva mai: salta l'avviso e
+registra il motivo, qualunque sia l'errore.
 """
 
 import logging
@@ -31,6 +32,12 @@ MISSING_BUYER = "(ente non indicato)"
 MISSING_NOTICE_TYPE = "unknown"
 _CPV_DIGITS = re.compile(r"^(\d{8})(?:-\d)?$")
 _CENT = Decimal("0.01")
+# Colonna `estimated_value` Numeric(18, 2): al massimo 16 cifre intere.
+MAX_AMOUNT = Decimal(10) ** 16
+MAX_PUBLICATION_NUMBER = 50
+MAX_NOTICE_TYPE = 100
+MAX_URL = 1000
+_CURRENCY = re.compile(r"^[A-Za-z]{3}$")
 
 
 class NoticeParseError(ValueError):
@@ -124,7 +131,10 @@ def combine_deadline(date_value: Any, time_value: Any) -> datetime | None:
     if not offset:
         return None
     offset = "+00:00" if offset == "Z" else offset
-    return datetime.fromisoformat(f"{day.isoformat()}T{clock.isoformat()}{offset}")
+    try:
+        return datetime.fromisoformat(f"{day.isoformat()}T{clock.isoformat()}{offset}")
+    except ValueError:
+        return None
 
 
 def earliest_deadline(raw: dict[str, Any]) -> datetime | None:
@@ -148,11 +158,11 @@ def parse_amount(value: Any) -> Decimal | None:
         return None
     try:
         amount = Decimal(str(value).strip())
+        if not amount.is_finite() or amount < 0 or amount >= MAX_AMOUNT:
+            return None
+        return amount.quantize(_CENT)
     except InvalidOperation:
         return None
-    if not amount.is_finite() or amount < 0:
-        return None
-    return amount.quantize(_CENT)
 
 
 def estimated_value(raw: dict[str, Any]) -> tuple[Decimal | None, str | None]:
@@ -191,11 +201,21 @@ def normalize_cpv_codes(raw: dict[str, Any]) -> list[str]:
 
 def notice_url(raw: dict[str, Any], publication_number: str) -> str:
     """Link alla pagina dell'avviso su TED, in italiano se disponibile."""
-    html = (raw.get("links") or {}).get("html") or {}
-    for lang in ("ITA", "ENG"):
-        if isinstance(html.get(lang), str):
-            return html[lang]
+    links = raw.get("links")
+    html = links.get("html") if isinstance(links, dict) else None
+    if isinstance(html, dict):
+        for lang in ("ITA", "ENG"):
+            url = html.get(lang)
+            if isinstance(url, str) and url.strip() and len(url) <= MAX_URL:
+                return url.strip()
     return TED_NOTICE_URL.format(publication_number=publication_number)
+
+
+def normalize_currency(value: Any) -> str | None:
+    """Codice valuta a 3 lettere maiuscole; `None` se assente o non valido."""
+    if isinstance(value, str) and _CURRENCY.match(value.strip()):
+        return value.strip().upper()
+    return None
 
 
 def change_reference(raw: dict[str, Any]) -> str | None:
@@ -229,6 +249,8 @@ def parse_notice(raw: dict[str, Any], parent_publication_number: str | None = No
     if not isinstance(publication_number, str) or not publication_number.strip():
         raise NoticeParseError("Avviso senza publication-number")
     publication_number = publication_number.strip()
+    if len(publication_number) > MAX_PUBLICATION_NUMBER:
+        raise NoticeParseError(f"publication-number troppo lungo: {publication_number[:60]!r}")
     publication_date = parse_ted_date(raw.get("publication-date"))
     if publication_date is None:
         raise NoticeParseError(f"Avviso {publication_number} senza data di pubblicazione valida")
@@ -251,9 +273,14 @@ def parse_notice(raw: dict[str, Any], parent_publication_number: str | None = No
         notice_type = MISSING_NOTICE_TYPE
         _warn_missing(publication_number, "notice-type")
 
-    amount, currency = estimated_value(raw)
+    amount, raw_currency = estimated_value(raw)
+    currency = normalize_currency(raw_currency)
     if amount is None:
         _warn_missing(publication_number, "estimated-value")
+    elif currency is None:
+        logger.warning(
+            "Avviso %s: valuta %r non valida, impostata a null", publication_number, raw_currency
+        )
     deadline = earliest_deadline(raw)
     if deadline is None:
         _warn_missing(publication_number, "deadline-receipt-tender")
@@ -266,13 +293,13 @@ def parse_notice(raw: dict[str, Any], parent_publication_number: str | None = No
         buyer_name=buyer_name[:500],
         buyer_city=buyer_city[:200] if buyer_city else None,
         cpv_codes=normalize_cpv_codes(raw),
-        notice_type=notice_type.strip(),
+        notice_type=notice_type.strip()[:MAX_NOTICE_TYPE],
         estimated_value=amount,
-        currency=currency if currency and len(currency) == 3 else None,
+        currency=currency if amount is not None else None,
         publication_date=publication_date,
         submission_deadline=deadline,
         ted_url=notice_url(raw, publication_number),
-        documents_url=documents[0][:1000] if documents else None,
+        documents_url=documents[0][:MAX_URL] if documents else None,
         parent_publication_number=parent_publication_number,
         raw_data=raw,
     )
@@ -286,4 +313,6 @@ def parse_notices(raws: Iterable[dict[str, Any]]) -> list[TenderCreate]:
             tenders.append(parse_notice(raw))
         except (NoticeParseError, ValidationError) as exc:
             logger.warning("Avviso saltato: %s", exc)
+        except Exception:  # il job giornaliero non deve mai fermarsi per un avviso anomalo
+            logger.exception("Avviso saltato per un errore inatteso")
     return tenders

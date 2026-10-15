@@ -23,6 +23,7 @@ from backend.ingestion.parser import (
     first_value,
     is_change_notice,
     normalize_cpv_codes,
+    normalize_currency,
     notice_url,
     parse_amount,
     parse_notice,
@@ -186,6 +187,7 @@ def test_parse_ted_date(value: Any, expected: date | None) -> None:
         ("2026-10-20", "09:30:00", None),  # senza fuso: scartata
         ("non-una-data", "09:30:00+02:00", None),
         ("2026-10-20+02:00", "25:00:00+02:00", None),
+        ("2026-10-20+99:00", None, None),
         (None, None, None),
     ],
 )
@@ -211,6 +213,9 @@ def test_earliest_deadline_picks_nearest_lot() -> None:
         ("-1", None),
         ("abc", None),
         ("NaN", None),
+        ("1e30", None),
+        ("99999999999999999", None),
+        ("9999999999999999.99", Decimal("9999999999999999.99")),
         (True, None),
         (None, None),
     ],
@@ -268,3 +273,57 @@ def test_change_reference_and_is_change_notice() -> None:
     original = notice("707611-2026")
     assert change_reference(original) is None
     assert not is_change_notice(original)
+
+
+@pytest.mark.parametrize("links", [[], "x", {"html": "x"}, {"html": {"ITA": 3}}, None])
+def test_notice_url_tolerates_malformed_links(links: Any) -> None:
+    assert (
+        notice_url({"links": links}, "1-2026") == "https://ted.europa.eu/it/notice/-/detail/1-2026"
+    )
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [("eur", "EUR"), (" EUR ", "EUR"), ("123", None), ("EURO", None), (None, None)],
+)
+def test_normalize_currency(value: Any, expected: str | None) -> None:
+    assert normalize_currency(value) == expected
+
+
+def test_invalid_currency_becomes_null_with_warning(caplog: pytest.LogCaptureFixture) -> None:
+    raw = notice("707611-2026")
+    raw["estimated-value-cur-proc"] = "€€€"
+    with caplog.at_level(logging.WARNING):
+        tender = parse_notice(raw)
+    assert tender.estimated_value == Decimal("293278.68")
+    assert tender.currency is None
+    assert "valuta" in caplog.text
+
+
+def test_long_strings_do_not_break_validation() -> None:
+    raw = notice("707611-2026")
+    raw["notice-type"] = "x" * 2000
+    raw["links"]["html"]["ITA"] = "https://ted.europa.eu/" + "a" * 2000
+    raw["document-url-lot"] = ["https://example.invalid/" + "b" * 2000]
+    raw["buyer-name"] = {"ita": ["c" * 2000]}
+    tender = parse_notice(raw)
+    assert len(tender.notice_type) == 100
+    # l'URL italiano troppo lungo è scartato: si usa la pagina inglese
+    assert tender.ted_url == "https://ted.europa.eu/en/notice/-/detail/707611-2026"
+    assert tender.documents_url is not None and len(tender.documents_url) == 1000
+    assert len(tender.buyer_name) == 500
+
+
+def test_too_long_publication_number_raises_parse_error() -> None:
+    raw = notice("707611-2026")
+    raw["publication-number"] = "9" * 51
+    with pytest.raises(NoticeParseError):
+        parse_notice(raw)
+
+
+def test_parse_notices_never_raises_on_unexpected_input(caplog: pytest.LogCaptureFixture) -> None:
+    good = notice("707611-2026")
+    with caplog.at_level(logging.WARNING):
+        tenders = parse_notices([["non", "un", "avviso"], good, {"publication-number": 5}])  # type: ignore[list-item]
+    assert [t.publication_number for t in tenders] == ["707611-2026"]
+    assert "errore inatteso" in caplog.text
