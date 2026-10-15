@@ -57,19 +57,20 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T0.3 – Configurazione condivisa di Claude (`.claude/`)
 - Responsabile: DEV-1 (hook preparati con DEV-3)
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge 38991d7)
 - Dipende da: T0.2
 - Branch: setup/init
 - Durata stimata: 1 giorno
 - Obiettivo: dare a tutti gli stessi permessi, hook, subagent e comandi.
 - Finito quando:
   - [x] ognuno dei tre dev ha provato `/my-tasks` e ottiene i propri task
-  - [ ] una modifica a `.env` tramite Claude viene bloccata
-    (2026-10-14: Read ed Edit bloccati; una scrittura con redirect Bash `>` non è stata bloccata nella sessione cloud: DA VERIFICARE in locale)
+  - [x] una modifica a `.env` tramite Claude viene bloccata
+    (2026-10-15, in locale su Windows: `echo prova > .env.hooktest` da Bash bloccato dall'hook `PreToolUse`, file non creato; Read/Edit bloccati dai permessi)
   - [x] un errore di lint introdotto di proposito viene segnalato dall'hook
 - Note: creati permessi, hook `PostToolUse` (ruff, script `.claude/hooks/ruff_check.py`), 3 subagent e 3 comandi; sintassi verificata sulla documentazione ufficiale di Claude Code il 2026-10-13.
   DA VERIFICARE: hook e comandi su Windows (usano `python3` e `date`).
   **Hook da configurare (con DEV-3):** `PreToolUse` che blocca le modifiche a `.env`, `docs/API_CONTRACT.yaml`, `docs/ARCHITECTURE.md` (da decidere come conciliarlo con le modifiche richieste esplicitamente) e `Stop` che esegue i test del modulo.
+- Esito (2026-10-15): hook `PreToolUse` `.claude/hooks/protect_files.py` (blocca `.env` anche via Bash, compresi i comandi che lo nominano soltanto; chiede conferma per `docs/API_CONTRACT.yaml` e `docs/ARCHITECTURE.md`), hook `Stop` `.claude/hooks/run_tests.py` (test dei moduli toccati, venv anche nei worktree), fallback a ruff del venv; OK di DEV-2 e DEV-3; ADR-011. Hook verificati su Windows con `python3` = Python 3.14.
 
 ### T0.4 – Modello dati e architettura
 - Responsabile: DEV-1 guida, tutti partecipano
@@ -127,7 +128,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T1.1 – Studio dell'API di TED
 - Responsabile: DEV-1
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T0.3
 - Branch: research/ted-api
 - Durata stimata: 1 giorno
