@@ -1,4 +1,4 @@
-"""Test dello scheletro dell'API (T3.1): dati di prova, contratto ed errori. Senza rete."""
+"""Test dello scheletro dell'API (T3.1): contratto, errori, CORS. Senza rete."""
 
 from typing import Any
 
@@ -8,9 +8,12 @@ from fastapi.testclient import TestClient
 from openapi_schema_validator import OAS31Validator, oas31_format_checker
 
 from backend.api.errors import ApiError, error_responses
-from backend.api.main import app, create_app
+from backend.api.main import create_app
+from backend.tests.api_db import make_app, make_seeded_engine
 from backend.tests.contract_utils import HTTP_METHODS, resolve
 
+# GET /tenders legge dal database (T3.2): qui un SQLite in memoria con i dati di seed.
+app = make_app(make_seeded_engine())
 client = TestClient(app)
 
 ENDPOINTS: list[tuple[str, str, int]] = [

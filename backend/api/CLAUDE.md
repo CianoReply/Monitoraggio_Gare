@@ -25,5 +25,6 @@ T0.5 contratto · T0.7 Docker · T3.1 scheletro · T3.2 elenco gare · T3.3 dett
 - Ambiente Docker (T0.7).
 - Avvio locale dell'API (T3.1): `uvicorn backend.api.main:app --reload`, documentazione su `/docs`. Da riportare nel `CLAUDE.md` radice (file condiviso: proposta al lead).
 - CORS (T3.1): origini da `CORS_ORIGINS` (separate da virgola), predefinite `http://localhost:3000` e `http://localhost:5173`; l'indirizzo reale del frontend è DA VERIFICARE.
-- Stato: i router restituiscono i dati di prova di `sample_data.py` (T3.1); T3.2-T3.5 li sostituiscono con il repository.
+- Stato: `GET /tenders` legge dal repository (T3.2) tramite la sessione `deps.get_session` (`DATABASE_URL`); gli altri endpoint restituiscono ancora i dati di prova di `sample_data.py` (T3.3-T3.5 li sostituiscono).
+- Test con database: `backend/tests/api_db.py` (`make_seeded_engine`, `make_app`) crea un SQLite in memoria con `seed.py` e sostituisce `get_session`.
 - Pipeline CI e test di conformità al contratto (T3.6).
