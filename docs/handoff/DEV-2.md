@@ -18,6 +18,12 @@
 
 <!-- Note -->
 
+## 2026-10-15 – T2.5 Archiviazione dei report
+- Fatto: `report_schema.json` (stesso schema di `ReportCreate` e `FieldReview` del contratto, test di confronto e test di equivalenza con jsonschema se presente), `reports.py` con `create_report`, `get_report_for_tender`, `get_report`, `review_field`, `compute_report_status`, modelli pydantic di validazione ed eccezioni dedicate (404/409/422).
+- Da fare: T5.1-T5.3 (Skill) restano bloccati in attesa dei prompt di Giuseppe.
+- Decisioni: validazione con pydantic (nessun jsonschema nel codice); un report senza campi critici diventa `verified` alla prima revisione (regola letterale del contratto: tutti i campi critici `verified`); `ai_label` "verificato" riporta l'ultimo revisore e la data UTC; dopo `reset_report_to_review` l'etichetta resta l'ultima finché non è riverificato.
+- Impatto sugli altri dev: DEV-3 (T3.3/T3.4) chiama le funzioni di `reports.py` e mappa `ReportError.code`/`message` agli errori del contratto (404 `tender_not_found` / `report_not_found` / `field_not_found`, 409 `report_already_exists`, 422 `validation_error`); può usare `ReportCreate` e `FieldReview` come corpo delle richieste. DEV-1 (T1.4) usa già `reset_report_to_review`.
+
 ## 2026-10-15 – T2.4 Documenti di gara
 - Fatto: `documents.py` (`classify_link`, `download_document`, `process_tender_documents`), sezione `[documents]` in `config.toml` con `load_documents_config`, test con `httpx.MockTransport` (nessuna rete).
 - Da fare: verificare su link reali di TED quali estensioni dirette compaiono (finora solo piattaforme di gara); un'eventuale colonna per il motivo dell'errore richiede una modifica al modello dati (non fatta, il motivo va nel log).
