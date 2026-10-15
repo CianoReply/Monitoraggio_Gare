@@ -20,6 +20,7 @@
 | ADR-012 | Gare scartate e stato del report nell'API | Accettata |
 | ADR-013 | Configurazione in TOML invece di YAML | Accettata |
 | ADR-014 | Una rettifica aggiorna la riga della gara originale | Proposta |
+| ADR-015 | API senza autenticazione, solo per rete locale | Proposta |
 
 ---
 
@@ -106,3 +107,9 @@
 - **Decisione:** la rettifica aggiorna la riga del primo avviso della catena già salvato (di solito l'originale): restano `publication_number`, data di pubblicazione e `parent_publication_number` della riga, gli altri campi e `raw_data` prendono i valori della rettifica, il report torna `to_review`. Non si crea una riga per la rettifica. `parent_publication_number` si usa solo per una rettifica salvata a sé perché l'originale non è nel database. Un avviso più vecchio di quello già applicato (data, poi numero) non sovrascrive la riga.
 - **Motivazione:** una gara compare una sola volta in `GET /tenders`, sempre con i dati più recenti; l'ordine di arrivo da TED non è garantito.
 - **Conseguenze:** sulla riga aggiornata il segnale della rettifica è `raw_data` (`change-notice-version-identifier`); `ted_url` punta all'ultima rettifica. Limite noto: senza l'originale nel database possono restare due righe per la stessa gara (originale arrivato dopo una rettifica salvata a sé, o due rettifiche salvate a sé in ordine inverso); una soluzione richiederebbe una ricerca per `parent_publication_number` nel repository. Stato "Proposta" fino all'approvazione dell'utente.
+
+## ADR-015 – API senza autenticazione, solo per rete locale
+- **Contesto:** il contratto API non prevede autenticazione. La revisione di sicurezza di T4.3 segnala che chiunque raggiunga la porta può avviare il job (`POST /runs`), creare report e confermare campi indicando un `reviewer` qualsiasi, così l'etichetta "revisionato da [nome]" non attesta un'identità.
+- **Decisione (proposta):** nella prima versione l'API resta senza autenticazione ed è usata solo in locale (porte pubblicate su `127.0.0.1` nel compose, `ALLOWED_HOSTS`, un solo worker). Prima di qualsiasi esposizione su una rete condivisa serve un reverse proxy con autenticazione e il `reviewer` va ricavato dall'utente autenticato.
+- **Motivazione:** il progetto è un prototipo interno; l'autenticazione cambia il contratto e il frontend e va decisa con l'utente.
+- **Conseguenze:** limite documentato in `backend/api/CLAUDE.md` e in [ONBOARDING.md](ONBOARDING.md); da riesaminare prima del rilascio. Stato "Proposta" fino alla decisione dell'utente.

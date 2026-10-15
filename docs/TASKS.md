@@ -386,17 +386,19 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T4.2 – Test end-to-end
 - Responsabile: DEV-3 (con DEV-1 e DEV-2)
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge 9bfd331) – esecuzione su GitHub IN ATTESA UMANA
 - Dipende da: T4.1
 - Branch: test/e2e
 - Durata stimata: 1,5 giorni
 - Obiettivo: verificare automaticamente 4 scenari: giorno normale, doppia esecuzione, rettifica, TED non raggiungibile.
 - Finito quando:
-  - [ ] i 4 scenari passano in CI
+  - [x] i 4 scenari passano in CI (in locale con `pytest -m e2e`; step dedicato in `ci.yml`, prima esecuzione su GitHub IN ATTESA UMANA)
+- Esito: `backend/tests/test_e2e.py` con TED finto a livello HTTP, database migrato con Alembic e verifiche tramite l'API.
+
 
 ### T4.3 – Revisione incrociata finale
 - Responsabile: Tutti
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T4.2
 - Branch: docs/final-review
 - Durata stimata: 1 giorno
