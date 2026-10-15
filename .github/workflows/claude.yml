@@ -1,0 +1,62 @@
+# Claude in GitHub Actions (T3.6): scrivendo @claude in una PR o in una issue si chiede una
+# revisione o una correzione.
+#
+# Condizioni per l'esecuzione:
+#  - la variabile del repository CLAUDE_ENABLED deve valere 'true' (interruttore: senza
+#    configurazione il job viene saltato e non fallisce);
+#  - l'autore del commento, della review o della issue deve essere OWNER, MEMBER o COLLABORATOR.
+#
+# DA VERIFICARE (senza accesso a GitHub, non provato):
+#  - il file deve stare sul branch predefinito perche' i trigger issue_comment/issues funzionino;
+#  - versione e input di anthropics/claude-code-action;
+#  - autenticazione con gli account Pro: qui il token OAuth dell'abbonamento
+#    (CLAUDE_CODE_OAUTH_TOKEN); l'alternativa e' la chiave API (ANTHROPIC_API_KEY), vedi handoff;
+#  - se il metodo scelto richiede `id-token: write` (non concesso).
+#
+# Sicurezza: prima di attivare il workflow sostituire il tag @v1 con lo SHA del commit
+# di anthropics/claude-code-action (passo umano, vedi docs/handoff/DEV-3.md).
+name: Claude
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+  issues:
+    types: [opened, assigned]
+
+jobs:
+  claude:
+    if: >-
+      vars.CLAUDE_ENABLED == 'true' && (
+      (github.event_name == 'issue_comment'
+        && contains(github.event.comment.body, '@claude')
+        && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review_comment'
+        && contains(github.event.comment.body, '@claude')
+        && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review'
+        && contains(github.event.review.body, '@claude')
+        && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.review.author_association)) ||
+      (github.event_name == 'issues'
+        && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude'))
+        && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association))
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Solo revisione: contents resta in lettura (scelta documentata). Scrittura su PR e issue
+    # serve soltanto per pubblicare i commenti.
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: anthropics/claude-code-action@v1
+        with:
+          # DA VERIFICARE. Alternativa: anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
