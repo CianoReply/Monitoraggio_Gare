@@ -34,6 +34,9 @@ def _find_tender_ids(test_client: TestClient) -> tuple[int, int]:
 
 
 WITH_REPORT, WITHOUT_REPORT = _find_tender_ids(client)
+_REPORT = client.get(f"/tenders/{WITH_REPORT}/report").json()
+REPORT_ID, FIELD_ID = _REPORT["id"], _REPORT["fields"][0]["id"]
+CONFIRM = {"action": "confirm", "reviewer": "A"}
 
 ENDPOINTS: list[tuple[str, str, int]] = [
     ("get", "/tenders", 200),
@@ -149,7 +152,7 @@ def test_post_report_and_patch_field_conform_to_contract(spec: dict) -> None:
     assert created.status_code == 201
     _assert_matches_contract(spec, "post", "/tenders/{id}/report", created)
 
-    reviewed = client.patch("/reports/7/fields/71", json={"action": "confirm", "reviewer": "A"})
+    reviewed = _fresh_client().patch(f"/reports/{REPORT_ID}/fields/{FIELD_ID}", json=CONFIRM)
     assert reviewed.status_code == 200
     _assert_matches_contract(spec, "patch", "/reports/{id}/fields/{field_id}", reviewed)
 
@@ -205,10 +208,10 @@ def test_not_found_uses_error_format() -> None:
     assert missing.status_code == 404
     assert missing.json()["error"] == "report_not_found"
     assert client.get("/nonexistent").json()["error"] == "not_found"
-    patch = client.patch("/reports/7/fields/999", json={"action": "confirm", "reviewer": "A"})
+    patch = client.patch(f"/reports/{REPORT_ID}/fields/99999", json=CONFIRM)
     assert patch.status_code == 404
     assert patch.json()["error"] == "field_not_found"
-    patch = client.patch("/reports/99/fields/71", json={"action": "confirm", "reviewer": "A"})
+    patch = client.patch(f"/reports/99999/fields/{FIELD_ID}", json=CONFIRM)
     assert patch.json()["error"] == "report_not_found"
 
 
@@ -249,7 +252,7 @@ def test_api_error_409_run_in_progress_uses_error_format() -> None:
         ("/tenders/0", "id: "),
         ("/tenders/0/report", "id: "),
         ("/reports/0/fields/1", "id: "),
-        ("/reports/7/fields/0", "field_id: "),
+        ("/reports/1/fields/0", "field_id: "),
         ("/deadlines?from=2026-11-10&to=2026-11-01", "to "),
         ("/deadlines?from=not-a-date", "from: "),
         ("/runs?limit=0", "limit: "),
@@ -277,7 +280,7 @@ def test_invalid_parameters_return_422_in_error_format(url: str, prefix: str) ->
     ],
 )
 def test_invalid_review_body_returns_422(body: dict) -> None:
-    response = client.patch("/reports/7/fields/71", json=body)
+    response = client.patch(f"/reports/{REPORT_ID}/fields/{FIELD_ID}", json=body)
     assert response.status_code == 422
     assert response.json()["error"] == "validation_error"
 
