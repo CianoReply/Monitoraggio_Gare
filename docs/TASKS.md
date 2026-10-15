@@ -186,7 +186,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T1.5 – Job giornaliero
 - Responsabile: DEV-1
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T1.4, T2.2, T2.3, T2.4
 - Branch: feat/scheduler
 - Durata stimata: 1 giorno
@@ -255,15 +255,17 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T2.4 – Documenti di gara
 - Responsabile: DEV-2
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge 4bc32c8)
 - Dipende da: T2.1, T1.3
 - Branch: feat/documents
 - Durata stimata: 2 giorni
 - Obiettivo: per ogni gara rilevante, sapere dove sono i documenti e scaricarli quando possibile.
 - Finito quando:
-  - [ ] per ogni gara rilevante esiste almeno una riga in `documents` (anche solo `not_accessible`)
-  - [ ] un link diretto a un PDF viene scaricato e salvato
-  - [ ] un file oltre i 50 MB viene rifiutato con messaggio chiaro
+  - [x] per ogni gara rilevante esiste almeno una riga in `documents` (anche solo `not_accessible`)
+  - [x] un link diretto a un PDF viene scaricato e salvato
+  - [x] un file oltre i 50 MB viene rifiutato con messaggio chiaro
+- Esito: 2 giri di revisione (protezione SSRF su ogni salto di redirect, classificazione degli errori, tempo massimo complessivo, nomi file senza collisioni). Limite noto: DNS rebinding; in produzione bloccare la rete in uscita verso gli indirizzi interni. Incluso il repository delle esecuzioni per T1.5/T3.5.
+
 
 ### T2.5 – Archiviazione dei report
 - Responsabile: DEV-2

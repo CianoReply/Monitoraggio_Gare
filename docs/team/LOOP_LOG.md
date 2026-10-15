@@ -92,3 +92,4 @@ Per le regole di coordinamento prevale il prompt del loop; per il contenuto tecn
 | 2026-10-15 | MERGED T2.3 – fabe2b7 (2 giri) con `reset_report_to_review` per T1.4; develop 496 + 1 saltato. SBLOCCATO T2.4 (DEV-2, prima di T2.5 perché blocca T1.5). Validazione di Giuseppe IN ATTESA UMANA. |
 | 2026-10-15 | MERGED T0.7 – 2b9580b (1 giro) – develop 510 + 1 saltato; avvio Docker IN ATTESA UMANA. Revisioni: T2.4 MODIFICHE RICHIESTE giro 1 (SSRF bloccante); T1.4 secondo giro in corso. DEV-3 in attesa di T2.4/T2.5 per T3.3. |
 | 2026-10-15 | MERGED T1.4 – a3a0298 (2 giri) – develop 535 + 1 saltato. ADR-014 proposta (per l'utente). T1.5 attende T2.4 (DEV-2, MODIFICHE RICHIESTE per SSRF). |
+| 2026-10-15 | MERGED T2.4 – 4bc32c8 (2 giri) – develop 664 + 1 saltato. SBLOCCATI T2.5 (DEV-2) e T1.5 (DEV-1, in corso). Righe Migrazioni/Avvio del CLAUDE.md radice applicate con l'OK dei tre agenti. |

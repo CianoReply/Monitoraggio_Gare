@@ -18,9 +18,9 @@ le filtra, assegna un punteggio di pertinenza da 1 a 5 con regole deterministich
 | Test | `pytest` |
 | Lint | `ruff check .` |
 | Formattazione | `ruff format .` |
-| Avvio ambiente completo | da completare in T0.7 (DEV-3, `docker compose up`) |
-| Avvio API | da completare in T3.1 (DEV-3) |
-| Migrazioni | da completare in T2.1 (DEV-2, Alembic) |
+| Avvio ambiente completo | `docker compose up --build` (PostgreSQL, migrazioni e API su http://localhost:8000; dati fittizi: `docker compose exec api python -m backend.domain.seed`) |
+| Avvio API | `uvicorn backend.api.main:app --reload` (ambiente virtuale attivo, `DATABASE_URL` impostata) |
+| Migrazioni | `alembic -c backend/domain/alembic.ini upgrade head` (annulla: `downgrade base`; richiede `DATABASE_URL`) · dati fittizi: `python -m backend.domain.seed` |
 
 ## Convenzioni
 - Codice, identificatori, tabelle e campi in inglese; documentazione e commenti di progetto in italiano.
