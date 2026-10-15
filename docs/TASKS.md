@@ -86,7 +86,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T0.5 – Contratto API
 - Responsabile: DEV-3 scrive, DEV-1 e DEV-2 approvano
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T0.4
 - Branch: setup/api-contract
 - Durata stimata: 1 giorno
@@ -204,7 +204,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T2.1 – Schema del database e migrazioni
 - Responsabile: DEV-2
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T0.4
 - Branch: feat/db-schema
 - Durata stimata: 1,5 giorni

@@ -72,3 +72,4 @@ Per le regole di coordinamento prevale il prompt del loop; per il contenuto tecn
 | Data | Evento |
 |---|---|
 | 2026-10-15 | Avvio del loop; creati `develop` e i worktree `wip/dev1..3`; pytest 3/3, ruff OK. |
+| 2026-10-15 | Assegnati T2.1 a DEV-2 e T0.5 a DEV-3 (stato [~]); avviati i teammate. |
