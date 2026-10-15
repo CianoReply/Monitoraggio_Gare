@@ -19,6 +19,7 @@ router = APIRouter(tags=["runs"])
     responses=error_responses(422),
 )
 def list_runs(limit: Annotated[int, Query(ge=1, le=100)] = 20) -> RunList:
+    # T3.5: sostituire con repository
     return RunList(items=sample_data.RUNS[:limit])
 
 
@@ -31,4 +32,5 @@ def list_runs(limit: Annotated[int, Query(ge=1, le=100)] = 20) -> RunList:
     responses=error_responses(409),
 )
 def start_run() -> RunAccepted:
+    # T3.5: sostituire con run_daily_ingestion in background e 409 se già in corso
     return RunAccepted(id=sample_data.NEW_RUN_ID, status="running")

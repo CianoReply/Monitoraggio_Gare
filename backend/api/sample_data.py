@@ -5,6 +5,7 @@ Usati da T3.1 finché i router non leggono il repository di `backend/domain` (T3
 
 from datetime import UTC, date, datetime, timedelta, timezone
 
+from backend.api.errors import ApiError
 from backend.api.schemas import (
     Deadline,
     Document,
@@ -196,3 +197,11 @@ RUNS: list[Run] = [
 ]
 
 NEW_RUN_ID = 32
+
+
+def get_sample_tender(tender_id: int) -> Tender:
+    """Restituisce la gara di prova o solleva `tender_not_found`."""
+    for tender in TENDERS:
+        if tender.id == tender_id:
+            return tender
+    raise ApiError(404, "tender_not_found", f"La gara {tender_id} non esiste.")

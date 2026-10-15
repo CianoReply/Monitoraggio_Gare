@@ -7,17 +7,15 @@ from fastapi import APIRouter, Query
 
 from backend.api import sample_data
 from backend.api.errors import ApiError, error_responses
-from backend.api.schemas import DocumentList, ReportStatusFilter, Tender, TenderList
+from backend.api.schemas import (
+    DocumentList,
+    PositiveId,
+    ReportStatusFilter,
+    Tender,
+    TenderList,
+)
 
 router = APIRouter(tags=["tenders"])
-
-
-def get_sample_tender(tender_id: int) -> Tender:
-    """Restituisce la gara di prova o solleva `tender_not_found`."""
-    for tender in sample_data.TENDERS:
-        if tender.id == tender_id:
-            return tender
-    raise ApiError(404, "tender_not_found", f"La gara {tender_id} non esiste.")
 
 
 @router.get(
@@ -45,6 +43,7 @@ def list_tenders(
         raise ApiError(422, "validation_error", "deadline_from non può essere dopo deadline_to.")
     if min_value is not None and max_value is not None and min_value > max_value:
         raise ApiError(422, "validation_error", "min_value non può essere maggiore di max_value.")
+    # T3.2: sostituire con repository.list_tenders
     items = sample_data.TENDERS
     return TenderList(items=items, total=len(items), page=page, page_size=page_size)
 
@@ -56,8 +55,9 @@ def list_tenders(
     response_model=Tender,
     responses=error_responses(404, 422),
 )
-def get_tender(id: int) -> Tender:
-    return get_sample_tender(id)
+def get_tender(id: PositiveId) -> Tender:
+    # T3.3: sostituire con repository
+    return sample_data.get_sample_tender(id)
 
 
 @router.get(
@@ -67,6 +67,7 @@ def get_tender(id: int) -> Tender:
     response_model=DocumentList,
     responses=error_responses(404, 422),
 )
-def list_tender_documents(id: int) -> DocumentList:
-    get_sample_tender(id)
+def list_tender_documents(id: PositiveId) -> DocumentList:
+    # T3.3: sostituire con repository
+    sample_data.get_sample_tender(id)
     return DocumentList(items=[d for d in sample_data.DOCUMENTS if d.tender_id == id])

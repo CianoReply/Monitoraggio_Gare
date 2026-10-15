@@ -1,11 +1,15 @@
 """Errori applicativi e handler che li rendono nel formato `{ "error", "message" }`."""
 
+import logging
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.api.schemas import Error
+
+logger = logging.getLogger(__name__)
 
 
 class ApiError(Exception):
@@ -44,8 +48,13 @@ async def _validation_handler(_: Request, exc: Exception) -> JSONResponse:
 
 async def _http_handler(_: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, StarletteHTTPException)
-    code = "not_found" if exc.status_code == 404 else "http_error"
+    code = {404: "not_found", 405: "method_not_allowed"}.get(exc.status_code, "http_error")
     return _response(exc.status_code, code, str(exc.detail))
+
+
+async def _unhandled_handler(_: Request, exc: Exception) -> JSONResponse:
+    logger.error("Errore non gestito", exc_info=exc)
+    return _response(500, "internal_error", "Errore interno del server.")
 
 
 def register_error_handlers(app: FastAPI) -> None:
@@ -53,3 +62,4 @@ def register_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(ApiError, _api_error_handler)
     app.add_exception_handler(RequestValidationError, _validation_handler)
     app.add_exception_handler(StarletteHTTPException, _http_handler)
+    app.add_exception_handler(Exception, _unhandled_handler)

@@ -25,9 +25,11 @@ def list_deadlines(
 ) -> DeadlineList:
     if from_ and to and to < from_:
         raise ApiError(422, "validation_error", "to non può essere prima di from.")
+    # T3.5: sostituire con repository
     return DeadlineList(items=sample_data.DEADLINES)
 
 
 @router.get("/stats", operation_id="getStats", summary="Indicatori della dashboard")
 def get_stats() -> Stats:
+    # T3.5: sostituire con repository
     return sample_data.STATS

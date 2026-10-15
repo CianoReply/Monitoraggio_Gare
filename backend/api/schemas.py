@@ -1,11 +1,19 @@
 """Schemi di risposta e di richiesta, identici a `docs/API_CONTRACT.yaml`."""
 
 from datetime import date, datetime
-from typing import Literal
+from typing import Annotated, Literal
 
+from fastapi import Path
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 ReportStatusFilter = Literal["none", "to_review", "verified"]
+# Identificativo nel percorso: intero positivo (0 e negativi sono 422, non 404).
+PositiveId = Annotated[int, Path(ge=1)]
+CpvCode = Annotated[str, Field(pattern=r"^[0-9]{8}$")]
+
+
+def _drop_default(schema: dict) -> None:
+    schema.pop("default", None)
 
 
 class Error(BaseModel):
@@ -22,7 +30,7 @@ class Tender(BaseModel):
     description: str | None
     buyer_name: str
     buyer_city: str | None
-    cpv_codes: list[str]
+    cpv_codes: list[CpvCode]
     notice_type: str
     estimated_value: float | None
     currency: str | None = Field(min_length=3, max_length=3)
@@ -98,7 +106,9 @@ class ReportCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     summary: str = Field(min_length=1)
-    generated_at: datetime | None = None
+    # Facoltativo ma mai null (contratto: type string); se assente vale None e il repository
+    # (T3.3) usa l'istante di caricamento. Il default non compare nella documentazione.
+    generated_at: datetime = Field(default=None, json_schema_extra=_drop_default)
     fields: list[ReportFieldCreate] = Field(min_length=1)
 
 

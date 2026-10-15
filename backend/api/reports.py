@@ -4,8 +4,7 @@ from fastapi import APIRouter
 
 from backend.api import sample_data
 from backend.api.errors import ApiError, error_responses
-from backend.api.schemas import FieldReview, Report, ReportCreate
-from backend.api.tenders import get_sample_tender
+from backend.api.schemas import FieldReview, PositiveId, Report, ReportCreate
 
 router = APIRouter(tags=["reports"])
 
@@ -17,8 +16,9 @@ router = APIRouter(tags=["reports"])
     response_model=Report,
     responses=error_responses(404, 422),
 )
-def get_tender_report(id: int) -> Report:
-    get_sample_tender(id)
+def get_tender_report(id: PositiveId) -> Report:
+    # T3.3: sostituire con repository
+    sample_data.get_sample_tender(id)
     if sample_data.REPORT_101.tender_id != id:
         raise ApiError(404, "report_not_found", f"La gara {id} non ha ancora un report.")
     return sample_data.REPORT_101
@@ -32,8 +32,9 @@ def get_tender_report(id: int) -> Report:
     response_model=Report,
     responses=error_responses(404, 409, 422),
 )
-def create_tender_report(id: int, body: ReportCreate) -> Report:
-    get_sample_tender(id)
+def create_tender_report(id: PositiveId, body: ReportCreate) -> Report:
+    # T3.3: sostituire con repository (validazione con lo schema di T2.5)
+    sample_data.get_sample_tender(id)
     if sample_data.REPORT_101.tender_id == id:
         raise ApiError(409, "report_already_exists", f"La gara {id} ha già un report.")
     return sample_data.REPORT_CREATED
@@ -46,7 +47,8 @@ def create_tender_report(id: int, body: ReportCreate) -> Report:
     response_model=Report,
     responses=error_responses(404, 422),
 )
-def review_report_field(id: int, field_id: int, body: FieldReview) -> Report:
+def review_report_field(id: PositiveId, field_id: PositiveId, body: FieldReview) -> Report:
+    # T3.4: sostituire con repository e ricalcolo dello stato del report
     report = sample_data.REPORT_101
     if id != report.id:
         raise ApiError(404, "report_not_found", f"Il report {id} non esiste.")
