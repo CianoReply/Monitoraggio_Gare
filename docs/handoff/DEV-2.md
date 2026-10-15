@@ -18,6 +18,12 @@
 
 <!-- Note -->
 
+## 2026-10-15 – T4.3 Correzioni del dominio dalla revisione incrociata
+- Fatto: `UtcDateTime` e `timeutil` (fusi coerenti su SQLite e PostgreSQL, una sola `ROME`), limiti del database come errori chiari (`estimated_value` < 10^16, `source_page`, NUL, `discard_reason`, date estreme, `page` enorme), `InvalidQueryError`, `get_run`, download documenti più sicuro (NAT64 bloccato, log senza query string, `trust_env=False`, `Tender.documents` ordinati), rettifica tenuta solo se `cn-*`, seed coerente (notice_type `cn-standard`, revisore sui campi verificati, giorno di Roma), `scoring_sample` robusto, test PostgreSQL con guardiano sul nome del database.
+- Da fare: eseguire i test `postgres` su un vero PostgreSQL (`TEST_POSTGRES_URL`, database `*_test`), mai eseguiti qui; proposta di `maxLength` nel contratto (label 200, source_doc 500, reviewer 200).
+- Decisioni: `UtcDateTime` tratta un datetime senza fuso come UTC (compatibilità con i test degli altri moduli); la rettifica con padre ma tipo non `cn-*` (es. `can-modif`) si scarta; nessuna modifica a contratto, migrazioni o pyproject.
+- Impatto sugli altri dev: DEV-3 cattura solo `InvalidQueryError` da `list_tenders`/`list_runs` (sottoclasse di `ValueError`, quindi il codice attuale continua a funzionare); DEV-1 usa `repository.get_run` invece di `session.get`. I datetime letti dal database sono sempre con fuso UTC.
+
 ## 2026-10-15 – T2.5 Archiviazione dei report
 - Fatto: `report_schema.json` (stesso schema di `ReportCreate` e `FieldReview` del contratto, test di confronto e test di equivalenza con jsonschema se presente), `reports.py` con `create_report`, `get_report_for_tender`, `get_report`, `review_field`, `compute_report_status`, modelli pydantic di validazione ed eccezioni dedicate (404/409/422).
 - Da fare: T5.1-T5.3 (Skill) restano bloccati in attesa dei prompt di Giuseppe. In T4.3 proporre di aggiungere `maxLength` al contratto (label 200, source_doc 500, reviewer 200) e a `report_schema.json`: oggi i limiti si controllano solo in codice.

@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from backend.domain.models import RunStatus
 from backend.domain.repository import (
     finish_run,
+    get_run,
     get_running_run,
     has_successful_run,
     last_successful_run_date,
@@ -164,3 +165,9 @@ def test_naive_times_are_rejected(session: Session) -> None:
     with pytest.raises(ValueError, match="fuso orario"):
         finish_run(session, run, status=RunStatus.SUCCESS, now=datetime(2026, 10, 15, 8, 0))
     assert run.status == RunStatus.RUNNING and run.finished_at is None
+
+
+def test_get_run_returns_the_run_or_none(session: Session) -> None:
+    run = start_run(session, date(2026, 10, 14), now=T0)
+    assert get_run(session, run.id) is run
+    assert get_run(session, run.id + 1000) is None

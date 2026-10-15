@@ -16,7 +16,6 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     Date,
-    DateTime,
     ForeignKey,
     Integer,
     MetaData,
@@ -28,6 +27,9 @@ from sqlalchemy import (
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy import false as sa_false
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.types import DateTime, TypeDecorator
+
+from backend.domain.timeutil import utcnow
 
 # Convenzione di denominazione: vincoli e indici hanno nomi stabili (serve ad Alembic).
 NAMING_CONVENTION = {
@@ -39,9 +41,28 @@ NAMING_CONVENTION = {
 }
 
 
-def utcnow() -> datetime:
-    """Istante corrente con fuso UTC."""
-    return datetime.now(UTC)
+class UtcDateTime(TypeDecorator[datetime]):
+    """Data e ora con fuso: scrive sempre in UTC e rilegge sempre con fuso UTC.
+
+    SQLite non conserva il fuso (rilegge datetime senza fuso); PostgreSQL sì. Con questo tipo
+    il codice vede lo stesso valore su entrambi. Non cambia lo schema (`TIMESTAMP WITH TIME
+    ZONE`): nessuna migrazione. Un datetime senza fuso si considera già UTC.
+    """
+
+    impl = DateTime(timezone=True)
+    cache_ok = True
+
+    def process_bind_param(self, value: datetime | None, dialect: Any) -> datetime | None:
+        if value is None:
+            return None
+        if value.tzinfo is None:  # come faceva SQLite: un valore senza fuso si considera UTC
+            return value.replace(tzinfo=UTC)
+        return value.astimezone(UTC)
+
+    def process_result_value(self, value: datetime | None, dialect: Any) -> datetime | None:
+        if value is None:
+            return None
+        return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
 
 
 class Base(DeclarativeBase):
@@ -106,9 +127,7 @@ class Tender(Base):
     estimated_value: Mapped[Decimal | None] = mapped_column(Numeric(18, 2))
     currency: Mapped[str | None] = mapped_column(String(3))
     publication_date: Mapped[date] = mapped_column(Date, index=True)
-    submission_deadline: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), index=True
-    )
+    submission_deadline: Mapped[datetime | None] = mapped_column(UtcDateTime(), index=True)
     ted_url: Mapped[str] = mapped_column(String(1000))
     documents_url: Mapped[str | None] = mapped_column(String(1000))
     # Calcolati da filtri (T2.2) e punteggio (T2.3): la gara si salva solo già valutata.
@@ -117,13 +136,11 @@ class Tender(Base):
     discard_reason: Mapped[str | None] = mapped_column(String(500))
     parent_publication_number: Mapped[str | None] = mapped_column(String(50))
     raw_data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=utcnow, onupdate=utcnow
-    )
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=utcnow, onupdate=utcnow)
 
     documents: Mapped[list[Document]] = relationship(
-        back_populates="tender", cascade="all, delete-orphan"
+        back_populates="tender", cascade="all, delete-orphan", order_by="Document.id"
     )
     report: Mapped[Report | None] = relationship(
         back_populates="tender", cascade="all, delete-orphan", uselist=False
@@ -143,7 +160,7 @@ class Document(Base):
         _enum(DocumentStatus, "document_status"), default=DocumentStatus.PENDING
     )
     local_path: Mapped[str | None] = mapped_column(String(1000))
-    downloaded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    downloaded_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
 
     tender: Mapped[Tender] = relationship(back_populates="documents")
 
@@ -160,7 +177,7 @@ class Report(Base):
     status: Mapped[ReportStatus] = mapped_column(
         _enum(ReportStatus, "report_status"), default=ReportStatus.TO_REVIEW
     )
-    generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    generated_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=utcnow)
     ai_label: Mapped[str] = mapped_column(String(500))
 
     tender: Mapped[Tender] = relationship(back_populates="report")
@@ -186,7 +203,7 @@ class ReportField(Base):
         _enum(VerificationStatus, "verification_status"), default=VerificationStatus.TO_VERIFY
     )
     reviewer: Mapped[str | None] = mapped_column(String(200))
-    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    reviewed_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
 
     report: Mapped[Report] = relationship(back_populates="fields")
 
@@ -198,8 +215,8 @@ class IngestionRun(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     run_date: Mapped[date] = mapped_column(Date, index=True)
-    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
-    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    started_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=utcnow)
+    finished_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
     status: Mapped[RunStatus] = mapped_column(
         _enum(RunStatus, "run_status"), default=RunStatus.RUNNING
     )

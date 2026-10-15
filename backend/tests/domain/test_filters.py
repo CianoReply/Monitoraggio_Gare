@@ -100,13 +100,35 @@ def test_notice_type_discarded(config: FiltersConfig, kind: str, detail: str) ->
     assert result.reason == f"Tipo di avviso {kind}: {detail}"
 
 
-def test_notice_type_correction_is_kept_even_if_not_a_notice_we_accept(
-    config: FiltersConfig,
-) -> None:
-    correction = make_tender(notice_type="can-modif", parent_publication_number="abc-01")
+@pytest.mark.parametrize("kind", ["cn-standard", "cn-social", "cn-desg", "cn-future"])
+def test_correction_of_a_call_for_tenders_is_kept(config: FiltersConfig, kind: str) -> None:
+    correction = make_tender(notice_type=kind, parent_publication_number="abc-01")
     assert filter_notice_type(correction, config).kept
-    same_type = make_tender(notice_type="cn-standard", parent_publication_number="abc-01")
-    assert filter_notice_type(same_type, config).kept
+
+
+@pytest.mark.parametrize(
+    ("kind", "detail"),
+    [
+        ("can-modif", "esito, non bando"),
+        ("can-standard", "esito, non bando"),
+        ("veat", "esito, non bando"),
+        ("pin-only", "preinformazione, non bando"),
+        ("pmc", "non è un bando"),
+    ],
+)
+def test_amendment_of_a_non_call_is_not_kept_just_because_it_has_a_parent(
+    config: FiltersConfig, kind: str, detail: str
+) -> None:
+    amendment = make_tender(notice_type=kind, parent_publication_number="abc-01")
+    result = filter_notice_type(amendment, config)
+    assert not result.kept
+    assert result.reason == f"Tipo di avviso {kind}: {detail}"
+
+
+def test_parent_publication_number_does_not_change_accepted_types(config: FiltersConfig) -> None:
+    tender = make_tender(notice_type=" CN-Standard ", parent_publication_number="abc-01")
+    assert filter_notice_type(tender, config).kept
+    assert filter_notice_type(make_tender(notice_type="cn-standard"), config).kept
 
 
 # --- Scadenza ---

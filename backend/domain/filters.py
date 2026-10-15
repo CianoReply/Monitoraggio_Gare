@@ -66,12 +66,15 @@ def filter_cpv(tender: TenderCreate, config: FiltersConfig) -> FilterResult:
 def filter_notice_type(tender: TenderCreate, config: FiltersConfig) -> FilterResult:
     """Tipo di avviso: solo i bandi (codici eForms `notice-type`, confronto esatto).
 
-    Una rettifica ha lo stesso tipo dell'originale e si riconosce da `parent_publication_number`
-    (valorizzato dal parser, T1.3): è tenuta, la gestisce la deduplica (T1.4).
+    Una rettifica di un bando ha lo stesso tipo dell'originale (`cn-*`) e si riconosce da
+    `parent_publication_number` (valorizzato dal parser, T1.3): è tenuta, la gestisce la
+    deduplica (T1.4). Un avviso con `parent_publication_number` ma di un altro tipo (es. una
+    modifica di contratto `can-modif`, un esito) non è la rettifica di un bando: segue le regole
+    normali e viene scartato.
     """
-    if tender.parent_publication_number:
-        return FilterResult.keep()
     notice_type = tender.notice_type.strip().lower()
+    if tender.parent_publication_number and notice_type.startswith("cn-"):
+        return FilterResult.keep()
     if notice_type in config.accepted_notice_types:
         return FilterResult.keep()
     if notice_type.startswith("can-") or notice_type in ("veat", "compl"):
