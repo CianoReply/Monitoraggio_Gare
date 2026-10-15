@@ -329,14 +329,16 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T3.4 – Revisione umana dei campi
 - Responsabile: DEV-3
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge fb2366b)
 - Dipende da: T3.3
 - Branch: feat/api-review
 - Durata stimata: 1 giorno
 - Obiettivo: permettere al revisore di confermare o correggere i campi critici del report.
 - Finito quando:
-  - [ ] confermando tutti i campi critici, il report diventa `verified`
-  - [ ] una correzione conserva il valore originale
+  - [x] confermando tutti i campi critici, il report diventa `verified`
+  - [x] una correzione conserva il valore originale
+- Esito: revisione del lead; PATCH tramite `backend.domain.reports.review_field`, 25 test.
+
 
 ### T3.5 – Scadenze, statistiche ed esecuzioni
 - Responsabile: DEV-3

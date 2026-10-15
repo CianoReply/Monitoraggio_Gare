@@ -97,3 +97,4 @@ Per le regole di coordinamento prevale il prompt del loop; per il contenuto tecn
 | 2026-10-15 | MERGED T1.5 – 96cd044 (1 giro) – develop 696 + 1 saltato. T1.6 in corso (DEV-1). DEV-2: PRONTO T2.5 giro 2 (con fix degli orari UTC delle esecuzioni). |
 | 2026-10-15 | MERGED T2.5 – 961b428 (DEV-2, 2 giri) e T1.6 – 882a912 (DEV-1); develop 801 + 1 saltato. Fasi 1A e 1B complete. SBLOCCATI T3.3 e T3.5 (DEV-3). T5.1–T5.3 bloccati: `docs/source/prompt_giuseppe/` non esiste. |
 | 2026-10-15 | MERGED T3.3 – 9fb5c35 (DEV-3) – develop 837 + 1 saltato. Nota di handoff DEV-1 (T1.1–T1.6) unita. DEV-3: PRONTO T3.4. |
+| 2026-10-15 | MERGED T3.4 – fb2366b (DEV-3). DEV-3 su T3.5; richiesta di `count_tenders_created_between` inoltrata a DEV-2 (branch feat/stats-support). |
