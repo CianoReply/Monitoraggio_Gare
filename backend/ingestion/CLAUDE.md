@@ -17,11 +17,11 @@ T1.1 studio API TED · T1.2 client · T1.3 parser · T1.4 deduplica e rettifiche
 - Client (`ted_client.py`): httpx, paginazione `ITERATION`, timeout 30 s; su rete, 5xx e 429 la prima richiesta più 3 tentativi (attese 1, 2, 4 s); almeno 1 s tra due richieste.
 - Il parser non solleva mai eccezioni per un campo mancante: imposta `null` e registra un warning.
 - Normalizza: date ISO con fuso, importo decimale con valuta separata, CPV a 8 cifre, testo in italiano o in inglese.
+- Mappatura campo TED → `tenders`: [MAPPING.md](MAPPING.md) (fuori da questo file per il limite di 30 righe).
 - Salva sempre il dato originale in `raw_data`.
 - Il salvataggio passa dalle funzioni di `backend/domain/repository.py`, mai da query dirette.
 - I test usano le fixture in `backend/tests/fixtures/`, mai la rete.
 
 ## Da completare
-- Tabella di mappatura campo TED → campo `tenders` (T1.3).
 - Regole di riconoscimento delle rettifiche (T1.4).
 - Formato dei log JSON (T1.6).
