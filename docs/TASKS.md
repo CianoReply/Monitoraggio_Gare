@@ -201,14 +201,16 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T1.6 – Registro delle esecuzioni e log
 - Responsabile: DEV-1
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge 882a912)
 - Dipende da: T1.5
 - Branch: feat/run-logging
 - Durata stimata: 0,5 giorni
 - Obiettivo: sapere sempre se il monitoraggio ha funzionato e cosa ha prodotto.
 - Finito quando:
-  - [ ] ogni esecuzione, riuscita o fallita, lascia una riga completa in `ingestion_runs`
-  - [ ] un errore simulato produce stato `failed` con messaggio leggibile
+  - [x] ogni esecuzione, riuscita o fallita, lascia una riga completa in `ingestion_runs`
+  - [x] un errore simulato produce stato `failed` con messaggio leggibile
+- Esito: Revisione del lead. Log JSON con `backend/ingestion/logging_config.configure_logging` (da chiamare all'avvio in T4.1).
+
 
 ---
 
@@ -271,15 +273,17 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T2.5 – Archiviazione dei report
 - Responsabile: DEV-2
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge 961b428)
 - Dipende da: T2.1
 - Branch: feat/reports
 - Durata stimata: 1,5 giorni
 - Obiettivo: salvare i report prodotti dalla Skill e gestirne lo stato di verifica.
 - Finito quando:
-  - [ ] un report non conforme allo schema viene rifiutato con errore chiaro
-  - [ ] un report diventa `verified` solo dopo la conferma di tutti i campi critici
-  - [ ] l'etichetta AI si aggiorna con nome del revisore e data
+  - [x] un report non conforme allo schema viene rifiutato con errore chiaro
+  - [x] un report diventa `verified` solo dopo la conferma di tutti i campi critici
+  - [x] l'etichetta AI si aggiorna con nome del revisore e data
+- Esito: 2 giri di revisione. `backend/domain/reports.py` e `report_schema.json` (uguale a `ReportCreate`/`FieldReview` del contratto, test di parità senza jsonschema); lunghezze controllate nel dominio (422); data dell'etichetta in Europe/Rome. Punti aperti per l'utente: report senza campi critici `verified` alla prima revisione; dopo una rettifica basta una conferma per tornare `verified`; proposta `maxLength` nel contratto (T4.3).
+
 
 ---
 
@@ -312,7 +316,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T3.3 – Dettaglio, documenti e report
 - Responsabile: DEV-3
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T3.2, T2.4, T2.5
 - Branch: feat/api-tender-detail
 - Durata stimata: 1,5 giorni
@@ -334,7 +338,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T3.5 – Scadenze, statistiche ed esecuzioni
 - Responsabile: DEV-3
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T3.2, T1.6
 - Branch: feat/api-dashboard
 - Durata stimata: 1,5 giorni
@@ -398,7 +402,8 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T5.1 – Creazione della Skill `analisi-gara`
 - Responsabile: DEV-2 + Giuseppe
-- Stato: [ ] da fare
+- Stato: [!] bloccato
+- Bloccato da: in attesa dei prompt di Giuseppe (`docs/source/prompt_giuseppe/` non esiste)
 - Dipende da: T2.5
 - Branch: feat/skill-analisi-gara
 - Durata stimata: 2 giorni
@@ -409,7 +414,8 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T5.2 – Esecuzione della Skill sui documenti
 - Responsabile: DEV-2
-- Stato: [ ] da fare
+- Stato: [!] bloccato
+- Bloccato da: in attesa dei prompt di Giuseppe (`docs/source/prompt_giuseppe/` non esiste)
 - Dipende da: T5.1, T3.3
 - Branch: feat/skill-run
 - Durata stimata: 1,5 giorni
@@ -419,7 +425,8 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T5.3 – Validazione dei report
 - Responsabile: Giuseppe (con DEV-2)
-- Stato: [ ] da fare
+- Stato: [!] bloccato
+- Bloccato da: in attesa dei prompt di Giuseppe (`docs/source/prompt_giuseppe/` non esiste)
 - Dipende da: T5.2
 - Branch: fix/skill-tuning
 - Durata stimata: 1 giorno
