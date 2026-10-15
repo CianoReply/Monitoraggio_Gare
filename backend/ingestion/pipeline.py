@@ -273,7 +273,7 @@ def _close_run(deps: PipelineDeps, summary: RunSummary) -> None:
     if deps.session_factory is None:
         raise RuntimeError("Dipendenze del job non risolte")
     with deps.session_factory() as session:
-        run = session.get(IngestionRun, summary.run_id)
+        run = repository.get_run(session, summary.run_id)
         if run is None:  # pragma: no cover - la riga è stata creata e salvata da _claim_run
             return
         repository.finish_run(
