@@ -11,11 +11,10 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from backend.api.convert import aware
-from backend.api.deps import get_now, get_pipeline_deps, get_session
+from backend.api.deps import get_now, get_pipeline_deps, get_session, session_factory
 from backend.api.errors import ApiError, error_responses
 from backend.api.schemas import Run, RunAccepted, RunList
 from backend.domain import repository
-from backend.domain.database import create_db_engine, create_session_factory
 from backend.domain.models import IngestionRun
 from backend.ingestion import pipeline
 from backend.ingestion.pipeline import PipelineDeps, RunAlreadyRunningError
@@ -75,7 +74,9 @@ def _job(deps: PipelineDeps | None, failure: list[BaseException]) -> None:
     """
     try:
         resolved = deps or PipelineDeps()
-        factory = resolved.session_factory or create_session_factory(create_db_engine())
+        factory = (
+            resolved.session_factory or session_factory()
+        )  # factory in cache, non un engine nuovo
         resolved = replace(resolved, session_factory=factory)
         today = resolved.now().astimezone(pipeline.ROME).date()
         with factory() as session:
@@ -87,7 +88,7 @@ def _job(deps: PipelineDeps | None, failure: list[BaseException]) -> None:
         else:
             # Niente da recuperare: l'avvio manuale rielabora comunque ieri (è idempotente).
             pipeline.run_daily_ingestion(today - timedelta(days=1), resolved)
-    except BaseException as exc:
+    except Exception as exc:
         failure.append(exc)
         logger.exception("Esecuzione manuale non riuscita")
 
@@ -133,12 +134,15 @@ def start_run(
 
         deadline = time.monotonic() + START_TIMEOUT_SECONDS
         while True:
+            # Prima si controlla il thread, poi si legge: se era già terminato la lettura che segue
+            # è definitiva (la riga, se creata, c'è). Al contrario si rischierebbe di perderla.
+            alive = thread.is_alive()
             session.rollback()  # chiude lo snapshot: la riga creata dal thread deve essere visibile
             created = [r.id for r in repository.list_runs(session, RECENT_RUNS) if r.id > baseline]
             if created:
                 # La prima riga creata dal job è la più bassa tra le nuove.
                 return RunAccepted(id=min(created), status="running")
-            if not thread.is_alive():
+            if not alive:
                 break
             if time.monotonic() > deadline:
                 break

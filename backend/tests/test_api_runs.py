@@ -276,3 +276,92 @@ def test_get_runs_default_limit_is_20(engine: Engine, db: Session) -> None:
         )
     db.commit()
     assert len(_runs(TestClient(make_app(engine)))) == 20
+
+
+# --- POST /runs: casi limite del thread ---
+
+
+def _insert_run_and_finish(engine: Engine):  # type: ignore[no-untyped-def]
+    """Finto job: crea subito la riga e termina, come una pipeline velocissima."""
+
+    def job(deps: object, failure: list[BaseException]) -> None:
+        with create_session_factory(engine)() as session:
+            session.add(
+                IngestionRun(
+                    run_date=YESTERDAY,
+                    started_at=FIXED_NOW,
+                    finished_at=FIXED_NOW,
+                    status=RunStatus.SUCCESS,
+                )
+            )
+            session.commit()
+
+    return job
+
+
+def test_job_that_creates_the_row_and_ends_between_poll_and_liveness_check_gives_202(
+    engine: Engine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(runs_module, "_job", _insert_run_and_finish(engine))
+    real_list_runs = runs_module.repository.list_runs
+    calls = {"count": 0}
+
+    def list_runs_with_race(session: Session, limit: int = 20) -> list[IngestionRun]:
+        result = real_list_runs(session, limit)
+        calls["count"] += 1
+        if calls["count"] == 2:  # prima lettura del ciclo: poi il job crea la riga e termina
+            thread = runs_module._job_thread
+            assert thread is not None
+            thread.join(timeout=10)
+        return result
+
+    monkeypatch.setattr(runs_module.repository, "list_runs", list_runs_with_race)
+    response = TestClient(make_app(engine)).post("/runs")
+    assert response.status_code == 202
+    assert response.json()["status"] == "running"
+    assert calls["count"] >= 3  # la riga è stata trovata alla rilettura
+
+
+def test_job_that_ends_immediately_after_creating_the_row_gives_202(
+    engine: Engine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(runs_module, "_job", _insert_run_and_finish(engine))
+    response = TestClient(make_app(engine)).post("/runs")
+    assert response.status_code == 202
+    ids = [r["id"] for r in _runs(TestClient(make_app(engine)))]
+    assert response.json()["id"] in ids
+
+
+def test_job_that_never_creates_a_row_gives_500(
+    engine: Engine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(runs_module, "_job", lambda deps, failure: None)
+    client = TestClient(make_app(engine), raise_server_exceptions=False)
+    response = client.post("/runs")
+    assert response.status_code == 500
+    assert response.json()["error"] == "internal_error"
+
+
+def test_job_without_session_factory_reuses_the_cached_one(
+    engine: Engine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    factory = create_session_factory(engine)
+    used = {"count": 0}
+
+    def cached_factory():  # type: ignore[no-untyped-def]
+        used["count"] += 1
+        return factory
+
+    def no_new_engine() -> None:
+        raise AssertionError("non va creato un engine nuovo")
+
+    monkeypatch.setattr(runs_module, "session_factory", cached_factory)
+    monkeypatch.setattr(pipeline, "create_db_engine", no_new_engine)
+    deps = fake_pipeline_deps(engine)
+    deps.session_factory = None  # come con le dipendenze reali: la factory arriva dalla cache
+    failure: list[BaseException] = []
+    runs_module._job(deps, failure)
+    assert failure == []
+    assert used["count"] == 1
+    with factory() as session:
+        assert session.scalar(select(IngestionRun).where(IngestionRun.run_date == YESTERDAY))

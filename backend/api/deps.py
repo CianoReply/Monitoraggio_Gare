@@ -16,6 +16,11 @@ def _session_factory() -> sessionmaker[Session]:
     return create_session_factory(create_db_engine())
 
 
+def session_factory() -> sessionmaker[Session]:
+    """Factory di sessioni in cache, condivisa dalle richieste e dal job avviato da `POST /runs`."""
+    return _session_factory()
+
+
 def get_session() -> Iterator[Session]:
     """Una sessione per richiesta, chiusa al termine. Nei test si sostituisce con un override."""
     with _session_factory()() as session:
