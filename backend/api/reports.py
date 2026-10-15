@@ -3,18 +3,26 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from backend.api.convert import aware
 from backend.api.deps import get_session
-from backend.api.errors import error_responses
-from backend.api.schemas import FieldReview, PositiveId, Report, ReportCreate
+from backend.api.errors import ApiError, error_responses
+from backend.api.schemas import PositiveId, Report, contains_nul
 from backend.api.schemas import ReportField as ReportFieldSchema
 from backend.domain import reports as domain_reports
 from backend.domain.models import Report as ReportModel
 from backend.domain.models import ReportField as ReportFieldModel
+from backend.domain.reports import FieldReview, ReportCreate
 
 router = APIRouter(tags=["reports"])
+
+
+def _reject_nul(body: BaseModel) -> None:
+    """NUL nei testi non è ammesso: PostgreSQL lo rifiuta e darebbe un 500."""
+    if contains_nul(body.model_dump(mode="json")):
+        raise ApiError(422, "validation_error", "body: contiene caratteri non validi (NUL)")
 
 
 def _field_from_model(field: ReportFieldModel) -> ReportFieldSchema:
@@ -69,9 +77,9 @@ def create_tender_report(
     id: PositiveId, body: ReportCreate, session: Annotated[Session, Depends(get_session)]
 ) -> Report:
     # Validazione e regole (un solo report per gara) sono del dominio; qui solo la transazione:
-    # il dominio fa flush, il commit spetta all'API.
-    payload = body.model_dump(mode="json", exclude_unset=True)
-    report = domain_reports.create_report(session, id, payload)
+    # il dominio fa flush, il commit spetta all'API. Il corpo è il modello del dominio (stretto).
+    _reject_nul(body)
+    report = domain_reports.create_report(session, id, body)
     session.commit()
     return report_from_model(report)
 
@@ -91,7 +99,7 @@ def review_report_field(
 ) -> Report:
     # Regole di revisione (stato dei campi, original_value, ricalcolo dello stato del report e
     # dell'etichetta) sono del dominio; qui solo la transazione.
-    payload = body.model_dump(exclude_unset=True)
-    report = domain_reports.review_field(session, id, field_id, payload)
+    _reject_nul(body)
+    report = domain_reports.review_field(session, id, field_id, body)
     session.commit()
     return report_from_model(report)

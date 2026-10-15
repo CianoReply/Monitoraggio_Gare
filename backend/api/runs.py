@@ -3,6 +3,8 @@
 import logging
 import threading
 import time
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import replace
 from datetime import datetime, timedelta
 from typing import Annotated
@@ -103,6 +105,26 @@ def _already_running(run_id: int | None) -> ApiError:
     return ApiError(409, "run_in_progress", detail)
 
 
+@contextmanager
+def _exclusive_launch() -> Iterator[None]:
+    """Un solo avvio alla volta: se un'altra richiesta sta già avviando il job risponde 409 subito,
+    senza attendere (le richieste non si accodano)."""
+    if not _launch_lock.acquire(blocking=False):
+        raise _already_running(None)
+    try:
+        yield
+    finally:
+        _launch_lock.release()
+
+
+def wait_for_job(timeout: float) -> bool:
+    """Attende il thread dell'ultima esecuzione manuale; `True` se non è più attivo."""
+    thread = _job_thread
+    if thread is not None and thread.is_alive():
+        thread.join(timeout)
+    return thread is None or not thread.is_alive()
+
+
 @router.post(
     "/runs",
     operation_id="startRun",
@@ -117,7 +139,7 @@ def start_run(
     now: Annotated[datetime, Depends(get_now)],
 ) -> RunAccepted:
     global _job_thread
-    with _launch_lock:
+    with _exclusive_launch():
         running = repository.get_running_run(session)
         if running is not None and now - aware(running.started_at) < pipeline.STALE_RUN_AFTER:
             raise _already_running(running.id)

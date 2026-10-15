@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from backend.api.deps import get_now, get_session
 from backend.api.errors import ApiError, error_responses
-from backend.api.schemas import Deadline, DeadlineList, Stats
+from backend.api.schemas import YEAR_RANGE, Deadline, DeadlineList, Stats
 from backend.api.tenders import tender_from_row
 from backend.domain import repository
 
@@ -21,6 +21,7 @@ DEFAULT_RANGE_DAYS = 30
 URGENCY_HIGH_DAYS = 3
 URGENCY_MEDIUM_DAYS = 7
 DEADLINES_PAGE_SIZE = 100
+MAX_RANGE_DAYS = 366  # ampiezza massima dell'intervallo di /deadlines
 
 router = APIRouter(tags=["dashboard"])
 
@@ -48,14 +49,20 @@ def _today_rome(now: datetime) -> date:
 def list_deadlines(
     session: Annotated[Session, Depends(get_session)],
     now: Annotated[datetime, Depends(get_now)],
-    from_: Annotated[date | None, Query(alias="from")] = None,
-    to: date | None = None,
+    from_: Annotated[date | None, Query(alias="from"), YEAR_RANGE] = None,
+    to: Annotated[date | None, YEAR_RANGE] = None,
 ) -> DeadlineList:
     today = _today_rome(now)
     start = from_ or today
     end = to or today + timedelta(days=DEFAULT_RANGE_DAYS)  # come da contratto: oggi + 30
     if end < start:
         raise ApiError(422, "validation_error", "to non può essere prima di from.")
+    if (end - start).days > MAX_RANGE_DAYS:
+        raise ApiError(
+            422,
+            "validation_error",
+            f"l'intervallo tra from e to non può superare {MAX_RANGE_DAYS} giorni.",
+        )
 
     items: list[Deadline] = []
     page = 1
@@ -71,7 +78,8 @@ def list_deadlines(
         )
         for row in result.items:
             tender = tender_from_row(row)
-            assert tender.submission_deadline is not None  # il filtro esclude chi non ha scadenza
+            if tender.submission_deadline is None:  # il filtro esclude chi non ha scadenza
+                continue
             # Le scadenze già passate (da `from` nel passato) hanno days_left 0: il contratto non
             # ammette valori negativi.
             days_left = max((tender.submission_deadline.astimezone(ROME).date() - today).days, 0)

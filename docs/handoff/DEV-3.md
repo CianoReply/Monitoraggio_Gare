@@ -18,6 +18,13 @@
 
 <!-- Note -->
 
+## 2026-10-15 – Correzioni della revisione T4.3 (fix/api-hardening)
+- Fatto: valori estremi a 422 (id oltre 2147483647, `page` oltre 1.000.000, anni fuori da 1900-2999, importi oltre 10^16, NUL in `q` e nei corpi, intervallo di `/deadlines` oltre 366 giorni); corpi di `POST` report e `PATCH` campo = modelli del dominio (parità `/openapi.json` verde, nessun modello duplicato); `POST /runs` risponde 409 subito se il lock è occupato; all'avvio le esecuzioni `running` rimaste si chiudono `failed`, alla chiusura si attende il job (timeout breve); `AllowedHostsMiddleware` (`ALLOWED_HOSTS`), `CORS_ORIGINS="*"` vietato, `DOCS_ENABLED`, `allow_headers` espliciti, `.dockerignore` senza `backend/tests`, avvertenza sulla password nel `.env.example`; messaggi 422/404/405 in italiano; tolti `assert` in `stats.py` e l'alias `_aware`.
+- Da fare: quando DEV-2 unisce `InvalidQueryError`, in `tenders.py` e `runs.py` catturare solo quella al posto di `ValueError` (piccolo follow-up).
+- Decisioni: i limiti sono `AfterValidator` (non cambiano lo schema OpenAPI, quindi nessuna modifica al contratto); gli host non ammessi ricevono 400 `invalid_host` in JSON (non il testo semplice di Starlette); un errore sul database all'avvio non impedisce all'app di partire (viene registrato).
+- Impatto sugli altri dev: nuove variabili `ALLOWED_HOSTS` e `DOCS_ENABLED` (nel compose con valori predefiniti); un frontend servito da un altro host deve essere aggiunto a `ALLOWED_HOSTS` solo se chiama l'API con un Host diverso da quelli predefiniti.
+
+
 ## 2026-10-15 – T4.2 Test end-to-end
 - Fatto: `backend/tests/test_e2e.py` (marker `e2e`, registrato in `conftest.py`) con i 4 scenari del piano: giorno normale, doppia esecuzione, rettifica (originale 437009-2026 con report verificato, rettifica 566426-2026: scadenza aggiornata e report `to_review` visibili dall'API), TED non raggiungibile (503 su tutti i tentativi: run `failed` con messaggio leggibile, nessuna gara toccata, il giorno dopo il recupero elabora anche il giorno fallito). TED è un `httpx.MockTransport` sul vero `TedClient` con le fixture reali; database migrato con Alembic su file; avvio con `POST /runs` e verifica con `GET /tenders`, `/tenders/{id}`, `/report`, `/runs`, `/stats`, `/deadlines`. Nuovo step "Test end-to-end (TED finto)" in `ci.yml` (`pytest -m e2e -q`).
 - Da fare: i passi umani su GitHub (CI e `@claude`, T3.6) e la prova di `docker compose up` (T0.7); su GitHub il criterio "i 4 scenari passano in CI" è IN ATTESA UMANA (in locale passano).

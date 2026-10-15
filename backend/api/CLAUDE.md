@@ -33,3 +33,14 @@ T0.5 contratto · T0.7 Docker · T3.1 scheletro · T3.2 elenco gare · T3.3 dett
 - Test con database: `backend/tests/api_db.py` (`make_seeded_engine`, `make_app`) crea un SQLite in memoria con `seed.py` e sostituisce `get_session`.
 - Pipeline CI e test di conformità al contratto (T3.6).
 - Ciclo di vita (`main.lifespan`, T4.1): configura il log JSON (`configure_logging`) e avvia lo scheduler del job giornaliero (`start_scheduler`, orario `INGESTION_SCHEDULE`) solo con `ENABLE_SCHEDULER=true`; alla chiusura `shutdown(wait=False)`. Predefinito spento (test e sviluppo); il compose lo accende e avvia uvicorn con `--workers 1` perché i lock valgono solo nel processo. I test usano `with TestClient(app)` solo per provare il ciclo di vita.
+
+## Sicurezza e limiti noti
+- **Nessuna autenticazione** (decisione dell'utente, da pianificare prima del rilascio al management): l'API va esposta solo su `127.0.0.1` o su una rete fidata. Il compose pubblica le porte solo su `127.0.0.1`.
+- `reviewer` nelle revisioni è un testo libero scritto dal client, **non un'identità verificata**: etichetta e `reviewer` non provano chi ha rivisto.
+- Difese: `ALLOWED_HOSTS` (Host ammessi; predefiniti `localhost,127.0.0.1,testserver`; gli altri ricevono 400 `invalid_host`), `CORS_ORIGINS` (`*` è vietato: l'app non parte), `CORS_ALLOWED_HEADERS` espliciti, `DOCS_ENABLED=false` spegne `/docs`, `/redoc` e `/openapi.json`.
+- Valori estremi danno `422 validation_error`, mai 500: id oltre 2147483647, `page` oltre 1.000.000, anni fuori da 1900-2999, importi oltre 10^16, NUL nei testi e nei corpi, intervallo di `/deadlines` oltre 366 giorni. Sono controlli nel codice (`schemas.py`: `at_most`, `YEAR_RANGE`, `NO_NUL`), non nel contratto, per non rompere la parità `/docs`-contratto.
+- Le risposte 500 (`internal_error`) e i rifiuti per host non passano dal CORS: un browser le vede come errore di rete.
+- `/deadlines` ragiona per giorno di calendario (Europe/Rome): le scadenze di oggi già passate nell'orario restano incluse, con `days_left` 0.
+- I corpi di `POST` report e `PATCH` campo sono i modelli stretti di `backend/domain/reports.py` (nessuna conversione di tipo); i messaggi di validazione, 404 e 405 sono in italiano (`errors.py`).
+- Ciclo di vita (`main.make_lifespan`): all'avvio le esecuzioni rimaste `running` si chiudono `failed` ("Esecuzione interrotta da un riavvio", un solo worker); alla chiusura si attende il job manuale al massimo `SHUTDOWN_WAIT_SECONDS`. `POST /runs` risponde 409 subito se un'altra richiesta sta avviando il job.
+

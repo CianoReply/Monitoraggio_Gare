@@ -11,7 +11,8 @@ from sqlalchemy import Engine, StaticPool, create_engine, select
 from sqlalchemy.orm import Session
 
 from backend.api import deps
-from backend.api.tenders import _aware, tender_from_row
+from backend.api.convert import aware as _aware
+from backend.api.tenders import tender_from_row
 from backend.domain.database import create_session_factory
 from backend.domain.models import Base, Tender
 from backend.domain.repository import TenderRow, upsert_tender

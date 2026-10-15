@@ -72,8 +72,8 @@ def make_app(
     `now` è l'orologio dell'API; `pipeline_deps` sostituisce TED e il resto del job di ingestion
     (predefinito: nessuna notizia da TED, mai la rete).
     """
-    app = create_app()
     factory: sessionmaker[Session] = create_session_factory(engine)
+    app = create_app(factory)
     pipeline_deps = pipeline_deps or fake_pipeline_deps(engine)
 
     def override() -> Iterator[Session]:

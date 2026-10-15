@@ -28,6 +28,8 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-radar}:${POSTGRES_PASSWORD:-radar_dev}@db:5432/${POSTGRES_DB:-radar}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-}
+      DOCS_ENABLED: ${DOCS_ENABLED:-true}
       TED_API_URL: ${TED_API_URL:-}
       TED_CPV_PREFIXES: ${TED_CPV_PREFIXES:-}
       DOCUMENTS_DIR: /data/documents

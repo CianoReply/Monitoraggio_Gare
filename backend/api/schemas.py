@@ -1,19 +1,64 @@
 """Schemi di risposta e di richiesta, identici a `docs/API_CONTRACT.yaml`."""
 
 from datetime import date, datetime
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
-from fastapi import Path
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from fastapi import Path, Query
+from pydantic import AfterValidator, BaseModel, Field
 
 ReportStatusFilter = Literal["none", "to_review", "verified"]
-# Identificativo nel percorso: intero positivo (0 e negativi sono 422, non 404).
-PositiveId = Annotated[int, Path(ge=1)]
 CpvCode = Annotated[str, Field(pattern=r"^[0-9]{8}$")]
 
+# Limiti di sicurezza controllati nel codice, non nel contratto: gli AfterValidator non cambiano
+# lo schema OpenAPI (la parità /docs-contratto resta), ma valori estremi danno 422 e non 500.
+INT32_MAX = 2_147_483_647  # id e chiavi del database
+MAX_PAGE = 1_000_000
+MAX_AMOUNT = 10_000_000_000_000_000.0  # colonna Numeric(18, 2): 16 cifre intere
+MIN_YEAR, MAX_YEAR = 1900, 2999
 
-def _drop_default(schema: dict) -> None:
-    schema.pop("default", None)
+
+def at_most(maximum: float) -> AfterValidator:
+    """Valore massimo controllato nel codice (non compare nello schema OpenAPI)."""
+
+    def check(value: Any) -> Any:
+        if value is not None and value > maximum:
+            shown = int(maximum) if float(maximum).is_integer() else maximum
+            raise ValueError(f"deve essere al massimo {shown}")
+        return value
+
+    return AfterValidator(check)
+
+
+def _year_in_range(value: date | None) -> date | None:
+    if value is not None and not MIN_YEAR <= value.year <= MAX_YEAR:
+        raise ValueError(f"l'anno deve essere tra {MIN_YEAR} e {MAX_YEAR}")
+    return value
+
+
+def _without_nul(value: str | None) -> str | None:
+    if value is not None and "\x00" in value:
+        raise ValueError("contiene caratteri non validi (NUL)")
+    return value
+
+
+# Controlli aggiuntivi da affiancare a `Query(...)` o `Path(...)` nelle firme degli endpoint.
+YEAR_RANGE = AfterValidator(_year_in_range)
+NO_NUL = AfterValidator(_without_nul)
+
+# Identificativo nel percorso: intero positivo e che entra nel database (0 e negativi sono 422).
+PositiveId = Annotated[int, Path(ge=1), at_most(INT32_MAX)]
+PageNumber = Annotated[int, Query(ge=1), at_most(MAX_PAGE)]
+
+
+def contains_nul(value: Any) -> bool:
+    """Vero se una stringa, o una stringa annidata in liste e dizionari, contiene NUL."""
+    if isinstance(value, str):
+        return "\x00" in value
+    if isinstance(value, dict):
+        return any(contains_nul(k) or contains_nul(v) for k, v in value.items())
+    if isinstance(value, list | tuple):
+        return any(contains_nul(v) for v in value)
+    return False
 
 
 class Error(BaseModel):
@@ -90,40 +135,6 @@ class Report(BaseModel):
     generated_at: datetime
     ai_label: str
     fields: list[ReportField]
-
-
-class ReportFieldCreate(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    label: str = Field(min_length=1)
-    value: str = Field(min_length=1)
-    source_doc: str = Field(min_length=1)
-    source_page: int | None = Field(default=None, ge=1)
-    is_critical: bool
-
-
-class ReportCreate(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    summary: str = Field(min_length=1)
-    # Facoltativo ma mai null (contratto: type string); se assente vale None e il repository
-    # (T3.3) usa l'istante di caricamento. Il default non compare nella documentazione.
-    generated_at: datetime = Field(default=None, json_schema_extra=_drop_default)
-    fields: list[ReportFieldCreate] = Field(min_length=1)
-
-
-class FieldReview(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    action: Literal["confirm", "correct"]
-    value: str | None = Field(default=None, min_length=1)
-    reviewer: str = Field(min_length=1)
-
-    @model_validator(mode="after")
-    def value_required_for_correct(self) -> "FieldReview":
-        if self.action == "correct" and self.value is None:
-            raise ValueError("value è obbligatorio con action=correct")
-        return self
 
 
 class Deadline(BaseModel):
