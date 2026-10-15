@@ -15,6 +15,7 @@ from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
+from functools import lru_cache
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -80,6 +81,7 @@ class RunSummary:
     relevant_count: int = 0
     skipped_count: int = 0
     documents_failed_count: int = 0
+    unresolved_changes: int = 0
     error_message: str | None = None
 
 
@@ -122,13 +124,25 @@ def utc_now(deps: PipelineDeps) -> datetime:
     return deps.now().astimezone(UTC)
 
 
+@lru_cache(maxsize=1)
+def _default_session_factory() -> sessionmaker[Session]:
+    """Engine e sessioni del database reale, creati una volta per processo."""
+    return create_session_factory(create_db_engine())
+
+
+@lru_cache(maxsize=1)
+def _default_ted_client() -> TedClient:
+    """Client TED riusato tra le esecuzioni dello stesso processo (connessioni HTTP comprese)."""
+    return TedClient()
+
+
 def _resolve(deps: PipelineDeps) -> PipelineDeps:
     """Completa le dipendenze mancanti con quelle reali (database, TED, configurazione)."""
-    session_factory = deps.session_factory or create_session_factory(create_db_engine())
+    session_factory = deps.session_factory or _default_session_factory()
     fetch = deps.fetch_notices
     lookup = deps.lookup
     if fetch is None or lookup is None:
-        client = TedClient()
+        client = _default_ted_client()
         fetch = fetch or client.fetch_notices
         lookup = lookup or TedNoticeLookup(client.search)
     return PipelineDeps(
@@ -236,8 +250,10 @@ def _process_day(session: Session, run_date: date, deps: PipelineDeps, summary: 
         try:
             _process_notice(session, tender, deps, now, summary)
         except ChainLookupError as exc:
-            # La rettifica si riprova alla prossima esecuzione: nulla è stato salvato.
+            # Nulla è stato salvato: il giorno chiude `failed` (vedi run_daily_ingestion), così
+            # il recupero lo rielabora e la rettifica viene ripresa.
             summary.skipped_count += 1
+            summary.unresolved_changes += 1
             logger.warning("Avviso %s non salvato: %s", tender.publication_number, exc)
         except (DataError, IntegrityError):
             # Dato non accettato dal database (es. valore fuori scala): si salta solo l'avviso.
@@ -298,6 +314,11 @@ def run_daily_ingestion(run_date: date, deps: PipelineDeps | None = None) -> Run
         try:
             with resolved.session_factory() as session:
                 _process_day(session, run_date, resolved, summary)
+            if summary.unresolved_changes:
+                raise ChainLookupError(
+                    f"{summary.unresolved_changes} rettifiche non collegate (TED non ha risposto "
+                    "alla ricerca dell'avviso originale): il giorno sarà rielaborato"
+                )
             summary.status = RunStatus.SUCCESS
         except Exception as exc:
             summary.error_message = public_error_message(exc)

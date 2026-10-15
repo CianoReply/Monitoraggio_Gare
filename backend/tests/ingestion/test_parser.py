@@ -311,7 +311,7 @@ def test_long_strings_do_not_break_validation() -> None:
     assert len(tender.notice_type) == 100
     # l'URL italiano troppo lungo è scartato: si usa la pagina inglese
     assert tender.ted_url == "https://ted.europa.eu/en/notice/-/detail/707611-2026"
-    assert tender.documents_url is not None and len(tender.documents_url) == 1000
+    assert tender.documents_url is None  # URL troppo lungo: scartato, non troncato
     assert len(tender.buyer_name) == 500
 
 
@@ -353,3 +353,11 @@ def test_non_http_links_are_dropped() -> None:
     tender = parse_notice(raw)
     assert tender.documents_url == "https://example.invalid/doc.pdf"
     assert tender.ted_url == "https://ted.europa.eu/it/notice/-/detail/707611-2026"
+
+
+@pytest.mark.parametrize(
+    "value",
+    ["x OR notice-type=cn-standard-01", "abc-01", "", "68d34303-2d11-45ec-ae35-19a735ee975d"],
+)
+def test_change_reference_requires_a_uuid(value: str) -> None:
+    assert change_reference({"change-notice-version-identifier": value}) is None

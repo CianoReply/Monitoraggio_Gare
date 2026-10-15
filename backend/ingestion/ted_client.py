@@ -183,12 +183,14 @@ class TedClient:
                         data = response.json()
                     except ValueError:
                         data = None
-                    if isinstance(data, dict):
+                    if isinstance(data, dict) and data.get("timedOut"):
+                        last_error = "TED ha risposto timedOut: risultato parziale"
+                    elif isinstance(data, dict):
                         return data
                     last_error = f"risposta 200 non valida: {response.text[:200]!r}"
                 elif not is_retryable_status(response.status_code):
                     raise TedApiError(
-                        f"TED ha risposto {response.status_code}: {response.text[:500]}"
+                        f"TED ha risposto {response.status_code}: {response.text[:200]}"
                     )
                 else:
                     last_error = f"TED ha risposto {response.status_code}: {response.text[:200]!r}"

@@ -221,6 +221,9 @@ def save_notice(
         )
 
     farthest = chain.links[-1].publication_number if chain.links else None
+    if farthest is not None and not _PUBLICATION_NUMBER.match(farthest):
+        logger.warning("Numero di pubblicazione dell'originale non valido: %r", farthest[:60])
+        farthest = None
     logger.warning(
         "Rettifica %s senza gara originale nel database (avviso più lontano su TED: %s%s): "
         "salvata a sé",

@@ -224,8 +224,10 @@ def test_notice_with_failed_chain_lookup_is_skipped(factory: sessionmaker[Sessio
 
     deps = make_deps(factory, fetch=lambda day: [*day_notices(), changes[0]], lookup=failing_lookup)
     summary = run_daily_ingestion(DAY, deps)
-    assert summary.status is RunStatus.SUCCESS
+    # gli altri avvisi sono salvati, ma il giorno resta da rielaborare
+    assert summary.status is RunStatus.FAILED
     assert summary.fetched_count == 10 and summary.new_count == 9 and summary.skipped_count == 1
+    assert "1 rettifiche non collegate" in (summary.error_message or "")
 
 
 def test_recovery_processes_failed_day_and_next_one(factory: sessionmaker[Session]) -> None:

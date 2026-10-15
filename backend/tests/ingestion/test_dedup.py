@@ -100,7 +100,10 @@ def test_resolve_chain_stops_when_ted_does_not_find_the_notice(
 
 
 def test_resolve_chain_stops_on_cycles() -> None:
-    looping = {"publication-number": "1-2026", "change-notice-version-identifier": "abc-01"}
+    looping = {
+        "publication-number": "1-2026",
+        "change-notice-version-identifier": "11111111-2222-3333-4444-555555555555-01",
+    }
     chain = resolve_chain(looping, lambda _: looping)
     assert [link.publication_number for link in chain.links] == ["1-2026"]
     assert not chain.complete
@@ -111,9 +114,12 @@ def test_resolve_chain_has_a_maximum_depth() -> None:
 
     def endless(_: str) -> dict[str, Any]:
         n = next(counter)
-        return {"publication-number": f"{n}-2026", "change-notice-version-identifier": f"id{n}-01"}
+        return {
+            "publication-number": f"{n}-2026",
+            "change-notice-version-identifier": f"11111111-2222-3333-4444-{n:012d}-01",
+        }
 
-    start = {"change-notice-version-identifier": "start-01"}
+    start = {"change-notice-version-identifier": "11111111-2222-3333-4444-999999999999-01"}
     chain = resolve_chain(start, endless)
     assert len(chain.links) == MAX_CHAIN_DEPTH and not chain.complete
 
