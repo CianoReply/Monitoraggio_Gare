@@ -32,7 +32,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T0.1 – Creazione del repository e della struttura
 - Responsabile: DEV-1
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15) – protezione di `main` IN ATTESA UMANA
 - Dipende da: –
 - Branch: setup/init
 - Durata stimata: 0,5 giorni
@@ -40,7 +40,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 - Finito quando:
   - [x] i 3 dev hanno clonato il repository
   - [x] `pytest` e `ruff check` si eseguono senza errori (anche senza test)
-  - [ ] `main` è protetto
+  - [ ] `main` è protetto — IN ATTESA UMANA: "Require a pull request" senza approvazioni obbligatorie (un solo account) e, dopo la prima esecuzione della CI, i controlli obbligatori di T3.6
 - Note: struttura, `pyproject.toml`, `.gitignore`, `.env.example` creati in `setup/init`. La protezione di `main` si attiva nelle impostazioni GitHub del repository.
 
 ### T0.2 – Scrittura di `CLAUDE.md`
@@ -112,7 +112,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T0.7 – Ambiente locale con Docker
 - Responsabile: DEV-3
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T0.1
 - Branch: setup/docker
 - Durata stimata: 0,5 giorni
@@ -336,16 +336,18 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T3.6 – Qualità, sicurezza e CI
 - Responsabile: DEV-3
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge 31fc6e1)
 - Dipende da: T0.3
 - Branch: setup/ci
 - Durata stimata: 1,5 giorni (poi continuativo)
 - Obiettivo: controllare automaticamente ogni modifica di tutti e tre i dev.
 - Finito quando:
-  - [ ] una PR con un test fallito non si può unire a `main`
-  - [ ] `@claude` risponde in una PR di prova
-  - [ ] il test di conformità al contratto è attivo
+  - [ ] una PR con un test fallito non si può unire a `main` — IN ATTESA UMANA (Actions e protezione di `main` su GitHub)
+  - [ ] `@claude` risponde in una PR di prova — IN ATTESA UMANA / DA VERIFICARE (GitHub App, secret, `CLAUDE_ENABLED`, SHA della action)
+  - [x] il test di conformità al contratto è attivo (job `test`: `pytest -m contract`; verificato in locale, prima esecuzione su GitHub DA VERIFICARE)
 - Note: Claude in GitHub Actions richiede una configurazione di autenticazione: le opzioni con account Pro sono DA VERIFICARE.
+- Esito: 2 giri di revisione. Workflow `.github/workflows/ci.yml` (lint, contratto, test, PostgreSQL) e `claude.yml` (dietro `vars.CLAUDE_ENABLED`). Passi umani in [handoff/DEV-3.md](handoff/DEV-3.md).
+
 
 ---
 
