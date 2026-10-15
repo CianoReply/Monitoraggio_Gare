@@ -238,19 +238,21 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T2.3 – Punteggio di pertinenza
 - Responsabile: DEV-2
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge fabe2b7) – validazione di Giuseppe IN ATTESA UMANA
 - Dipende da: T2.2
 - Branch: feat/relevance-score
 - Durata stimata: 2 giorni
 - Obiettivo: ordinare le gare per interesse con un voto da 1 a 5 calcolato con regole trasparenti, senza LLM.
 - Finito quando:
-  - [ ] ogni gara salvata ha un punteggio da 1 a 5
-  - [ ] 10 gare di esempio danno il punteggio atteso
-  - [ ] Giuseppe ha visto un campione di 20 gare reali con il loro punteggio e ha confermato che l'ordine è sensato
+  - [x] ogni gara salvata ha un punteggio da 1 a 5
+  - [x] 10 gare di esempio danno il punteggio atteso (9 avvisi reali + 7 sintetici)
+  - [ ] IN ATTESA UMANA – Giuseppe ha visto un campione di 20 gare reali con il loro punteggio e ha confermato che l'ordine è sensato
+- Esito: 2 giri di revisione. Regole e pesi in `backend/domain/config.toml` `[scoring]`; campione per Giuseppe: `python -m backend.domain.scoring_sample --per-score 4` (serve un database con gare reali, dopo T1.5). Il voto si ricalcola a ogni upsert dell'avviso.
+
 
 ### T2.4 – Documenti di gara
 - Responsabile: DEV-2
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T2.1, T1.3
 - Branch: feat/documents
 - Durata stimata: 2 giorni
