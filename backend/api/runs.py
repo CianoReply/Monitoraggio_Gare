@@ -18,6 +18,7 @@ from backend.api.errors import ApiError, error_responses
 from backend.api.schemas import Run, RunAccepted, RunList
 from backend.domain import repository
 from backend.domain.models import IngestionRun
+from backend.domain.repository import InvalidQueryError
 from backend.ingestion import pipeline
 from backend.ingestion.pipeline import PipelineDeps, RunAlreadyRunningError
 
@@ -64,7 +65,7 @@ def list_runs(
 ) -> RunList:
     try:
         runs = repository.list_runs(session, limit)
-    except ValueError as exc:
+    except InvalidQueryError as exc:
         raise ApiError(422, "validation_error", str(exc)) from exc
     return RunList(items=[run_from_model(r) for r in runs])
 

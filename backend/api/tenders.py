@@ -27,7 +27,7 @@ from backend.api.schemas import (
 from backend.domain import repository
 from backend.domain.models import Document as DocumentModel
 from backend.domain.models import Tender as TenderModel
-from backend.domain.repository import TenderRow
+from backend.domain.repository import InvalidQueryError, TenderRow
 
 ROME = ZoneInfo("Europe/Rome")
 router = APIRouter(tags=["tenders"])
@@ -90,7 +90,7 @@ def list_tenders(
             page=page,
             page_size=page_size,
         )
-    except ValueError as exc:
+    except InvalidQueryError as exc:
         raise ApiError(422, "validation_error", str(exc)) from exc
     return TenderList(
         items=[tender_from_row(row) for row in result.items],
