@@ -25,5 +25,12 @@ T2.1 schema e migrazioni · T2.2 filtri · T2.3 punteggio · T2.4 documenti · T
 
 ## Da completare
 - Regole di punteggio tarate con Giuseppe (T2.3).
-- Comandi Alembic e uso di `seed.py` (T2.1).
 - Classificazione dei link ai documenti (T2.4).
+
+## Database, migrazioni e seed (T2.1)
+- `DATABASE_URL` dall'ambiente (vedi `.env.example`); i test usano SQLite, produzione PostgreSQL.
+- Configurazione Alembic in `backend/domain/alembic.ini`, migrazioni in `backend/domain/migrations/versions/`.
+- Applica: `alembic -c backend/domain/alembic.ini upgrade head` · annulla: `... downgrade base`.
+- Nuova migrazione: `alembic -c backend/domain/alembic.ini revision --autogenerate -m "descrizione"`, poi controlla il file (i CHECK degli enum non vanno duplicati).
+- Dati fittizi: `python -m backend.domain.seed` (20 gare, 2 report, 2 esecuzioni; idempotente).
+- Il repository fa solo `flush`: il `commit` spetta a chi possiede la transazione.
