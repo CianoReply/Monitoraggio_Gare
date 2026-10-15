@@ -27,7 +27,6 @@ from collections.abc import Mapping
 from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any, Literal, Self
-from zoneinfo import ZoneInfo
 
 from pydantic import (
     AwareDatetime,
@@ -51,12 +50,12 @@ from backend.domain.models import (
     ReportStatus,
     Tender,
     VerificationStatus,
-    utcnow,
 )
+from backend.domain.timeutil import ROME, as_utc
 
 REPORT_SCHEMA_PATH = Path(__file__).with_name("report_schema.json")
 LABEL_TO_REVIEW = "Contenuto generato con IA – da revisionare"
-ROME = ZoneInfo("Europe/Rome")  # la data dell'etichetta è quella italiana, come in /deadlines
+# La data dell'etichetta è quella italiana (ROME), come in /deadlines.
 
 # Lunghezze massime delle colonne (models.py). Il contratto non le dichiara (proposta per T4.3:
 # aggiungere maxLength), quindi si controllano qui, dopo lo schema, per rispondere 422 e non 500.
@@ -251,15 +250,6 @@ def _check_lengths(what: str, checks: list[tuple[str, str, int]]) -> None:
         raise ReportValidationError(what, errors)
 
 
-def _aware(moment: datetime | None) -> datetime:
-    """Istante in UTC (SQLite non conserva il fuso): `None` = adesso, naive = ValueError."""
-    if moment is None:
-        return utcnow()
-    if moment.tzinfo is None:
-        raise ValueError("now deve avere il fuso orario (datetime aware)")
-    return moment.astimezone(UTC)
-
-
 def _report_exists(session: Session, tender_id: int) -> bool:
     return session.scalar(select(Report.id).where(Report.tender_id == tender_id)) is not None
 
@@ -310,7 +300,7 @@ def create_report(
             )
         ],
     )
-    created_at = _aware(now)
+    created_at = as_utc(now)
     if session.get(Tender, tender_id) is None:
         raise TenderNotFoundError(tender_id)
     if _report_exists(session, tender_id):
@@ -370,7 +360,7 @@ def review_field(
     """
     data = validate_field_review(review)
     _check_lengths("Revisione", [("reviewer", data.reviewer, MAX_REVIEWER_LENGTH)])
-    moment = _aware(now)
+    moment = as_utc(now)
     report = get_report(session, report_id)
     field = next((f for f in report.fields if f.id == field_id), None)
     if field is None:

@@ -10,19 +10,18 @@ import re
 from datetime import UTC, date, datetime, time, timedelta
 from decimal import Decimal
 from typing import Literal, NamedTuple
-from zoneinfo import ZoneInfo
 
 from sqlalchemy import String, cast, func, or_, select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import ColumnElement
 
-from backend.domain.models import IngestionRun, Report, ReportStatus, RunStatus, Tender, utcnow
+from backend.domain.models import IngestionRun, Report, ReportStatus, RunStatus, Tender
 from backend.domain.schemas import TenderCreate, TenderEvaluation
+from backend.domain.timeutil import ROME, as_utc, utcnow
 
 DEFAULT_PAGE_SIZE = 20
 MAX_PAGE_SIZE = 100
 MAX_QUERY_LENGTH = 200
-ROME = ZoneInfo("Europe/Rome")
 
 # Valori di `sort` del contratto API (docs/API_CONTRACT.yaml).
 SortKey = Literal["relevance", "deadline", "published"]
@@ -241,18 +240,9 @@ def list_tenders(
 DEFAULT_RUNS_LIMIT = 20
 
 
-def _as_utc(moment: datetime | None) -> datetime:
-    """Istante in UTC (SQLite non conserva il fuso): `None` = adesso, naive = ValueError."""
-    if moment is None:
-        return utcnow()
-    if moment.tzinfo is None:
-        raise ValueError("now deve avere il fuso orario (datetime aware)")
-    return moment.astimezone(UTC)
-
-
 def start_run(session: Session, run_date: date, now: datetime | None = None) -> IngestionRun:
     """Registra l'inizio dell'elaborazione del giorno `run_date` (stato `running`)."""
-    run = IngestionRun(run_date=run_date, started_at=_as_utc(now), status=RunStatus.RUNNING)
+    run = IngestionRun(run_date=run_date, started_at=as_utc(now), status=RunStatus.RUNNING)
     session.add(run)
     session.flush()
     return run
@@ -276,7 +266,7 @@ def finish_run(
     counts = (fetched_count, new_count, updated_count, relevant_count)
     if any(count < 0 for count in counts):
         raise ValueError("i conteggi devono essere >= 0")
-    finished_at = _as_utc(now)
+    finished_at = as_utc(now)
     run.status = status
     run.finished_at = finished_at
     run.fetched_count = fetched_count
@@ -286,6 +276,11 @@ def finish_run(
     run.error_message = error_message
     session.flush()
     return run
+
+
+def get_run(session: Session, run_id: int) -> IngestionRun | None:
+    """Esecuzione per id, `None` se non esiste."""
+    return session.get(IngestionRun, run_id)
 
 
 def get_running_run(session: Session) -> IngestionRun | None:
