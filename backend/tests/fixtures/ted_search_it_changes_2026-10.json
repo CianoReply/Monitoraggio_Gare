@@ -1,0 +1,659 @@
+{
+  "request": {
+    "query": "buyer-country=ITA AND classification-cpv IN (72* 48* 302* 324* 642*) AND change-notice-version-identifier=* AND publication-date=(20261001 <> 20261014)",
+    "fields": [
+      "publication-number",
+      "notice-identifier",
+      "notice-version",
+      "notice-type",
+      "form-type",
+      "procedure-type",
+      "contract-nature-main-proc",
+      "publication-date",
+      "dispatch-date",
+      "notice-title",
+      "title-proc",
+      "title-lot",
+      "description-proc",
+      "buyer-name",
+      "buyer-city",
+      "buyer-country",
+      "organisation-name-buyer",
+      "organisation-city-buyer",
+      "classification-cpv",
+      "main-classification-proc",
+      "main-classification-lot",
+      "estimated-value-proc",
+      "estimated-value-cur-proc",
+      "estimated-value-lot",
+      "estimated-value-cur-lot",
+      "estimated-value-glo",
+      "estimated-value-cur-glo",
+      "deadline-receipt-tender-date-lot",
+      "deadline-receipt-tender-time-lot",
+      "deadline-date-lot",
+      "deadline",
+      "document-url-lot",
+      "submission-url-lot",
+      "identifier-lot",
+      "procedure-identifier",
+      "change-notice-version-identifier",
+      "change-description",
+      "change-reason-code",
+      "change-previous-notice-section-identifier",
+      "previous-notice-id-proc",
+      "links"
+    ],
+    "limit": 3,
+    "page": 1
+  },
+  "response": {
+    "notices": [
+      {
+        "deadline-receipt-tender-date-lot": [
+          "2026-10-19+02:00",
+          "2026-10-19+02:00",
+          "2026-10-19+02:00"
+        ],
+        "notice-type": "cn-standard",
+        "publication-number": "684359-2026",
+        "main-classification-lot": [
+          "64121100",
+          "64110000",
+          "72252000"
+        ],
+        "main-classification-proc": [
+          "64110000"
+        ],
+        "submission-url-lot": [
+          "https://extranet.abbanoa.it/PortaleAppalti/it/procedure/codice/G03004",
+          "https://extranet.abbanoa.it/PortaleAppalti/it/procedure/codice/G03004",
+          "https://extranet.abbanoa.it/PortaleAppalti/it/procedure/codice/G03004"
+        ],
+        "procedure-identifier": "bd04c7a2-c16b-4275-bcec-646e50ef277b",
+        "document-url-lot": [
+          "https://extranet.abbanoa.it/PortaleAppalti/it/procedure/codice/G03004",
+          "https://extranet.abbanoa.it/PortaleAppalti/it/procedure/codice/G03004",
+          "https://extranet.abbanoa.it/PortaleAppalti/it/procedure/codice/G03004"
+        ],
+        "publication-date": "2026-10-05+02:00",
+        "estimated-value-proc": "11940687.5",
+        "contract-nature-main-proc": "services",
+        "links": {
+          "xml": {
+            "MUL": "https://ted.europa.eu/en/notice/684359-2026/xml"
+          },
+          "pdf": {
+            "BUL": "https://ted.europa.eu/bg/notice/684359-2026/pdf",
+            "SPA": "https://ted.europa.eu/es/notice/684359-2026/pdf",
+            "CES": "https://ted.europa.eu/cs/notice/684359-2026/pdf",
+            "DAN": "https://ted.europa.eu/da/notice/684359-2026/pdf",
+            "DEU": "https://ted.europa.eu/de/notice/684359-2026/pdf",
+            "EST": "https://ted.europa.eu/et/notice/684359-2026/pdf",
+            "ELL": "https://ted.europa.eu/el/notice/684359-2026/pdf",
+            "ENG": "https://ted.europa.eu/en/notice/684359-2026/pdf",
+            "FRA": "https://ted.europa.eu/fr/notice/684359-2026/pdf",
+            "GLE": "https://ted.europa.eu/ga/notice/684359-2026/pdf",
+            "HRV": "https://ted.europa.eu/hr/notice/684359-2026/pdf",
+            "ITA": "https://ted.europa.eu/it/notice/684359-2026/pdf",
+            "LAV": "https://ted.europa.eu/lv/notice/684359-2026/pdf",
+            "LIT": "https://ted.europa.eu/lt/notice/684359-2026/pdf",
+            "HUN": "https://ted.europa.eu/hu/notice/684359-2026/pdf",
+            "MLT": "https://ted.europa.eu/mt/notice/684359-2026/pdf",
+            "NLD": "https://ted.europa.eu/nl/notice/684359-2026/pdf",
+            "POL": "https://ted.europa.eu/pl/notice/684359-2026/pdf",
+            "POR": "https://ted.europa.eu/pt/notice/684359-2026/pdf",
+            "RON": "https://ted.europa.eu/ro/notice/684359-2026/pdf",
+            "SLK": "https://ted.europa.eu/sk/notice/684359-2026/pdf",
+            "SLV": "https://ted.europa.eu/sl/notice/684359-2026/pdf",
+            "FIN": "https://ted.europa.eu/fi/notice/684359-2026/pdf",
+            "SWE": "https://ted.europa.eu/sv/notice/684359-2026/pdf"
+          },
+          "pdfs": {
+            "ITA": "https://ted.europa.eu/it/notice/684359-2026/pdfs"
+          },
+          "html": {
+            "BUL": "https://ted.europa.eu/bg/notice/-/detail/684359-2026",
+            "SPA": "https://ted.europa.eu/es/notice/-/detail/684359-2026",
+            "CES": "https://ted.europa.eu/cs/notice/-/detail/684359-2026",
+            "DAN": "https://ted.europa.eu/da/notice/-/detail/684359-2026",
+            "DEU": "https://ted.europa.eu/de/notice/-/detail/684359-2026",
+            "EST": "https://ted.europa.eu/et/notice/-/detail/684359-2026",
+            "ELL": "https://ted.europa.eu/el/notice/-/detail/684359-2026",
+            "ENG": "https://ted.europa.eu/en/notice/-/detail/684359-2026",
+            "FRA": "https://ted.europa.eu/fr/notice/-/detail/684359-2026",
+            "GLE": "https://ted.europa.eu/ga/notice/-/detail/684359-2026",
+            "HRV": "https://ted.europa.eu/hr/notice/-/detail/684359-2026",
+            "ITA": "https://ted.europa.eu/it/notice/-/detail/684359-2026",
+            "LAV": "https://ted.europa.eu/lv/notice/-/detail/684359-2026",
+            "LIT": "https://ted.europa.eu/lt/notice/-/detail/684359-2026",
+            "HUN": "https://ted.europa.eu/hu/notice/-/detail/684359-2026",
+            "MLT": "https://ted.europa.eu/mt/notice/-/detail/684359-2026",
+            "NLD": "https://ted.europa.eu/nl/notice/-/detail/684359-2026",
+            "POL": "https://ted.europa.eu/pl/notice/-/detail/684359-2026",
+            "POR": "https://ted.europa.eu/pt/notice/-/detail/684359-2026",
+            "RON": "https://ted.europa.eu/ro/notice/-/detail/684359-2026",
+            "SLK": "https://ted.europa.eu/sk/notice/-/detail/684359-2026",
+            "SLV": "https://ted.europa.eu/sl/notice/-/detail/684359-2026",
+            "FIN": "https://ted.europa.eu/fi/notice/-/detail/684359-2026",
+            "SWE": "https://ted.europa.eu/sv/notice/-/detail/684359-2026"
+          },
+          "htmlDirect": {
+            "BUL": "https://ted.europa.eu/bg/notice/684359-2026/html",
+            "SPA": "https://ted.europa.eu/es/notice/684359-2026/html",
+            "CES": "https://ted.europa.eu/cs/notice/684359-2026/html",
+            "DAN": "https://ted.europa.eu/da/notice/684359-2026/html",
+            "DEU": "https://ted.europa.eu/de/notice/684359-2026/html",
+            "EST": "https://ted.europa.eu/et/notice/684359-2026/html",
+            "ELL": "https://ted.europa.eu/el/notice/684359-2026/html",
+            "ENG": "https://ted.europa.eu/en/notice/684359-2026/html",
+            "FRA": "https://ted.europa.eu/fr/notice/684359-2026/html",
+            "GLE": "https://ted.europa.eu/ga/notice/684359-2026/html",
+            "HRV": "https://ted.europa.eu/hr/notice/684359-2026/html",
+            "ITA": "https://ted.europa.eu/it/notice/684359-2026/html",
+            "LAV": "https://ted.europa.eu/lv/notice/684359-2026/html",
+            "LIT": "https://ted.europa.eu/lt/notice/684359-2026/html",
+            "HUN": "https://ted.europa.eu/hu/notice/684359-2026/html",
+            "MLT": "https://ted.europa.eu/mt/notice/684359-2026/html",
+            "NLD": "https://ted.europa.eu/nl/notice/684359-2026/html",
+            "POL": "https://ted.europa.eu/pl/notice/684359-2026/html",
+            "POR": "https://ted.europa.eu/pt/notice/684359-2026/html",
+            "RON": "https://ted.europa.eu/ro/notice/684359-2026/html",
+            "SLK": "https://ted.europa.eu/sk/notice/684359-2026/html",
+            "SLV": "https://ted.europa.eu/sl/notice/684359-2026/html",
+            "FIN": "https://ted.europa.eu/fi/notice/684359-2026/html",
+            "SWE": "https://ted.europa.eu/sv/notice/684359-2026/html"
+          }
+        },
+        "organisation-name-buyer": {
+          "ita": [
+            "Abbanoa S.p.A. - U.O. Servizi e Forniture"
+          ]
+        },
+        "organisation-city-buyer": [
+          "NUORO (NU)"
+        ],
+        "identifier-lot": [
+          "LOT-0001",
+          "LOT-0002",
+          "LOT-0003"
+        ],
+        "buyer-city": {
+          "mul": [
+            "NUORO (NU)"
+          ]
+        },
+        "notice-identifier": "ba94509d-a839-4910-9564-83a4c75741bb",
+        "title-proc": {
+          "ita": "RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un"
+        },
+        "estimated-value-lot": [
+          "10626250",
+          "891936.5",
+          "422500"
+        ],
+        "dispatch-date": "2026-10-02+02:00",
+        "estimated-value-cur-lot": [
+          "EUR"
+        ],
+        "estimated-value-cur-proc": "EUR",
+        "buyer-country": [
+          "ITA"
+        ],
+        "change-notice-version-identifier": "42f656d2-162c-4575-ac34-52915bdfec90-01",
+        "procedure-type": "open",
+        "deadline-receipt-tender-time-lot": [
+          "13:00:00+02:00",
+          "13:00:00+02:00",
+          "13:00:00+02:00"
+        ],
+        "classification-cpv": [
+          "64110000",
+          "79810000",
+          "64121100",
+          "64110000",
+          "72252000",
+          "79810000"
+        ],
+        "buyer-name": {
+          "ita": [
+            "Abbanoa S.p.A. - U.O. Servizi e Forniture"
+          ]
+        },
+        "notice-version": 1,
+        "notice-title": {
+          "hun": "Olaszország – Postai szolgáltatások – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "lav": "Itāija – Pasta pakalpojumi – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "swe": "Italien – Postgång – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "gle": "An Iodáil – Postal services – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "ell": "Ιταλία – Ταχυδρομικές υπηρεσίες – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "spa": "Italia – Servicios postales – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "est": "Itaalia – Postiteenused – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "nld": "Italië – Postdiensten – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "fin": "Italia – Postipalvelut – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "pol": "Włochy – Usługi pocztowe – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "hrv": "Italija – Poštanske usluge – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "ces": "Itálie – Poštovní služby – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "dan": "Italien – Postbefordring – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "ron": "Italia – Servicii poştale – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "por": "Itália – Serviços postais – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "slk": "Taliansko – Poštové služby – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "fra": "Italie – Services postaux – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "mlt": "L-Italja – Servizzi postali – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "deu": "Italien – Postdienste – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "lit": "Italija – Pašto paslaugos – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "ita": "Italia – Servizi postali – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "bul": "Итaлия – Услуги на националната поща – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "slv": "Italija – Poštne storitve – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un",
+          "eng": "Italy – Postal services – RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per un"
+        },
+        "title-lot": {
+          "ita": [
+            "Recapito delle bollette e dei documenti del credito",
+            "Servizi a monte del recapito.",
+            "Servizi a valle del recapito"
+          ]
+        },
+        "form-type": "competition",
+        "description-proc": {
+          "ita": "RIF. APP. 20/2026 - Procedura aperta, ai sensi degli artt. 71 e 151 del D. lgs. n. 36/2023, per la conclusione di un Accordo Quadro con un unico operatore economico, ai sensi degli artt. 59 c. 3 e 154 del D.Lgs 36/2023, per l'affidamento del Servizio di recapito delle bollette e dei documenti del credito delle utenze del S.I.I. e dei relativi servizi a monte e a valle, suddiviso in 3 lotti, per una durata di 12 mesi."
+        }
+      },
+      {
+        "change-reason-code": "update-add",
+        "deadline-receipt-tender-date-lot": [
+          "2026-10-27+02:00"
+        ],
+        "notice-type": "cn-standard",
+        "publication-number": "685981-2026",
+        "main-classification-lot": [
+          "72400000"
+        ],
+        "main-classification-proc": [
+          "72400000"
+        ],
+        "submission-url-lot": [
+          "https://albofornitori.amaroma.it/PortaleAppalti/it/procedure/codice/26/000314"
+        ],
+        "procedure-identifier": "47001632-307a-4df9-8047-5ee68a9246da",
+        "document-url-lot": [
+          "https://albofornitori.amaroma.it/PortaleAppalti/it/procedure/codice/26/000314"
+        ],
+        "publication-date": "2026-10-06+02:00",
+        "estimated-value-proc": "4972980",
+        "contract-nature-main-proc": "services",
+        "links": {
+          "xml": {
+            "MUL": "https://ted.europa.eu/en/notice/685981-2026/xml"
+          },
+          "pdf": {
+            "BUL": "https://ted.europa.eu/bg/notice/685981-2026/pdf",
+            "SPA": "https://ted.europa.eu/es/notice/685981-2026/pdf",
+            "CES": "https://ted.europa.eu/cs/notice/685981-2026/pdf",
+            "DAN": "https://ted.europa.eu/da/notice/685981-2026/pdf",
+            "DEU": "https://ted.europa.eu/de/notice/685981-2026/pdf",
+            "EST": "https://ted.europa.eu/et/notice/685981-2026/pdf",
+            "ELL": "https://ted.europa.eu/el/notice/685981-2026/pdf",
+            "ENG": "https://ted.europa.eu/en/notice/685981-2026/pdf",
+            "FRA": "https://ted.europa.eu/fr/notice/685981-2026/pdf",
+            "GLE": "https://ted.europa.eu/ga/notice/685981-2026/pdf",
+            "HRV": "https://ted.europa.eu/hr/notice/685981-2026/pdf",
+            "ITA": "https://ted.europa.eu/it/notice/685981-2026/pdf",
+            "LAV": "https://ted.europa.eu/lv/notice/685981-2026/pdf",
+            "LIT": "https://ted.europa.eu/lt/notice/685981-2026/pdf",
+            "HUN": "https://ted.europa.eu/hu/notice/685981-2026/pdf",
+            "MLT": "https://ted.europa.eu/mt/notice/685981-2026/pdf",
+            "NLD": "https://ted.europa.eu/nl/notice/685981-2026/pdf",
+            "POL": "https://ted.europa.eu/pl/notice/685981-2026/pdf",
+            "POR": "https://ted.europa.eu/pt/notice/685981-2026/pdf",
+            "RON": "https://ted.europa.eu/ro/notice/685981-2026/pdf",
+            "SLK": "https://ted.europa.eu/sk/notice/685981-2026/pdf",
+            "SLV": "https://ted.europa.eu/sl/notice/685981-2026/pdf",
+            "FIN": "https://ted.europa.eu/fi/notice/685981-2026/pdf",
+            "SWE": "https://ted.europa.eu/sv/notice/685981-2026/pdf"
+          },
+          "pdfs": {
+            "ITA": "https://ted.europa.eu/it/notice/685981-2026/pdfs"
+          },
+          "html": {
+            "BUL": "https://ted.europa.eu/bg/notice/-/detail/685981-2026",
+            "SPA": "https://ted.europa.eu/es/notice/-/detail/685981-2026",
+            "CES": "https://ted.europa.eu/cs/notice/-/detail/685981-2026",
+            "DAN": "https://ted.europa.eu/da/notice/-/detail/685981-2026",
+            "DEU": "https://ted.europa.eu/de/notice/-/detail/685981-2026",
+            "EST": "https://ted.europa.eu/et/notice/-/detail/685981-2026",
+            "ELL": "https://ted.europa.eu/el/notice/-/detail/685981-2026",
+            "ENG": "https://ted.europa.eu/en/notice/-/detail/685981-2026",
+            "FRA": "https://ted.europa.eu/fr/notice/-/detail/685981-2026",
+            "GLE": "https://ted.europa.eu/ga/notice/-/detail/685981-2026",
+            "HRV": "https://ted.europa.eu/hr/notice/-/detail/685981-2026",
+            "ITA": "https://ted.europa.eu/it/notice/-/detail/685981-2026",
+            "LAV": "https://ted.europa.eu/lv/notice/-/detail/685981-2026",
+            "LIT": "https://ted.europa.eu/lt/notice/-/detail/685981-2026",
+            "HUN": "https://ted.europa.eu/hu/notice/-/detail/685981-2026",
+            "MLT": "https://ted.europa.eu/mt/notice/-/detail/685981-2026",
+            "NLD": "https://ted.europa.eu/nl/notice/-/detail/685981-2026",
+            "POL": "https://ted.europa.eu/pl/notice/-/detail/685981-2026",
+            "POR": "https://ted.europa.eu/pt/notice/-/detail/685981-2026",
+            "RON": "https://ted.europa.eu/ro/notice/-/detail/685981-2026",
+            "SLK": "https://ted.europa.eu/sk/notice/-/detail/685981-2026",
+            "SLV": "https://ted.europa.eu/sl/notice/-/detail/685981-2026",
+            "FIN": "https://ted.europa.eu/fi/notice/-/detail/685981-2026",
+            "SWE": "https://ted.europa.eu/sv/notice/-/detail/685981-2026"
+          },
+          "htmlDirect": {
+            "BUL": "https://ted.europa.eu/bg/notice/685981-2026/html",
+            "SPA": "https://ted.europa.eu/es/notice/685981-2026/html",
+            "CES": "https://ted.europa.eu/cs/notice/685981-2026/html",
+            "DAN": "https://ted.europa.eu/da/notice/685981-2026/html",
+            "DEU": "https://ted.europa.eu/de/notice/685981-2026/html",
+            "EST": "https://ted.europa.eu/et/notice/685981-2026/html",
+            "ELL": "https://ted.europa.eu/el/notice/685981-2026/html",
+            "ENG": "https://ted.europa.eu/en/notice/685981-2026/html",
+            "FRA": "https://ted.europa.eu/fr/notice/685981-2026/html",
+            "GLE": "https://ted.europa.eu/ga/notice/685981-2026/html",
+            "HRV": "https://ted.europa.eu/hr/notice/685981-2026/html",
+            "ITA": "https://ted.europa.eu/it/notice/685981-2026/html",
+            "LAV": "https://ted.europa.eu/lv/notice/685981-2026/html",
+            "LIT": "https://ted.europa.eu/lt/notice/685981-2026/html",
+            "HUN": "https://ted.europa.eu/hu/notice/685981-2026/html",
+            "MLT": "https://ted.europa.eu/mt/notice/685981-2026/html",
+            "NLD": "https://ted.europa.eu/nl/notice/685981-2026/html",
+            "POL": "https://ted.europa.eu/pl/notice/685981-2026/html",
+            "POR": "https://ted.europa.eu/pt/notice/685981-2026/html",
+            "RON": "https://ted.europa.eu/ro/notice/685981-2026/html",
+            "SLK": "https://ted.europa.eu/sk/notice/685981-2026/html",
+            "SLV": "https://ted.europa.eu/sl/notice/685981-2026/html",
+            "FIN": "https://ted.europa.eu/fi/notice/685981-2026/html",
+            "SWE": "https://ted.europa.eu/sv/notice/685981-2026/html"
+          }
+        },
+        "organisation-name-buyer": {
+          "ita": [
+            "AMA S.p.A."
+          ]
+        },
+        "organisation-city-buyer": [
+          "ROMA (RM)"
+        ],
+        "identifier-lot": [
+          "LOT-0001"
+        ],
+        "buyer-city": {
+          "mul": [
+            "ROMA (RM)"
+          ]
+        },
+        "notice-identifier": "815e468b-a324-4910-93ab-669a21f05580",
+        "title-proc": {
+          "ita": "Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi."
+        },
+        "estimated-value-lot": [
+          "4972980"
+        ],
+        "dispatch-date": "2026-10-05+02:00",
+        "estimated-value-cur-lot": [
+          "EUR"
+        ],
+        "estimated-value-cur-proc": "EUR",
+        "buyer-country": [
+          "ITA"
+        ],
+        "change-notice-version-identifier": "333f7154-5366-45d8-8b45-2a1adce91bd6-01",
+        "procedure-type": "open",
+        "deadline-receipt-tender-time-lot": [
+          "13:00:00+02:00"
+        ],
+        "classification-cpv": [
+          "72400000",
+          "72253000",
+          "72400000",
+          "72253000"
+        ],
+        "buyer-name": {
+          "ita": [
+            "AMA S.p.A."
+          ]
+        },
+        "notice-version": 1,
+        "notice-title": {
+          "hun": "Olaszország – Internetszolgáltatások – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "lav": "Itāija – Interneta pakalpojumi – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "swe": "Italien – Internettjänster – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "gle": "An Iodáil – Internet services – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "ell": "Ιταλία – Υπηρεσίες Διαδικτύου – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "spa": "Italia – Servicios de Internet – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "est": "Itaalia – Internetiteenused – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "nld": "Italië – Internetdiensten – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "fin": "Italia – Internet-palvelut – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "pol": "Włochy – Usługi internetowe – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "hrv": "Italija – Usluge interneta – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "ces": "Itálie – Internetové služby – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "dan": "Italien – Internettjenester – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "ron": "Italia – Servicii de internet – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "por": "Itália – Serviços de Internet – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "slk": "Taliansko – Internetové služby – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "fra": "Italie – Services internet – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "mlt": "L-Italja – Servizzi ta' l-internet – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "deu": "Italien – Internetdienste – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "lit": "Italija – Interneto paslaugos – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "ita": "Italia – Servizi di Internet – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "bul": "Итaлия – Интернет услуги – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "slv": "Italija – Internetne storitve – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi.",
+          "eng": "Italy – Internet services – Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi."
+        },
+        "title-lot": {
+          "ita": [
+            "Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi."
+          ]
+        },
+        "form-type": "competition",
+        "description-proc": {
+          "ita": "Procedura Aperta per l'affidamento del servizio di Data Center in outsourcing per il sistema SAP di AMA S.p.A., per un periodo di 60 (sessanta) mesi."
+        }
+      },
+      {
+        "change-reason-code": "update-add",
+        "deadline-receipt-tender-date-lot": [
+          "2026-10-14+02:00"
+        ],
+        "notice-type": "cn-standard",
+        "publication-number": "687833-2026",
+        "main-classification-lot": [
+          "72260000"
+        ],
+        "main-classification-proc": [
+          "72260000"
+        ],
+        "submission-url-lot": [
+          "https://start.toscana.it/tendering/tenders/023658-2026/view/detail/1"
+        ],
+        "change-description": {
+          "ita": [
+            "Correzione di errori materiali riscontrati nel “Disciplinare di Gara” e nella “Relazione Tecnico illustrativa del servizio”"
+          ]
+        },
+        "procedure-identifier": "87bf8416-7139-439b-8c43-997710b5f6a5",
+        "document-url-lot": [
+          "https://webs.rete.toscana.it/sitat/trasparenza/#/procedura?uuid=START_947b89bc-8282-4daa-ccb0-39a06a2689e2"
+        ],
+        "publication-date": "2026-10-06+02:00",
+        "estimated-value-proc": "8571100.00",
+        "contract-nature-main-proc": "services",
+        "links": {
+          "xml": {
+            "MUL": "https://ted.europa.eu/en/notice/687833-2026/xml"
+          },
+          "pdf": {
+            "BUL": "https://ted.europa.eu/bg/notice/687833-2026/pdf",
+            "SPA": "https://ted.europa.eu/es/notice/687833-2026/pdf",
+            "CES": "https://ted.europa.eu/cs/notice/687833-2026/pdf",
+            "DAN": "https://ted.europa.eu/da/notice/687833-2026/pdf",
+            "DEU": "https://ted.europa.eu/de/notice/687833-2026/pdf",
+            "EST": "https://ted.europa.eu/et/notice/687833-2026/pdf",
+            "ELL": "https://ted.europa.eu/el/notice/687833-2026/pdf",
+            "ENG": "https://ted.europa.eu/en/notice/687833-2026/pdf",
+            "FRA": "https://ted.europa.eu/fr/notice/687833-2026/pdf",
+            "GLE": "https://ted.europa.eu/ga/notice/687833-2026/pdf",
+            "HRV": "https://ted.europa.eu/hr/notice/687833-2026/pdf",
+            "ITA": "https://ted.europa.eu/it/notice/687833-2026/pdf",
+            "LAV": "https://ted.europa.eu/lv/notice/687833-2026/pdf",
+            "LIT": "https://ted.europa.eu/lt/notice/687833-2026/pdf",
+            "HUN": "https://ted.europa.eu/hu/notice/687833-2026/pdf",
+            "MLT": "https://ted.europa.eu/mt/notice/687833-2026/pdf",
+            "NLD": "https://ted.europa.eu/nl/notice/687833-2026/pdf",
+            "POL": "https://ted.europa.eu/pl/notice/687833-2026/pdf",
+            "POR": "https://ted.europa.eu/pt/notice/687833-2026/pdf",
+            "RON": "https://ted.europa.eu/ro/notice/687833-2026/pdf",
+            "SLK": "https://ted.europa.eu/sk/notice/687833-2026/pdf",
+            "SLV": "https://ted.europa.eu/sl/notice/687833-2026/pdf",
+            "FIN": "https://ted.europa.eu/fi/notice/687833-2026/pdf",
+            "SWE": "https://ted.europa.eu/sv/notice/687833-2026/pdf"
+          },
+          "pdfs": {
+            "ITA": "https://ted.europa.eu/it/notice/687833-2026/pdfs"
+          },
+          "html": {
+            "BUL": "https://ted.europa.eu/bg/notice/-/detail/687833-2026",
+            "SPA": "https://ted.europa.eu/es/notice/-/detail/687833-2026",
+            "CES": "https://ted.europa.eu/cs/notice/-/detail/687833-2026",
+            "DAN": "https://ted.europa.eu/da/notice/-/detail/687833-2026",
+            "DEU": "https://ted.europa.eu/de/notice/-/detail/687833-2026",
+            "EST": "https://ted.europa.eu/et/notice/-/detail/687833-2026",
+            "ELL": "https://ted.europa.eu/el/notice/-/detail/687833-2026",
+            "ENG": "https://ted.europa.eu/en/notice/-/detail/687833-2026",
+            "FRA": "https://ted.europa.eu/fr/notice/-/detail/687833-2026",
+            "GLE": "https://ted.europa.eu/ga/notice/-/detail/687833-2026",
+            "HRV": "https://ted.europa.eu/hr/notice/-/detail/687833-2026",
+            "ITA": "https://ted.europa.eu/it/notice/-/detail/687833-2026",
+            "LAV": "https://ted.europa.eu/lv/notice/-/detail/687833-2026",
+            "LIT": "https://ted.europa.eu/lt/notice/-/detail/687833-2026",
+            "HUN": "https://ted.europa.eu/hu/notice/-/detail/687833-2026",
+            "MLT": "https://ted.europa.eu/mt/notice/-/detail/687833-2026",
+            "NLD": "https://ted.europa.eu/nl/notice/-/detail/687833-2026",
+            "POL": "https://ted.europa.eu/pl/notice/-/detail/687833-2026",
+            "POR": "https://ted.europa.eu/pt/notice/-/detail/687833-2026",
+            "RON": "https://ted.europa.eu/ro/notice/-/detail/687833-2026",
+            "SLK": "https://ted.europa.eu/sk/notice/-/detail/687833-2026",
+            "SLV": "https://ted.europa.eu/sl/notice/-/detail/687833-2026",
+            "FIN": "https://ted.europa.eu/fi/notice/-/detail/687833-2026",
+            "SWE": "https://ted.europa.eu/sv/notice/-/detail/687833-2026"
+          },
+          "htmlDirect": {
+            "BUL": "https://ted.europa.eu/bg/notice/687833-2026/html",
+            "SPA": "https://ted.europa.eu/es/notice/687833-2026/html",
+            "CES": "https://ted.europa.eu/cs/notice/687833-2026/html",
+            "DAN": "https://ted.europa.eu/da/notice/687833-2026/html",
+            "DEU": "https://ted.europa.eu/de/notice/687833-2026/html",
+            "EST": "https://ted.europa.eu/et/notice/687833-2026/html",
+            "ELL": "https://ted.europa.eu/el/notice/687833-2026/html",
+            "ENG": "https://ted.europa.eu/en/notice/687833-2026/html",
+            "FRA": "https://ted.europa.eu/fr/notice/687833-2026/html",
+            "GLE": "https://ted.europa.eu/ga/notice/687833-2026/html",
+            "HRV": "https://ted.europa.eu/hr/notice/687833-2026/html",
+            "ITA": "https://ted.europa.eu/it/notice/687833-2026/html",
+            "LAV": "https://ted.europa.eu/lv/notice/687833-2026/html",
+            "LIT": "https://ted.europa.eu/lt/notice/687833-2026/html",
+            "HUN": "https://ted.europa.eu/hu/notice/687833-2026/html",
+            "MLT": "https://ted.europa.eu/mt/notice/687833-2026/html",
+            "NLD": "https://ted.europa.eu/nl/notice/687833-2026/html",
+            "POL": "https://ted.europa.eu/pl/notice/687833-2026/html",
+            "POR": "https://ted.europa.eu/pt/notice/687833-2026/html",
+            "RON": "https://ted.europa.eu/ro/notice/687833-2026/html",
+            "SLK": "https://ted.europa.eu/sk/notice/687833-2026/html",
+            "SLV": "https://ted.europa.eu/sl/notice/687833-2026/html",
+            "FIN": "https://ted.europa.eu/fi/notice/687833-2026/html",
+            "SWE": "https://ted.europa.eu/sv/notice/687833-2026/html"
+          }
+        },
+        "organisation-name-buyer": {
+          "ita": [
+            "SOGGETTO AGGREGATORE REGIONE TOSCANA - SETTORE SISTEMA CLOUD TOSCANO, INFRASTRUTTURE DIGITALI E PIATTAFORME ABILITANTI"
+          ]
+        },
+        "organisation-city-buyer": [
+          "Firenze"
+        ],
+        "identifier-lot": [
+          "LOT-0001"
+        ],
+        "buyer-city": {
+          "mul": [
+            "Firenze"
+          ]
+        },
+        "notice-identifier": "87bf8416-7139-439b-8c43-997710b5f6a5",
+        "title-proc": {
+          "ita": "Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)"
+        },
+        "estimated-value-lot": [
+          "8571100.00"
+        ],
+        "dispatch-date": "2026-10-05+02:00",
+        "estimated-value-cur-lot": [
+          "EUR"
+        ],
+        "estimated-value-cur-proc": "EUR",
+        "buyer-country": [
+          "ITA"
+        ],
+        "change-notice-version-identifier": "68d34303-2d11-45ec-ae35-19a735ee975d-01",
+        "change-previous-notice-section-identifier": [
+          "LOT-0001"
+        ],
+        "procedure-type": "open",
+        "deadline-receipt-tender-time-lot": [
+          "13:00:00+02:00"
+        ],
+        "classification-cpv": [
+          "72260000",
+          "72260000"
+        ],
+        "buyer-name": {
+          "ita": [
+            "SOGGETTO AGGREGATORE REGIONE TOSCANA - SETTORE SISTEMA CLOUD TOSCANO, INFRASTRUTTURE DIGITALI E PIATTAFORME ABILITANTI"
+          ]
+        },
+        "notice-version": 1,
+        "notice-title": {
+          "hun": "Olaszország – Szoftverrel kapcsolatos szolgáltatások – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "lav": "Itāija – Ar programmatūru saistītie pakalpojumi – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "swe": "Italien – Programrelaterade tjänster – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "gle": "An Iodáil – Software-related services – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "ell": "Ιταλία – Υπηρεσίες σχετιζόμενες με λογισμικά – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "spa": "Italia – Servicios relacionados con el software – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "est": "Itaalia – Tarkvaraga seotud teenused – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "nld": "Italië – Diensten in verband met software – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "fin": "Italia – Ohjelmistoihin liittyvät palvelut – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "pol": "Włochy – Usługi w zakresie oprogramowania – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "hrv": "Italija – Usluge povezane s programskom podrškom – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "ces": "Itálie – Služby programového vybavení – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "dan": "Italien – Programmelrelaterede tjenester – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "ron": "Italia – Servicii de software – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "por": "Itália – Serviços relacionados com software – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "slk": "Taliansko – Služby súvisiace so softvérom – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "fra": "Italie – Services relatifs aux logiciels – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "mlt": "L-Italja – Servizzi relatati mas-software – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "deu": "Italien – Dienstleistungen in Verbindung mit Software – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "lit": "Italija – Su programine įranga susijusios paslaugos – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "ita": "Italia – Servizi connessi al software – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "bul": "Итaлия – Услуги, свързани със софтуерни продукти – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "slv": "Italija – Storitve, povezane s programsko opremo – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)",
+          "eng": "Italy – Software-related services – Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)"
+        },
+        "title-lot": {
+          "ita": [
+            "Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)"
+          ]
+        },
+        "form-type": "competition",
+        "description-proc": {
+          "ita": "Servizio di Gestione del Sistema Telematico Acquisti Regionale della Toscana (START)"
+        }
+      }
+    ],
+    "totalNoticeCount": 15,
+    "iterationNextToken": null,
+    "timedOut": false
+  }
+}
