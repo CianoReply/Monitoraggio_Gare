@@ -18,6 +18,7 @@
 | ADR-010 | Punteggio per ogni gara salvata | Accettata |
 | ADR-011 | Integrazione su `develop` con revisione del lead e una sola persona | Accettata |
 | ADR-012 | Gare scartate e stato del report nell'API | Accettata |
+| ADR-013 | Configurazione in TOML invece di YAML | Accettata |
 
 ---
 
@@ -92,3 +93,9 @@
 - **Decisione:** `GET /tenders` esclude le gare scartate salvo il parametro aggiuntivo `include_discarded=true` (predefinito `false`); `GET /tenders/{id}` restituisce sempre la gara. L'oggetto `Tender` dell'API espone il campo derivato `report_status` (`none` / `to_review` / `verified`), calcolato da `reports.status` (`none` se la gara non ha report), senza nuova colonna.
 - **Motivazione:** l'elenco mostra di default solo ciò che serve; le gare scartate restano consultabili e spiegabili (ADR-010). Il frontend filtra e mostra lo stato del report senza una chiamata per gara.
 - **Conseguenze:** `repository.list_tenders` (DEV-2) implementa `include_discarded` e restituisce `report_status`; contratto in [API_CONTRACT.yaml](API_CONTRACT.yaml) (T0.5). Approvata dall'utente al checkpoint di fine Fase 0 (2026-10-15).
+
+## ADR-013 – Configurazione in TOML invece di YAML
+- **Contesto:** il piano prevede `config.yaml` per soglie, CPV e pesi (T2.2, T2.3), ma `pyyaml` non è tra le dipendenze autorizzate dall'utente (2026-10-15).
+- **Decisione:** la configurazione del dominio è in `backend/domain/config.toml`, letta con `tomllib` della libreria standard; T2.3 vi aggiunge la sezione `[scoring]`.
+- **Motivazione:** nessuna nuova dipendenza; TOML è leggibile quanto YAML per una configurazione piatta.
+- **Conseguenze:** dove il piano dice `config.yaml` si intende `backend/domain/config.toml`. Se un giorno servisse YAML, si cambierà con un nuovo ADR e l'autorizzazione della dipendenza.

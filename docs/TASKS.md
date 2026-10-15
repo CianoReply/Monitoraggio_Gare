@@ -272,18 +272,19 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T3.1 – Struttura dell'API con dati di prova
 - Responsabile: DEV-3
-- Stato: [ ] da fare
+- Stato: [x] fatto (2026-10-15, merge 1cd7ba0)
 - Dipende da: T0.5
 - Branch: feat/api-skeleton
 - Durata stimata: 1,5 giorni
 - Obiettivo: avere subito un'API funzionante che restituisce dati di prova, così da non aspettare DEV-1 e DEV-2.
 - Finito quando:
-  - [ ] tutti gli endpoint del contratto rispondono con dati di prova
-  - [ ] la documentazione generata da FastAPI (`/docs`) coincide con il contratto
+  - [x] tutti gli endpoint del contratto rispondono con dati di prova
+  - [x] la documentazione generata da FastAPI (`/docs`) coincide con il contratto
+- Esito: 2 giri di revisione; risposte validate contro il contratto, `/docs` confrontato con il contratto (unica eccezione nota: if/then di `FieldReview`, imposto da validatore); handler `{error, message}` per 404/405/409/422/500. Origine reale del frontend per CORS: DA VERIFICARE.
 
 ### T3.2 – Elenco delle gare (`GET /tenders`)
 - Responsabile: DEV-3
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T3.1, T2.1
 - Branch: feat/api-tenders-list
 - Durata stimata: 1,5 giorni
