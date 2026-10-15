@@ -53,6 +53,18 @@ def test_api_runs_migrations_then_uvicorn(compose: dict[str, Any]) -> None:
     assert command.index(migration) < command.index(server)
 
 
+def test_api_runs_scheduler_with_a_single_worker(compose: dict[str, Any]) -> None:
+    api = compose["services"]["api"]
+    assert api["environment"]["ENABLE_SCHEDULER"] == "true"
+    assert "INGESTION_SCHEDULE" in api["environment"]
+    command = " ".join(api["command"].split())
+    assert command.endswith('--workers 1"') or "--workers 1" in command
+
+
+def test_env_example_documents_scheduler_variables() -> None:
+    assert {"ENABLE_SCHEDULER", "INGESTION_SCHEDULE"} <= _env_example_keys()
+
+
 def test_api_environment_points_to_compose_database(compose: dict[str, Any]) -> None:
     environment = compose["services"]["api"]["environment"]
     url = environment["DATABASE_URL"]

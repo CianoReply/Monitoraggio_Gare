@@ -31,6 +31,9 @@ services:
       TED_API_URL: ${TED_API_URL:-}
       TED_CPV_PREFIXES: ${TED_CPV_PREFIXES:-}
       DOCUMENTS_DIR: /data/documents
+      # Scheduler del job giornaliero nel processo dell'API (un solo worker, vedi il comando).
+      ENABLE_SCHEDULER: "true"
+      INGESTION_SCHEDULE: ${INGESTION_SCHEDULE:-}
     volumes:
       - documents:/data/documents
     ports:
@@ -38,7 +41,7 @@ services:
     # Applica le migrazioni e poi avvia l'API.
     command: >-
       sh -c "alembic -c backend/domain/alembic.ini upgrade head &&
-      uvicorn backend.api.main:app --host 0.0.0.0 --port 8000"
+      uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 --workers 1"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
       interval: 10s
