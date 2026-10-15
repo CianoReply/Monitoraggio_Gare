@@ -108,6 +108,10 @@ class TedClientConfig:
     def from_env(cls) -> "TedClientConfig":
         """Legge la configurazione dalle variabili d'ambiente; i valori vuoti usano i default."""
         api_url = os.environ.get("TED_API_URL", "").strip() or DEFAULT_API_URL
+        if not api_url.lower().startswith("https://"):
+            raise ValueError(f"TED_API_URL deve usare https: {api_url!r}")
+        if not api_url.lower().startswith("https://api.ted.europa.eu/"):
+            logger.warning("TED_API_URL punta a un host diverso da api.ted.europa.eu: %s", api_url)
         raw_prefixes = os.environ.get("TED_CPV_PREFIXES", "")
         prefixes = tuple(p.strip() for p in raw_prefixes.split(",") if p.strip())
         return cls(api_url=api_url, cpv_prefixes=prefixes or DEFAULT_CPV_PREFIXES)

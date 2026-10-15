@@ -199,6 +199,14 @@ def normalize_cpv_codes(raw: dict[str, Any]) -> list[str]:
     return list(codes)
 
 
+def is_http_url(value: Any) -> bool:
+    """Indica se il valore è un URL `http` o `https` (niente `javascript:`, `data:`, ...)."""
+    if not isinstance(value, str):
+        return False
+    lowered = value.strip().lower()
+    return lowered.startswith(("http://", "https://")) and len(lowered) > len("https://")
+
+
 def notice_url(raw: dict[str, Any], publication_number: str) -> str:
     """Link alla pagina dell'avviso su TED, in italiano se disponibile."""
     links = raw.get("links")
@@ -206,7 +214,7 @@ def notice_url(raw: dict[str, Any], publication_number: str) -> str:
     if isinstance(html, dict):
         for lang in ("ITA", "ENG"):
             url = html.get(lang)
-            if isinstance(url, str) and url.strip() and len(url) <= MAX_URL:
+            if is_http_url(url) and len(url) <= MAX_URL:
                 return url.strip()
     return TED_NOTICE_URL.format(publication_number=publication_number)
 
@@ -284,7 +292,7 @@ def parse_notice(raw: dict[str, Any], parent_publication_number: str | None = No
     deadline = earliest_deadline(raw)
     if deadline is None:
         _warn_missing(publication_number, "deadline-receipt-tender")
-    documents = [u for u in as_list(raw.get("document-url-lot")) if isinstance(u, str)]
+    documents = [u.strip() for u in as_list(raw.get("document-url-lot")) if is_http_url(u)]
 
     return TenderCreate(
         publication_number=publication_number,

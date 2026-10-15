@@ -349,3 +349,9 @@ def test_module_fetch_notices_uses_a_client(monkeypatch: pytest.MonkeyPatch) -> 
     result = ted_client.fetch_notices(date(2026, 10, 14), config)
     assert result == [{"publication-number": "2026-10-14"}]
     assert captured == {"config": config, "closed": True}
+
+
+def test_config_from_env_rejects_non_https(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("TED_API_URL", "http://10.0.0.1/search")
+    with pytest.raises(ValueError, match="https"):
+        TedClientConfig.from_env()

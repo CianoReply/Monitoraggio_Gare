@@ -22,6 +22,7 @@ from backend.ingestion.parser import (
     estimated_value,
     first_value,
     is_change_notice,
+    is_http_url,
     normalize_cpv_codes,
     normalize_currency,
     notice_url,
@@ -327,3 +328,28 @@ def test_parse_notices_never_raises_on_unexpected_input(caplog: pytest.LogCaptur
         tenders = parse_notices([["non", "un", "avviso"], good, {"publication-number": 5}])  # type: ignore[list-item]
     assert [t.publication_number for t in tenders] == ["707611-2026"]
     assert "errore inatteso" in caplog.text
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        ("https://ted.europa.eu/x", True),
+        ("HTTP://example.invalid", True),
+        ("javascript:alert(1)", False),
+        ("data:text/html,x", False),
+        ("ftp://example.invalid", False),
+        ("https://", False),
+        (None, False),
+    ],
+)
+def test_is_http_url(value: Any, expected: bool) -> None:
+    assert is_http_url(value) is expected
+
+
+def test_non_http_links_are_dropped() -> None:
+    raw = notice("707611-2026")
+    raw["document-url-lot"] = ["javascript:alert(1)", "https://example.invalid/doc.pdf"]
+    raw["links"]["html"] = {"ITA": "data:text/html,x"}
+    tender = parse_notice(raw)
+    assert tender.documents_url == "https://example.invalid/doc.pdf"
+    assert tender.ted_url == "https://ted.europa.eu/it/notice/-/detail/707611-2026"
