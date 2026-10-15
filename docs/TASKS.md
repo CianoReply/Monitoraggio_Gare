@@ -186,20 +186,22 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T1.5 – Job giornaliero
 - Responsabile: DEV-1
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge 96cd044)
 - Dipende da: T1.4, T2.2, T2.3, T2.4
 - Branch: feat/scheduler
 - Durata stimata: 1 giorno
 - Obiettivo: eseguire tutto il flusso automaticamente ogni mattina.
 - Finito quando:
-  - [ ] il job parte all'orario configurato (testabile impostando un orario vicino)
-  - [ ] una seconda esecuzione contemporanea viene rifiutata
-  - [ ] simulando un giorno fallito, il giorno dopo vengono recuperati entrambi
+  - [x] il job parte all'orario configurato (testabile impostando un orario vicino)
+  - [x] una seconda esecuzione contemporanea viene rifiutata
+  - [x] simulando un giorno fallito, il giorno dopo vengono recuperati entrambi
 - Note: dipendenza da T2.4 aggiunta in T0.4 (decisione D3). Recupero dei giorni falliti basato su `ingestion_runs.run_date` (ADR-009).
+- Esito: 1 giro di revisione. `backend/ingestion/pipeline.py` (`run_daily_ingestion`, `run_pending_days`) e `scheduler.py` (APScheduler 3.11, 06:00 Europe/Rome, `INGESTION_SCHEDULE`). Un avviso anomalo è saltato senza far fallire il giorno; riga dell'esecuzione chiusa anche in caso di interruzione. Limite: un solo worker (lock nel processo, nessun vincolo univoco su `running`). Recupero secondo ADR-009: un giorno senza successo prima dell'ultimo riuscito non viene ripreso.
+
 
 ### T1.6 – Registro delle esecuzioni e log
 - Responsabile: DEV-1
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T1.5
 - Branch: feat/run-logging
 - Durata stimata: 0,5 giorni
