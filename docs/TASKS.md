@@ -41,7 +41,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
   - [x] i 3 dev hanno clonato il repository
   - [x] `pytest` e `ruff check` si eseguono senza errori (anche senza test)
   - [ ] `main` è protetto
-- Note: struttura, `pyproject.toml`, `.gitignore`, `.env.example` creati in `setup/init`. La protezione di `main` si attiva nelle impostazioni GitHub del repository.
+- Note: struttura, `pyproject.toml`, `.gitignore`, `.env.example` creati in `setup/init`. Unico criterio aperto: protezione di `main` (GitHub → Settings → Branches). Con un solo account GitHub usare "Require a pull request" **senza** approvazioni obbligatorie, altrimenti non si possono unire le proprie PR. Sblocca T0.7.
 
 ### T0.2 – Scrittura di `CLAUDE.md`
 - Responsabile: DEV-1 (rivedono DEV-2 e DEV-3)
@@ -68,6 +68,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
     (2026-10-14: Read ed Edit bloccati; una scrittura con redirect Bash `>` non è stata bloccata nella sessione cloud: DA VERIFICARE in locale)
   - [x] un errore di lint introdotto di proposito viene segnalato dall'hook
 - Note: creati permessi, hook `PostToolUse` (ruff, script `.claude/hooks/ruff_check.py`), 3 subagent e 3 comandi; sintassi verificata sulla documentazione ufficiale di Claude Code il 2026-10-13.
+  Criteri aperti: blocco di `.env` via Bash da verificare in locale; hook `PreToolUse` e `Stop`. Sblocca T1.1 e T3.6.
   DA VERIFICARE: hook e comandi su Windows (usano `python3` e `date`).
   **Hook da configurare (con DEV-3):** `PreToolUse` che blocca le modifiche a `.env`, `docs/API_CONTRACT.yaml`, `docs/ARCHITECTURE.md` (da decidere come conciliarlo con le modifiche richieste esplicitamente) e `Stop` che esegue i test del modulo.
 
@@ -82,7 +83,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
   - [x] tutti e tre i dev hanno approvato la PR
   - [x] ogni campo ha tipo e significato chiari
   - [x] i dubbi aperti sono elencati come domande da chiudere in T1.1
-- Note: approvazione = merge della PR `setup/architecture` (i tre ruoli sono coperti dalla stessa persona). Decisioni D1–D7 in [ARCHITECTURE.md](ARCHITECTURE.md) sezione 5.2 e ADR-006…010 in [DECISIONS.md](DECISIONS.md); prima sintesi TED in sezione 5.1.
+- Note: approvato con il merge della PR #2 `setup/architecture` il 2026-10-14 (i tre ruoli sono coperti dalla stessa persona). Decisioni D1–D7 in [ARCHITECTURE.md](ARCHITECTURE.md) sezione 5.2 e ADR-006…010 in [DECISIONS.md](DECISIONS.md); prima sintesi TED in sezione 5.1.
 
 ### T0.5 – Contratto API
 - Responsabile: DEV-3 scrive, DEV-1 e DEV-2 approvano
@@ -95,7 +96,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
   - [ ] il file supera la validazione OpenAPI (ad esempio con `openapi-spec-validator`)
   - [ ] tutti e tre i dev hanno approvato
   - [ ] da questo momento il file si modifica solo con una PR approvata da tutti
-- Note: produce `docs/API_CONTRACT.yaml` (OpenAPI 3) con gli 11 endpoint del piano, errori `404`/`409`/`422`, formato errore `{ "error": "codice", "message": "descrizione" }` e un esempio per endpoint.
+- Note: libero dal 2026-10-14 (T0.4 chiuso). Per validare il contratto serve `openapi-spec-validator`: dipendenza da approvare (vedi `CLAUDE.md`). Vincoli da T0.4: `409` sul secondo report (ADR-008), `verification_status` = `to_verify` / `verified`. Produce `docs/API_CONTRACT.yaml` (OpenAPI 3) con gli 11 endpoint del piano, errori `404`/`409`/`422`, formato errore `{ "error": "codice", "message": "descrizione" }` e un esempio per endpoint.
 
 ### T0.6 – Compilazione di `docs/TASKS.md` e dei file di coordinamento
 - Responsabile: DEV-1
@@ -214,7 +215,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
   - [ ] `alembic downgrade base` le rimuove senza errori
   - [ ] `seed.py` popola il database
   - [ ] i test del repository passano
-- Note: include `backend/domain/schemas.py` con `TenderCreate` (ADR-006), l'inizializzazione di Alembic (`alembic init`) e i comandi delle migrazioni in `CLAUDE.md`.
+- Note: libero dal 2026-10-14 (T0.4 chiuso). Include `backend/domain/schemas.py` con `TenderCreate` (ADR-006), l'inizializzazione di Alembic (`alembic init`) e i comandi delle migrazioni in `CLAUDE.md`.
 
 ### T2.2 – Filtri automatici
 - Responsabile: DEV-2
