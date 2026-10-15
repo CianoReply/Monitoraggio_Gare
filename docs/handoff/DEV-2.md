@@ -18,6 +18,12 @@
 
 <!-- Note -->
 
+## 2026-10-15 – T2.3 Punteggio di pertinenza
+- Fatto: `scoring.py` (`compute_score`, `score_breakdown`, `evaluate_tender`), sezione `[scoring]` in `config.toml` con `load_scoring_config`, `scoring_sample.py` per la validazione, seed che calcola i voti con le regole, test su 9 avvisi reali della fixture TED e 7 casi sintetici.
+- Da fare: validazione di Giuseppe su 20 gare reali (IN ATTESA UMANA; `python -m backend.domain.scoring_sample --limit 20` dopo che il job ha riempito il database) e taratura di pesi, CPV core e parole chiave in `config.toml`.
+- Decisioni: CPV core come prefissi 722 e 725; deviazioni dal piano: "AI" e "data" NON sono keyword ("ai" è una preposizione, "data" è la parola "data"; si usano "intelligenza artificiale", "big data", ecc.); parola intera con plurali come varianti della stessa voce (`portale|portali`, contano una volta); se una keyword è dentro una più lunga conta solo la più lunga; scadenza già passata penalizzata come < 5 giorni; il punteggio vale anche per le gare scartate (ADR-010). Il voto si ricalcola a ogni upsert dell'avviso (nuovo o rettifica) in T1.5/T1.4, non ogni giorno (decisione del lead).
+- Impatto sugli altri dev: DEV-1 in T1.5 chiama `evaluate_tender(tender, apply_filters(...), scoring_config)` e passa il risultato a `upsert_tender`; carica le due config una volta con `load_filters_config()` e `load_scoring_config()`. Il seed ora calcola i voti con le regole.
+
 ## 2026-10-15 – T2.2 Filtri automatici
 - Fatto: `filters.py` (cinque regole + `apply_filters` -> `FilterResult(kept, reason)`), `config.py` e `config.toml` (sezione `[filters]`), test.
 - Da fare: T2.3 aggiungerà la sezione `[scoring]` nello stesso `config.toml`; verificare i codici `notice-type` degli avvisi pre-eForms (DA VERIFICARE).

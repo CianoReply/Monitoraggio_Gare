@@ -16,7 +16,7 @@ from sqlalchemy import String, cast, func, or_, select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import ColumnElement
 
-from backend.domain.models import Report, Tender, utcnow
+from backend.domain.models import Report, ReportStatus, Tender, utcnow
 from backend.domain.schemas import TenderCreate, TenderEvaluation
 
 DEFAULT_PAGE_SIZE = 20
@@ -87,6 +87,20 @@ def get_tender(session: Session, tender_id: int) -> Tender | None:
 def get_tender_by_publication_number(session: Session, publication_number: str) -> Tender | None:
     """Gara per numero di pubblicazione TED, `None` se non esiste."""
     return session.scalar(select(Tender).where(Tender.publication_number == publication_number))
+
+
+def reset_report_to_review(session: Session, tender: Tender) -> bool:
+    """Riporta a `to_review` il report della gara, per esempio dopo una rettifica (T1.4).
+
+    Vale anche se il report era `verified`. I campi del report (`report_fields`) e l'etichetta
+    `ai_label` restano invariati. Restituisce `True` se la gara ha un report, `False` altrimenti.
+    """
+    report = session.scalar(select(Report).where(Report.tender_id == tender.id))
+    if report is None:
+        return False
+    report.status = ReportStatus.TO_REVIEW
+    session.flush()
+    return True
 
 
 def _escape_like(text: str) -> str:

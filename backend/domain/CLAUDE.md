@@ -7,7 +7,7 @@
 - `models.py`: modelli SQLAlchemy delle 5 tabelle; `schemas.py`: `TenderCreate` (T2.1, ADR-006)
 - `repository.py`: `upsert_tender`, `list_tenders` (filtri e paginazione), `get_tender` (T2.1)
 - `filters.py`: una funzione per regola, esito "tenuta" o "scartata con motivo" (T2.2)
-- `scoring.compute_score(tender) -> int` (T2.3)
+- `scoring.compute_score(tender, config, now=None) -> int` e `scoring.evaluate_tender(tender, filter_result, config, now=None) -> TenderEvaluation` (T2.3)
 - gestione documenti (T2.4) e `report_schema.json` con le regole di verifica (T2.5)
 
 ## Task del modulo
@@ -24,7 +24,7 @@ T2.1 schema e migrazioni · T2.2 filtri · T2.3 punteggio · T2.4 documenti · T
 - Per i test usa il subagent `test-writer`, anche in background o in un worktree.
 
 ## Da completare
-- Regole di punteggio tarate con Giuseppe (T2.3).
+- Taratura delle regole di punteggio con Giuseppe (T2.3, IN ATTESA UMANA).
 - Classificazione dei link ai documenti (T2.4).
 
 ## Database, migrazioni e seed (T2.1)
@@ -45,3 +45,11 @@ T2.1 schema e migrazioni · T2.2 filtri · T2.3 punteggio · T2.4 documenti · T
 - `currency=None` con importo = euro. Importi in altre valute non si confrontano con la soglia.
 - `now` deve avere il fuso orario (altrimenti `ValueError`).
 - DA VERIFICARE: i codici `notice-type` degli avvisi pre-eForms.
+
+## Punteggio di pertinenza (T2.3)
+- Pesi, CPV core, parole chiave e soglia stanno in `config.toml`, sezione `[scoring]` (`load_scoring_config()`); nessun LLM.
+- Regole (valori predefiniti, da tarare con Giuseppe): CPV core (prefissi 722, 725) +2, altrimenti altro CPV IT +1; parole chiave +1 ogni 2 voci distinte trovate, max +2; importo >= 1.000.000 EUR (o senza valuta) +1; scadenza tra 10 e 60 giorni +1; scadenza a meno di 5 giorni o già passata -1. Voto = totale limitato a 1..5.
+- Parole chiave: parola intera in titolo o descrizione, senza maiuscole. I plurali non si trovano da soli: si scrivono come varianti della stessa voce (`portale|portali`), che conta una volta. Se una parola è dentro una più lunga di un'altra voce (`software` in `sviluppo software`) conta solo la più lunga. "AI" e "data" non sono keyword (preposizione "ai", parola "data"): si usano "intelligenza artificiale", "big data", ecc.
+- `score_breakdown(...)` spiega i criteri. `evaluate_tender` calcola il voto SEMPRE (ADR-010): `is_relevant` = tenuta dai filtri e voto >= `relevance_threshold` (predefinita 3); `discard_reason` = motivo dei filtri.
+- Quando si ricalcola: a ogni upsert dell'avviso (nuovo o rettifica) in T1.5/T1.4, non ogni giorno. Il voto dipende dalla scadenza rispetto a `now`, quindi può diventare vecchio finché l'avviso non cambia.
+- Validazione con Giuseppe: `python -m backend.domain.scoring_sample --limit 20` oppure `--per-score 4` (campione per voto, anche i voti bassi), con `DATABASE_URL`.

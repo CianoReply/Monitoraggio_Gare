@@ -8,11 +8,12 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from backend.domain.models import Report, ReportStatus, Tender
+from backend.domain.models import Report, ReportField, ReportStatus, Tender, VerificationStatus
 from backend.domain.repository import (
     get_tender,
     get_tender_by_publication_number,
     list_tenders,
+    reset_report_to_review,
     upsert_tender,
 )
 from backend.domain.schemas import TenderEvaluation
@@ -270,3 +271,44 @@ def test_list_rejects_invalid_parameters(session: Session, kwargs: dict[str, Any
 def test_list_accepts_equal_bounds_and_max_length_query(session: Session) -> None:
     list_tenders(session, min_value=Decimal("5"), max_value=Decimal("5"), q="x" * 200)
     list_tenders(session, deadline_from=date(2026, 11, 1), deadline_to=date(2026, 11, 1))
+
+
+def test_reset_report_to_review_resets_verified_report_keeping_fields(session: Session) -> None:
+    tender = _add(session, "a")
+    report = Report(
+        tender=tender,
+        summary="s",
+        status=ReportStatus.VERIFIED,
+        ai_label="Contenuto generato con IA – revisionato da Mario Rossi, 2026-10-15",
+        fields=[
+            ReportField(
+                label="Scadenza",
+                value="2026-11-01",
+                source_doc="Bando.pdf",
+                verification_status=VerificationStatus.VERIFIED,
+            )
+        ],
+    )
+    session.add(report)
+    session.flush()
+
+    assert reset_report_to_review(session, tender) is True
+    session.refresh(report)
+    assert report.status == ReportStatus.TO_REVIEW
+    assert report.ai_label.startswith("Contenuto generato con IA – revisionato da")
+    assert [f.verification_status for f in report.fields] == [VerificationStatus.VERIFIED]
+    assert _numbers(session, report_status="to_review") == ["a"]
+
+
+def test_reset_report_to_review_is_idempotent_on_to_review_report(session: Session) -> None:
+    tender = _add(session, "a")
+    session.add(Report(tender=tender, summary="s", status=ReportStatus.TO_REVIEW, ai_label="x"))
+    session.flush()
+    assert reset_report_to_review(session, tender) is True
+    assert tender.report is not None and tender.report.status == ReportStatus.TO_REVIEW
+
+
+def test_reset_report_to_review_without_report_returns_false(session: Session) -> None:
+    tender = _add(session, "a")
+    assert reset_report_to_review(session, tender) is False
+    assert session.query(Report).count() == 0

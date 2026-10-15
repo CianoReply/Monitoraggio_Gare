@@ -16,7 +16,9 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.domain.config import load_scoring_config
 from backend.domain.database import create_db_engine, create_session_factory
+from backend.domain.filters import FilterResult
 from backend.domain.models import (
     Document,
     DocumentStatus,
@@ -29,10 +31,12 @@ from backend.domain.models import (
     VerificationStatus,
 )
 from backend.domain.repository import upsert_tender
-from backend.domain.schemas import TenderCreate, TenderEvaluation
+from backend.domain.schemas import TenderCreate
+from backend.domain.scoring import evaluate_tender
 
-# (titolo, ente, città, CPV, importo, giorni a scadenza (None = nessuna), punteggio, scarto)
-_ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | None]] = [
+# (titolo, ente, città, CPV, importo, giorni a scadenza (None = nessuna), scarto)
+# Il voto salvato lo calcola scoring.evaluate_tender.
+_ROWS: list[tuple[str, str, str, list[str], str | None, int | None, str | None]] = [
     (
         "Sviluppo e manutenzione evolutiva del sistema informativo regionale",
         "Regione Lombardia",
@@ -40,7 +44,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["72200000", "72262000"],
         "2400000.00",
         28,
-        5,
         None,
     ),
     (
@@ -50,7 +53,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["72500000", "48000000"],
         "18000000.00",
         35,
-        5,
         None,
     ),
     (
@@ -60,7 +62,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["72212000", "48310000"],
         "650000.00",
         21,
-        4,
         None,
     ),
     (
@@ -70,7 +71,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["72700000", "48730000"],
         "1200000.00",
         30,
-        4,
         None,
     ),
     (
@@ -80,7 +80,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["72212200", "72413000"],
         "320000.00",
         18,
-        4,
         None,
     ),
     (
@@ -90,7 +89,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["72300000", "72500000"],
         "9500000.00",
         42,
-        5,
         None,
     ),
     (
@@ -100,7 +98,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["72253000"],
         "480000.00",
         14,
-        3,
         None,
     ),
     (
@@ -110,7 +107,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["72413000", "72212224"],
         "210000.00",
         25,
-        3,
         None,
     ),
     (
@@ -120,7 +116,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["72316000", "48600000"],
         "870000.00",
         33,
-        4,
         None,
     ),
     (
@@ -130,7 +125,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["30213000", "30231300"],
         "150000.00",
         10,
-        2,
         None,
     ),
     (
@@ -140,7 +134,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["48000000", "72267000"],
         "760000.00",
         27,
-        3,
         None,
     ),
     (
@@ -150,7 +143,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["32400000", "72700000"],
         "540000.00",
         20,
-        2,
         None,
     ),
     (
@@ -160,7 +152,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["72200000", "72310000"],
         "390000.00",
         38,
-        4,
         None,
     ),
     (
@@ -170,7 +161,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["72212000", "85320000"],
         None,
         24,
-        3,
         None,
     ),
     (
@@ -180,7 +170,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["72250000", "72267000"],
         "3100000.00",
         45,
-        4,
         None,
     ),
     (
@@ -190,7 +179,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["45454000"],
         "1800000.00",
         16,
-        1,
         "CPV non pertinente (non IT)",
     ),
     (
@@ -200,7 +188,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["39130000"],
         "95000.00",
         12,
-        1,
         "CPV non pertinente (non IT)",
     ),
     (
@@ -210,7 +197,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["72210000", "72212000"],
         "1650000.00",
         None,
-        4,
         None,
     ),
     (
@@ -218,9 +204,8 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         "Comune di Pescara",
         "Pescara",
         ["50320000", "72267000"],
-        "60000.00",
+        "45000.00",
         8,
-        2,
         "Importo sotto la soglia minima",
     ),
     (
@@ -230,7 +215,6 @@ _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | N
         ["72212000", "48000000"],
         "1050000.00",
         31,
-        5,
         None,
     ),
 ]
@@ -240,7 +224,7 @@ _LABEL_VERIFIED = "Contenuto generato con IA – revisionato da Mario Rossi, {d}
 
 
 def _build(index: int, row: tuple[Any, ...], today: date) -> TenderCreate:
-    title, buyer, city, cpv, value, days, _score, _discard = row
+    title, buyer, city, cpv, value, days, _discard = row
     deadline = (
         datetime.combine(today + timedelta(days=days), time(12, 0), tzinfo=UTC)
         if days is not None
@@ -271,11 +255,15 @@ def seed(session: Session, today: date | None = None) -> int:
     Restituisce il numero di gare create. Non fa commit.
     """
     today = today or date.today()
+    now = datetime.combine(today, time(12, 0), tzinfo=UTC)
+    scoring_config = load_scoring_config()
     created = 0
     for index, row in enumerate(_ROWS):
-        score, discard = row[6], row[7]
-        evaluation = TenderEvaluation(score, discard is None and score >= 3, discard)
-        tender, is_new = upsert_tender(session, _build(index, row, today), evaluation)
+        tender_data = _build(index, row, today)
+        discard = row[6]
+        filter_result = FilterResult.discard(discard) if discard else FilterResult.keep()
+        evaluation = evaluate_tender(tender_data, filter_result, scoring_config, now)
+        tender, is_new = upsert_tender(session, tender_data, evaluation)
         if not is_new:
             continue
         created += 1

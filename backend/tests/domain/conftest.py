@@ -2,6 +2,7 @@
 
 from collections.abc import Iterator
 from datetime import UTC, date, datetime
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -11,6 +12,7 @@ from sqlalchemy.orm import Session
 from backend.domain.database import create_session_factory
 from backend.domain.models import Base
 from backend.domain.schemas import TenderCreate
+from backend.tests.domain.scoring_helpers import ConfigFactory, make_scoring_factory
 
 
 @pytest.fixture
@@ -44,3 +46,9 @@ def make_tender(**overrides: Any) -> TenderCreate:
     }
     data.update(overrides)
     return TenderCreate(**data)
+
+
+@pytest.fixture
+def cfg(tmp_path: Path) -> ConfigFactory:
+    """Crea una `ScoringConfig` di prova da un file temporaneo, con valori sovrascrivibili."""
+    return make_scoring_factory(tmp_path)
