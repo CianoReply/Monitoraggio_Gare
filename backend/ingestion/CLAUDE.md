@@ -20,7 +20,7 @@ T1.1 studio API TED · T1.2 client · T1.3 parser · T1.4 deduplica e rettifiche
 - Mappatura campo TED → `tenders`: [MAPPING.md](MAPPING.md) (fuori da questo file per il limite di 30 righe).
 - Salva sempre il dato originale in `raw_data`.
 - Il salvataggio passa dalle funzioni di `backend/domain/repository.py`, mai da query dirette.
-- Rettifiche (`dedup.py`): si risale la catena dei change notice e si aggiorna il primo avviso già salvato (report → `to_review`); senza originale, gara a sé con `parent_publication_number`.
+- Rettifiche (`dedup.py`, ADR-014): si risale la catena e si aggiorna il primo avviso già salvato (report → `to_review`); un avviso più vecchio non sovrascrive; errore TED → `ChainLookupError`, nulla salvato.
 - I test usano le fixture in `backend/tests/fixtures/`, mai la rete.
 
 ## Da completare

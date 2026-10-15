@@ -251,9 +251,13 @@ def test_changes_in_reverse_order_keep_the_newest(session: Session) -> None:
 
 
 def test_same_change_imported_twice_is_idempotent(session: Session) -> None:
-    save(session, ORIGINAL)
+    original = save(session, ORIGINAL).tender
     first = save(session, FIRST_CHANGE)
+    report = add_report(session, original, ReportStatus.VERIFIED)
     second = save(session, FIRST_CHANGE)
+    session.refresh(report)
+    assert report.status == ReportStatus.VERIFIED
+    assert second.report_reset is False
     assert second.skipped_as_older is False
     assert deadline_of(second.tender) == deadline_of(first.tender)
     assert count_tenders(session) == 1
@@ -283,3 +287,26 @@ def test_original_arriving_after_standalone_change_is_a_known_limit(session: Ses
     save(session, ORIGINAL)
     # Limite documentato in dedup.py e ADR-014: restano due righe per la stessa gara.
     assert count_tenders(session) == 2
+
+
+def test_notice_order_key_edge_cases() -> None:
+    dated = {"publication-date": "2026-10-14+02:00", "publication-number": "5-2026"}
+    assert notice_order_key({"publication-number": "5-2026"}) < notice_order_key(dated)
+    assert notice_order_key({"publication-date": "2026-10-14", "publication-number": "x"}) == (
+        "2026-10-14",
+        0,
+        0,
+    )
+
+
+def test_resolve_chain_stops_at_first_saved_notice() -> None:
+    calls: list[str] = []
+
+    def counting(identifier: str) -> dict[str, Any] | None:
+        calls.append(identifier)
+        return lookup(identifier)
+
+    chain = resolve_chain(RAW[SECOND_CHANGE], counting, lambda number: number == FIRST_CHANGE)
+    assert [link.publication_number for link in chain.links] == [FIRST_CHANGE]
+    assert chain.complete
+    assert len(calls) == 1

@@ -15,7 +15,10 @@ Regole (docs/TED_API_NOTES.md, domanda 9):
   catena è completa) e un warning;
 - se il lookup su TED fallisce, `save_notice` solleva `ChainLookupError` senza scrivere nulla:
   il chiamante salta l'avviso e lo riprova alla prossima esecuzione.
-Limite noto: se l'originale arriva dopo una rettifica salvata a sé, restano due righe.
+Limite noto: senza l'originale nel database possono restare due righe per la stessa gara
+(originale arrivato dopo una rettifica salvata a sé, o due rettifiche salvate a sé in ordine
+inverso).
+Reimportare la stessa rettifica aggiorna la riga ma non riporta il report a `to_review`.
 Il salvataggio passa sempre da `backend.domain.repository`.
 """
 
@@ -84,6 +87,7 @@ def notice_order_key(raw: dict[str, Any]) -> tuple[str, int, int]:
     """Chiave per ordinare gli avvisi nel tempo: data di pubblicazione, anno e numero.
 
     I numeri di pubblicazione TED crescono nel corso dell'anno (es. 566426-2026 < 687833-2026).
+    Una data mancante vale come la più vecchia; un numero non standard vale (0, 0).
     """
     day = parse_ted_date(raw.get("publication-date"))
     number = first_value(raw.get("publication-number"))
@@ -92,10 +96,15 @@ def notice_order_key(raw: dict[str, Any]) -> tuple[str, int, int]:
     return (day.isoformat() if day else "", year, serial)
 
 
-def resolve_chain(raw: dict[str, Any], lookup: NoticeLookup) -> Chain:
+def resolve_chain(
+    raw: dict[str, Any],
+    lookup: NoticeLookup,
+    is_saved: Callable[[str], bool] | None = None,
+) -> Chain:
     """Risale gli avvisi modificati da `raw` (catena vuota e completa se non è una rettifica).
 
-    Si ferma se TED non trova un avviso (catena incompleta), se la catena ha un ciclo o supera
+    Si ferma al primo avviso per cui `is_saved(publication_number)` è vero (nessuna chiamata
+    TED in più), se TED non trova un avviso (catena incompleta), se la catena ha un ciclo o supera
     `MAX_CHAIN_DEPTH`. Un'eccezione del lookup diventa `ChainLookupError`.
     """
     links: list[ChainLink] = []
@@ -109,12 +118,16 @@ def resolve_chain(raw: dict[str, Any], lookup: NoticeLookup) -> Chain:
         try:
             predecessor = lookup(reference)
         except Exception as exc:
-            raise ChainLookupError(f"Ricerca su TED fallita per {reference}: {exc}") from exc
+            raise ChainLookupError(
+                f"Ricerca su TED fallita per {reference}: {exc.__class__.__name__}: {exc}"
+            ) from exc
         number = first_value(predecessor.get("publication-number")) if predecessor else None
         if not isinstance(number, str) or not number:
             logger.warning("Avviso modificato non trovato su TED: notice-identifier %s", reference)
             return Chain(links, complete=False)
         links.append(ChainLink(number, reference))
+        if is_saved is not None and is_saved(number):
+            return Chain(links, complete=True)
         reference = change_reference(predecessor) if predecessor else None
     return Chain(links, complete=True)
 
@@ -155,7 +168,10 @@ def save_notice(
         result = repository.upsert_tender(session, tender, evaluation)
         return SaveOutcome(result.tender, result.created, is_change=False)
 
-    chain = resolve_chain(raw, lookup)
+    def is_saved(publication_number: str) -> bool:
+        return repository.get_tender_by_publication_number(session, publication_number) is not None
+
+    chain = resolve_chain(raw, lookup, is_saved)
     for link in chain.links:
         target = repository.get_tender_by_publication_number(session, link.publication_number)
         if target is None:
@@ -181,8 +197,14 @@ def save_notice(
                 "parent_publication_number": target.parent_publication_number,
             }
         )
+        already_applied = (target.raw_data or {}).get("publication-number") == raw.get(
+            "publication-number"
+        )
         result = repository.upsert_tender(session, merged, evaluation)
-        reset = repository.reset_report_to_review(session, result.tender)
+        # La stessa rettifica reimportata non cambia i dati: il report verificato resta tale.
+        reset = (
+            False if already_applied else repository.reset_report_to_review(session, result.tender)
+        )
         logger.info(
             "Rettifica %s applicata alla gara %s%s",
             tender.publication_number,
