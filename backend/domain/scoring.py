@@ -59,13 +59,37 @@ def total_to_score(total: int) -> int:
 
 
 def _matched_keywords(tender: TenderCreate, config: ScoringConfig) -> list[str]:
-    """Parole chiave (distinte, parola intera) presenti in titolo o descrizione."""
+    """Parole chiave (distinte, parola intera) presenti in titolo o descrizione.
+
+    Ogni voce di config è un concetto con varianti separate da `|` (es. `portale|portali`):
+    conta una volta sola. Se una occorrenza è contenuta in una più lunga di un altro concetto
+    ("software" dentro "sviluppo software"), quell'occorrenza non conta: vale la più lunga.
+    Restituisce il nome del concetto (la prima variante) nell'ordine di config.
+    """
     text = html.unescape(f"{tender.title} {tender.description or ''}").lower()
-    found = []
-    for keyword in dict.fromkeys(config.keywords):
-        if re.search(rf"(?<!\w){re.escape(keyword)}(?!\w)", text):
-            found.append(keyword)
-    return found
+    spans: list[tuple[int, int, str]] = []  # (inizio, fine, concetto)
+    for entry in dict.fromkeys(config.keywords):
+        variants = [v.strip() for v in entry.split("|") if v.strip()]
+        for variant in variants:
+            for match in re.finditer(rf"(?<!\w){re.escape(variant)}(?!\w)", text):
+                spans.append((match.start(), match.end(), variants[0]))
+
+    def covered(span: tuple[int, int, str]) -> bool:
+        start, end, concept = span
+        return any(
+            other_concept != concept
+            and other_start <= start
+            and end <= other_end
+            and other_end - other_start > end - start
+            for other_start, other_end, other_concept in spans
+        )
+
+    counted = {span[2] for span in spans if not covered(span)}
+    return [
+        entry.split("|")[0].strip()
+        for entry in dict.fromkeys(config.keywords)
+        if entry.split("|")[0].strip() in counted
+    ]
 
 
 def score_breakdown(

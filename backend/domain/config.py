@@ -96,7 +96,9 @@ def _string_list(
     return tuple(cleaned)
 
 
-def _number(section: dict[str, Any], key: str, where: str, *, minimum: float | None = None):  # noqa: ANN202
+def _number(
+    section: dict[str, Any], key: str, where: str, *, minimum: float | None = None
+) -> int | float:
     value = section.get(key)
     if isinstance(value, bool) or not isinstance(value, int | float):
         raise ConfigError(f"{where}.{key} deve essere un numero")
@@ -150,6 +152,12 @@ def load_scoring_config(path: Path | None = None) -> ScoringConfig:
     ok_max = _integer(section, "deadline_ok_max_days", where, minimum=0)
     if ok_min > ok_max:
         raise ConfigError(f"{where}: deadline_ok_min_days non può superare deadline_ok_max_days")
+    urgent_days = _integer(section, "deadline_urgent_days", where, minimum=0)
+    if urgent_days >= ok_min:
+        raise ConfigError(f"{where}: deadline_urgent_days deve essere < deadline_ok_min_days")
+    keywords = _string_list(section, "keywords", where, lower=True)
+    if any(not [v for v in k.split("|") if v.strip()] for k in keywords):
+        raise ConfigError(f'{where}.keywords: voce senza parole (solo "|")')
     return ScoringConfig(
         relevance_threshold=threshold,
         core_cpv_prefixes=_cpv_prefixes(
@@ -160,7 +168,7 @@ def load_scoring_config(path: Path | None = None) -> ScoringConfig:
             _string_list(section, "it_cpv_prefixes", where), f"{where}.it_cpv_prefixes"
         ),
         other_cpv_points=_integer(section, "other_cpv_points", where),
-        keywords=_string_list(section, "keywords", where, lower=True),
+        keywords=keywords,
         keyword_words_per_point=_integer(section, "keyword_words_per_point", where, minimum=1),
         keyword_max_points=_integer(section, "keyword_max_points", where, minimum=0),
         high_value_eur=Decimal(str(_number(section, "high_value_eur", where, minimum=0))),
@@ -168,6 +176,6 @@ def load_scoring_config(path: Path | None = None) -> ScoringConfig:
         deadline_ok_min_days=ok_min,
         deadline_ok_max_days=ok_max,
         deadline_ok_points=_integer(section, "deadline_ok_points", where),
-        deadline_urgent_days=_integer(section, "deadline_urgent_days", where, minimum=0),
+        deadline_urgent_days=urgent_days,
         deadline_urgent_points=_integer(section, "deadline_urgent_points", where),
     )

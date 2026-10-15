@@ -1,24 +1,19 @@
-"""Test del punteggio di pertinenza (T2.3), del campione di validazione e della config [scoring].
+"""Test delle regole di punteggio (T2.3).
 
-I primi casi sono avvisi reali di `fixtures/ted_search_it_2026-10-14.json` (titolo, CPV, importo,
-scadenza), costruiti a mano come `TenderCreate`. Il voto atteso è calcolato a mano con i pesi
-predefiniti di `config.toml`; se si ritarano i pesi, vanno aggiornati questi valori.
+I casi "reali" vengono da `fixtures/ted_search_it_2026-10-14.json`: titolo (`title-proc`),
+descrizione (`description-proc`), CPV, importo e scadenza (data `deadline-receipt-tender-date-lot`
++ ora `deadline-receipt-tender-time-lot`, con il fuso dato da TED) sono scritti a mano come farà
+il parser, senza importarlo. Il voto atteso è calcolato a mano con i pesi predefiniti di
+`config.toml`: se si ritarano i pesi, vanno aggiornati questi valori.
 """
 
-import io
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from pathlib import Path
 from typing import Any
 
 import pytest
-from sqlalchemy.orm import Session
 
-from backend.domain.config import (
-    ConfigError,
-    ScoringConfig,
-    load_scoring_config,
-)
+from backend.domain.config import ScoringConfig, load_scoring_config
 from backend.domain.filters import FilterResult
 from backend.domain.schemas import TenderCreate
 from backend.domain.scoring import (
@@ -27,10 +22,8 @@ from backend.domain.scoring import (
     score_breakdown,
     total_to_score,
 )
-from backend.domain.scoring_sample import main as sample_main
-from backend.domain.scoring_sample import print_sample
-from backend.domain.seed import seed
 from backend.tests.domain.conftest import make_tender
+from backend.tests.domain.scoring_helpers import ConfigFactory
 
 NOW = datetime(2026, 10, 14, 12, 0, tzinfo=UTC)
 
@@ -48,9 +41,9 @@ def neutral(**overrides: Any) -> TenderCreate:
     return make_tender(**{**base, **overrides})
 
 
-def d(date_str: str) -> datetime:
-    """Mezzanotte del giorno indicato (le fixture TED danno solo la data)."""
-    return datetime.fromisoformat(date_str).replace(tzinfo=UTC)
+def ted_deadline(date: str, time: str) -> datetime:
+    """Scadenza come la compone il parser: data + ora con fuso (es. "12:00:00+02:00")."""
+    return datetime.fromisoformat(f"{date}T{time}")
 
 
 @pytest.fixture
@@ -58,95 +51,116 @@ def config() -> ScoringConfig:
     return load_scoring_config()
 
 
-# (descrizione, campi della gara, voto atteso)
+# (descrizione del caso, campi della gara, voto atteso)
 REAL_NOTICES = [
     (
-        "707611 gestione atti Codice della Strada: CPV core +2, scadenza 32 giorni +1 -> 3",
+        "707611 gestione atti Codice della Strada: CPV core +2, scadenza 33 giorni +1 -> 3",
         {
             "title": "Affidamento del servizio di gestione degli atti provenienti dal Codice "
-            "della Strada, relativi al controllo elettronico della velocità",
+            "della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224; "
+            "di controdeduzione, supporto e assistenza legale",
+            "description": "Affidamento del servizio di gestione degli atti provenienti dal "
+            "Codice della Strada (C.d.S.), relativi al controllo elettronico della velocit&#224;",
             "cpv_codes": ["72500000"],
             "estimated_value": Decimal("293278.68"),
-            "submission_deadline": d("2026-11-16"),
+            "submission_deadline": ted_deadline("2026-11-16", "12:00:00+02:00"),
         },
         3,
     ),
     (
-        "707979 manutenzione suite AIRONE: CPV core +2, importo 1,16 M +1 -> 3",
+        # can-standard: è un esito, i filtri lo scartano; qui si verifica solo il voto (ADR-010).
+        "707979 manutenzione suite AIRONE (ESITO, solo punteggio): core +2, importo 1,16 M +1 -> 3",
         {
-            "title": "Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura kiosk",
+            "title": "Affidamento del Servizio di manutenzione suite AIRONE 2000 e fornitura "
+            "kiosk PRM",
+            "description": "Affidamento del Servizio di manutenzione suite AIRONE 2000 e "
+            "fornitura kiosk PRM",
             "cpv_codes": ["72253200"],
             "estimated_value": Decimal("1155807.90"),
         },
         3,
     ),
     (
-        "708163 conservazione digitale: core +2, importo +1, scadenza 40 giorni +1 -> 4",
+        "708163 conservazione digitale: core +2, 1 keyword +0, importo +1, scadenza 40 giorni +1 "
+        "-> 4",
         {
             "title": "Assistenza tecnica e manutenzione evolutiva sistema di conservazione "
             "digitale",
+            "description": "Assistenza tecnica e manutenzione evolutiva sistema di conservazione "
+            "digitale",
             "cpv_codes": ["72500000"],
             "estimated_value": Decimal("2664750"),
-            "submission_deadline": d("2026-11-23"),
+            "submission_deadline": ted_deadline("2026-11-23", "10:00:00+01:00"),
         },
         4,
     ),
     (
-        "708865 hardware FlexPod: CPV IT +1, importo +1, scadenza 14 giorni +1 -> 3",
+        "708865 hardware FlexPod: CPV IT +1, importo +1, scadenza 15 giorni +1 -> 3",
         {
             "title": "FORNITURA DELL'AMPLIAMENTO E AMMODERNAMENTO DELL'INFRASTRUTTURA FLEXPOD "
-            "CISCO-NETAPP DELL'AMBIENTE DI PRODUZIONE",
+            "CISCO-NETAPP DELL'AMBIENTE DI PRODUZIONE CON RELATIVI SERVIZI DI SUPPORTO",
+            "description": "Si rimanda ai documenti di gara",
             "cpv_codes": ["30210000"],
             "estimated_value": Decimal("1609833.34"),
-            "submission_deadline": d("2026-10-29"),
+            "submission_deadline": ted_deadline("2026-10-29", "12:00:00+01:00"),
         },
         3,
     ),
     (
-        "709110 sistema dinamico licenze software: CPV IT +1, 1 keyword +0, importo 20 M +1 -> 2",
+        "709110 sistema dinamico licenze software: IT +1, 'software' (1 keyword) +0, 20 M +1 -> 2",
         {
-            "title": "BANDO PER L'ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE DELLE FORNITURE "
-            "DI LICENZE SOFTWARE",
+            "title": "BANDO PER L'ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE DELLE "
+            "FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI",
+            "description": "BANDO PER L'ISTITUZIONE DEL SISTEMA DINAMICO DI ACQUISIZIONE DELLE "
+            "FORNITURE DI LICENZE SOFTWARE PER LIGURIA DIGITALE ED ENTI SOCI",
             "cpv_codes": ["48517000"],
             "estimated_value": Decimal("20000000.00"),
         },
         2,
     ),
     (
-        "709116 licenze software: CPV IT +1, importo +1, scadenza 37 giorni +1 -> 3",
+        "709116 licenze software: IT +1, importo +1, scadenza 37 giorni +1 -> 3",
         {
             "title": "866-2026 FORNITURA LICENZE SOFTWARE",
+            "description": "866-2026 FORNITURA LICENZE SOFTWARE",
             "cpv_codes": ["48218000"],
             "estimated_value": Decimal("2260500.48"),
-            "submission_deadline": d("2026-11-20"),
+            "submission_deadline": ted_deadline("2026-11-20", "12:00:00+01:00"),
         },
         3,
     ),
     (
-        "710118 gestione informatica: CPV core +2, importo 854 k sotto soglia -> 2",
+        "710118 portale sismica: core +2, 'portale' nella descrizione (1 keyword) +0 -> 2",
         {
             "title": "Proc 4389/AP/2026",
+            "description": "Proc 4389/AP/2026_PROCEDURA APERTA AI SENSI DELL'ART. 71 DEL D.LGS. "
+            "36/2023 PER AFFIDAMENTO DEL SERVIZIO INFORMATICO PER LA GESTIONE E MANUTENZIONE "
+            "DEL PORTALE REGIONALE S.I.SMI.CA. (SISTEMA INFORMATIVO DELLA SISMICA IN REGIONE "
+            "CAMPANIA)",
             "cpv_codes": ["72510000"],
             "estimated_value": Decimal("853741.50"),
         },
         2,
     ),
     (
-        "710485 tesserini venatori: CPV core +2, importo +1, scadenza 29 giorni +1 -> 4",
+        "710485 tesserini venatori: core +2, importo +1, scadenza 30 giorni +1 -> 4",
         {
-            "title": "Servizio per la realizzazione di Tesserini venatori e di portali faunistici "
-            "della Regione Toscana - due Lotti",
+            "title": "Servizio per la realizzazione di Tesserini venatori e di portali "
+            "faunistici della Regione Toscana - due Lotti",
+            "description": "Servizio per la realizzazione di Tesserini venatori e di portali "
+            "faunistici della Regione Toscana - due Lotti",
             "cpv_codes": ["72212000", "79824000"],
             "estimated_value": Decimal("1373972.76"),
-            "submission_deadline": d("2026-11-13"),
+            "submission_deadline": ted_deadline("2026-11-13", "13:00:00+01:00"),
         },
         4,
     ),
     (
-        "711174 piattaforma welfare: CPV IT +1 (72000000 non core), importo +1 -> 2",
+        "711174 piattaforma welfare: IT +1 (72000000 non core), 'piattaforma' +0, importo +1 -> 2",
         {
-            "title": "PROCEDURA APERTA PER L'AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE "
-            "E DI SUPPORTO DI UNA PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI",
+            "title": "PROCEDURA APERTA, EX ART. 71 DEL D. LGS. 36/2023 E S.M.I., PER "
+            "L'AFFIDAMENTO DELLA FORNITURA, DEL SERVIZIO DI GESTIONE E DI SUPPORTO DI UNA "
+            "PIATTAFORMA WELFARE RIVOLTA AI DIPENDENTI DEL COMUNE DI MONZA",
             "cpv_codes": ["72000000", "72411000"],
             "estimated_value": Decimal("5229120"),
         },
@@ -197,20 +211,22 @@ SYNTHETIC = [
     ),
 ]
 
+ALL_CASES = REAL_NOTICES + SYNTHETIC
+
 
 @pytest.mark.parametrize(
     ("fields", "expected"),
-    [(f, e) for _, f, e in REAL_NOTICES + SYNTHETIC],
-    ids=[name.split(":")[0] for name, _, _ in REAL_NOTICES + SYNTHETIC],
+    [(f, e) for _, f, e in ALL_CASES],
+    ids=[name.split(":")[0] for name, _, _ in ALL_CASES],
 )
-def test_expected_score(config: ScoringConfig, fields: dict, expected: int) -> None:
+def test_expected_score(config: ScoringConfig, fields: dict[str, Any], expected: int) -> None:
     if fields.get("estimated_value") is not None:
         fields = {"currency": "EUR", **fields}
     assert compute_score(neutral(**fields), config, NOW) == expected
 
 
 def test_at_least_ten_example_tenders_are_checked() -> None:
-    assert len(REAL_NOTICES) + len(SYNTHETIC) >= 10
+    assert len(ALL_CASES) >= 10
 
 
 # --- Singoli criteri e confini ---
@@ -224,7 +240,7 @@ def test_core_cpv_beats_other_cpv_and_does_not_stack(config: ScoringConfig) -> N
 
 def test_deadline_boundaries(config: ScoringConfig) -> None:
     def points(days: float) -> int:
-        tender = neutral(cpv_codes=["45000000"], submission_deadline=NOW + timedelta(days=days))
+        tender = neutral(submission_deadline=NOW + timedelta(days=days))
         return score_breakdown(tender, config, NOW).total
 
     assert points(10) == 1 and points(60) == 1
@@ -234,7 +250,7 @@ def test_deadline_boundaries(config: ScoringConfig) -> None:
 
 def test_high_value_boundary_and_missing_currency(config: ScoringConfig) -> None:
     def total(value: str, currency: str | None) -> int:
-        tender = neutral(cpv_codes=["45000000"], estimated_value=Decimal(value), currency=currency)
+        tender = neutral(estimated_value=Decimal(value), currency=currency)
         return score_breakdown(tender, config, NOW).total
 
     assert total("1000000", "EUR") == 1
@@ -242,19 +258,54 @@ def test_high_value_boundary_and_missing_currency(config: ScoringConfig) -> None
     assert total("1000000", None) == 1
 
 
-def test_keywords_use_whole_words_title_and_description_and_html_entities(
-    config: ScoringConfig,
-) -> None:
-    def kw(title: str, description: str | None = None) -> list[str]:
-        tender = neutral(cpv_codes=["45000000"], title=title, description=description)
-        comps = score_breakdown(tender, config, NOW).components
-        return [c.detail for c in comps if c.rule == "keywords"]
+def _keywords(config: ScoringConfig, title: str, description: str | None = None) -> list[str]:
+    comps = score_breakdown(neutral(title=title, description=description), config, NOW).components
+    return [word for c in comps if c.rule == "keywords" for word in c.detail.split(", ")]
 
-    assert kw("Servizi cloud", "con cybersecurity") == ["cloud, cybersecurity"]
-    assert kw("Application programming") == []  # "app" non è dentro "application"
-    assert kw("Cloud cloud CLOUD") == []  # una sola keyword distinta = 0 punti
-    assert kw("Sicurezza informatica e cloud") == ["cloud, sicurezza informatica"]
-    assert kw("Portale per la città di Forl&#236; e cloud") == ["cloud, portale"]
+
+def test_keywords_use_whole_words_title_description_and_html_entities(cfg: ConfigFactory) -> None:
+    config = cfg(keyword_words_per_point="1", keyword_max_points="9")
+    assert _keywords(config, "Servizi cloud", "con cybersecurity") == ["cloud", "cybersecurity"]
+    assert _keywords(config, "Application programming") == []  # "app" non è in "application"
+    assert _keywords(config, "Cloud cloud CLOUD") == ["cloud"]  # distinte, non occorrenze
+    assert _keywords(config, "Portale per la città di Forl&#236; e cloud") == ["cloud", "portale"]
+
+
+def test_default_keywords_need_two_distinct_words_for_one_point(config: ScoringConfig) -> None:
+    assert _keywords(config, "Cloud cloud CLOUD") == []
+    assert _keywords(config, "Sicurezza informatica e cloud") == ["cloud", "sicurezza informatica"]
+
+
+def test_keyword_plurals_are_variants_of_the_same_word(cfg: ConfigFactory) -> None:
+    config = cfg(keyword_words_per_point="1", keyword_max_points="9")
+    assert _keywords(config, "Realizzazione di portali faunistici") == ["portale"]
+    assert _keywords(config, "Il portale e i portali") == ["portale"]  # conta una volta
+    assert _keywords(config, "Nuovi applicativi e piattaforme") == ["applicativo", "piattaforma"]
+    assert _keywords(config, "Data center e datacenter") == ["datacenter"]
+
+
+def test_default_config_recognizes_plurals(config: ScoringConfig) -> None:
+    detail = _keywords(config, "Portali e applicativi per il cloud")
+    assert detail == ["cloud", "applicativo", "portale"]
+
+
+def test_overlapping_keywords_count_only_the_longest(cfg: ConfigFactory) -> None:
+    config = cfg(keyword_words_per_point="1", keyword_max_points="9")
+    # "software" è dentro "sviluppo software": vale solo "sviluppo software"
+    assert _keywords(config, "Sviluppo software") == ["sviluppo software"]
+    # ma se "software" compare anche da solo, conta come parola a sé
+    assert _keywords(config, "Sviluppo software e licenze software") == [
+        "sviluppo software",
+        "software",
+    ]
+    assert _keywords(config, "Licenze software") == ["software"]
+
+
+def test_overlap_does_not_inflate_the_score(config: ScoringConfig) -> None:
+    only_overlap = neutral(title="Sviluppo software")
+    assert score_breakdown(only_overlap, config, NOW).total == 0
+    with_other = neutral(title="Sviluppo software in cloud")
+    assert score_breakdown(with_other, config, NOW).total == 1
 
 
 def test_total_to_score_clamps() -> None:
@@ -281,23 +332,24 @@ def test_breakdown_explains_the_score(config: ScoringConfig) -> None:
 
 def test_naive_now_is_rejected(config: ScoringConfig) -> None:
     with pytest.raises(ValueError, match="fuso orario"):
-        compute_score(neutral(), config, datetime(2026, 10, 14, 12, 0))
+        compute_score(make_tender(), config, datetime(2026, 10, 14, 12, 0))
 
 
 def test_default_now_is_current_time(config: ScoringConfig) -> None:
-    far = neutral(
-        cpv_codes=["45000000"], submission_deadline=datetime.now(UTC) + timedelta(days=30)
-    )
-    assert compute_score(far, config) == 1
+    far = neutral(submission_deadline=datetime.now(UTC) + timedelta(days=30))
     assert score_breakdown(far, config).total == 1
+    assert compute_score(far, config) == 1
 
 
 # --- Valutazione per upsert_tender (ADR-010) ---
 
 
+def _good_tender() -> TenderCreate:
+    return neutral(cpv_codes=["72500000"], estimated_value=Decimal("2000000"), currency="EUR")
+
+
 def test_evaluate_kept_and_high_score_is_relevant(config: ScoringConfig) -> None:
-    tender = neutral(cpv_codes=["72500000"], estimated_value=Decimal("2000000"), currency="EUR")
-    result = evaluate_tender(tender, FilterResult.keep(), config, NOW)
+    result = evaluate_tender(_good_tender(), FilterResult.keep(), config, NOW)
     assert (result.relevance_score, result.is_relevant, result.discard_reason) == (3, True, None)
 
 
@@ -307,190 +359,30 @@ def test_evaluate_kept_but_low_score_is_not_relevant(config: ScoringConfig) -> N
 
 
 def test_evaluate_discarded_keeps_score_but_is_never_relevant(config: ScoringConfig) -> None:
-    tender = neutral(cpv_codes=["72500000"], estimated_value=Decimal("2000000"), currency="EUR")
-    result = evaluate_tender(tender, FilterResult.discard("Scadenza passata"), config, NOW)
+    result = evaluate_tender(_good_tender(), FilterResult.discard("Scadenza passata"), config, NOW)
     assert result.relevance_score == 3  # il voto c'è anche per le scartate
     assert result.is_relevant is False
     assert result.discard_reason == "Scadenza passata"
 
 
-def test_threshold_in_config_changes_relevance(tmp_path: Path) -> None:
-    tender = neutral(cpv_codes=["72500000"], estimated_value=Decimal("2000000"), currency="EUR")
-    assert evaluate_tender(tender, FilterResult.keep(), load_scoring_config(), NOW).is_relevant
-    strict = _write_config(tmp_path, relevance_threshold="4")
-    assert not evaluate_tender(tender, FilterResult.keep(), strict, NOW).is_relevant
+def test_threshold_in_config_changes_relevance(cfg: ConfigFactory) -> None:
+    assert evaluate_tender(
+        _good_tender(), FilterResult.keep(), load_scoring_config(), NOW
+    ).is_relevant
+    strict = cfg(relevance_threshold="4")
+    assert not evaluate_tender(_good_tender(), FilterResult.keep(), strict, NOW).is_relevant
 
 
-def test_weights_and_keywords_in_config_change_score(tmp_path: Path) -> None:
+def test_weights_and_keywords_in_config_change_score(cfg: ConfigFactory) -> None:
     tender = neutral(title="Gestione blockchain", cpv_codes=["72500000"])
     assert compute_score(tender, load_scoring_config(), NOW) == 2
-    boosted = _write_config(tmp_path, core_cpv_points="3")
-    assert compute_score(tender, boosted, NOW) == 3
-    with_kw = _write_config(
-        tmp_path, keywords='["blockchain", "gestione"]', keyword_words_per_point="2"
-    )
+    assert compute_score(tender, cfg(core_cpv_points="3"), NOW) == 3
+    with_kw = cfg(keywords='["blockchain", "gestione"]')
     assert compute_score(tender, with_kw, NOW) == 3
 
 
-# --- Configurazione [scoring] ---
-
-BASE = {
-    "relevance_threshold": "3",
-    "core_cpv_prefixes": '["722", "725"]',
-    "core_cpv_points": "2",
-    "it_cpv_prefixes": '["72", "48"]',
-    "other_cpv_points": "1",
-    "keywords": '["cloud"]',
-    "keyword_words_per_point": "2",
-    "keyword_max_points": "2",
-    "high_value_eur": "1000000",
-    "high_value_points": "1",
-    "deadline_ok_min_days": "10",
-    "deadline_ok_max_days": "60",
-    "deadline_ok_points": "1",
-    "deadline_urgent_days": "5",
-    "deadline_urgent_points": "-1",
-}
-
-
-def _write_path(tmp_path: Path, **overrides: str) -> Path:
-    values = {**BASE, **overrides}
-    body = "\n".join(f"{k} = {v}" for k, v in values.items())
-    path = tmp_path / "config.toml"
-    path.write_text(f"[scoring]\n{body}\n", encoding="utf-8")
-    return path
-
-
-def _write_config(tmp_path: Path, **overrides: str) -> ScoringConfig:
-    return load_scoring_config(_write_path(tmp_path, **overrides))
-
-
-def test_default_scoring_config_matches_the_plan() -> None:
-    cfg = load_scoring_config()
-    assert cfg.relevance_threshold == 3
-    assert (cfg.core_cpv_points, cfg.other_cpv_points) == (2, 1)
-    assert (cfg.keyword_words_per_point, cfg.keyword_max_points) == (2, 2)
-    assert (cfg.high_value_eur, cfg.high_value_points) == (Decimal(1000000), 1)
-    assert (cfg.deadline_ok_min_days, cfg.deadline_ok_max_days, cfg.deadline_ok_points) == (
-        10,
-        60,
-        1,
-    )
-    assert (cfg.deadline_urgent_days, cfg.deadline_urgent_points) == (5, -1)
-    assert "cloud" in cfg.keywords and "cybersecurity" in cfg.keywords
-
-
-def test_valid_custom_config_is_loaded(tmp_path: Path) -> None:
-    cfg = _write_config(tmp_path, keywords='["Cloud", " AI "]')
-    assert cfg.keywords == ("cloud", "ai")
-
-
-@pytest.mark.parametrize(
-    "override",
-    [
-        {"relevance_threshold": "0"},
-        {"relevance_threshold": "6"},
-        {"relevance_threshold": "true"},
-        {"relevance_threshold": "2.5"},
-        {"core_cpv_prefixes": "[]"},
-        {"core_cpv_prefixes": '["7"]'},
-        {"it_cpv_prefixes": '"72"'},
-        {"core_cpv_points": '"due"'},
-        {"other_cpv_points": "1.5"},
-        {"keywords": "[]"},
-        {"keywords": '["cloud", 3]'},
-        {"keyword_words_per_point": "0"},
-        {"keyword_max_points": "-1"},
-        {"high_value_eur": "-5"},
-        {"high_value_eur": "true"},
-        {"high_value_points": "false"},
-        {"deadline_ok_min_days": "70"},
-        {"deadline_ok_min_days": "-1"},
-        {"deadline_urgent_days": "-2"},
-        {"deadline_urgent_points": '"meno uno"'},
-    ],
-)
-def test_invalid_scoring_config_is_rejected_with_path(
-    tmp_path: Path, override: dict[str, str]
-) -> None:
-    path = _write_path(tmp_path, **override)
-    with pytest.raises(ConfigError) as excinfo:
-        load_scoring_config(path)
-    assert str(path) in str(excinfo.value)
-
-
-@pytest.mark.parametrize("missing", list(BASE))
-def test_missing_scoring_key_is_rejected(tmp_path: Path, missing: str) -> None:
-    path = _write_path(tmp_path)
-    lines = [
-        ln for ln in path.read_text(encoding="utf-8").splitlines() if not ln.startswith(missing)
-    ]
-    path.write_text("\n".join(lines), encoding="utf-8")
-    with pytest.raises(ConfigError):
-        load_scoring_config(path)
-
-
-def test_missing_scoring_section_is_rejected(tmp_path: Path) -> None:
-    path = tmp_path / "config.toml"
-    path.write_text("[filters]\nx = 1\n", encoding="utf-8")
-    with pytest.raises(ConfigError, match=r"\[scoring\]"):
-        load_scoring_config(path)
-
-
-# --- Seed e campione per la validazione ---
-
-
-def test_seed_scores_come_from_scoring_rules(session: Session) -> None:
-    seed(session, today=NOW.date())
-    cfg = load_scoring_config()
-    stream = io.StringIO()
-    count = print_sample(
-        session, cfg, limit=20, now=datetime(2026, 10, 14, 12, 0, tzinfo=UTC), out=stream
-    )
-    assert count == 20
-    text = stream.getvalue()
-    assert "ATTENZIONE" not in text  # voto salvato = voto ricalcolato
-    assert "SCARTATA: CPV non pertinente" in text
-    scores = [int(line[1]) for line in text.splitlines() if line.startswith("[")]
-    assert scores == sorted(scores, reverse=True)
-    assert set(scores) <= {1, 2, 3, 4, 5}
-
-
-def test_print_sample_respects_limit(session: Session) -> None:
-    seed(session, today=NOW.date())
-    stream = io.StringIO()
-    assert print_sample(session, load_scoring_config(), limit=3, now=NOW, out=stream) == 3
-    assert sum(1 for line in stream.getvalue().splitlines() if line.startswith("[")) == 3
-
-
-def test_print_sample_flags_score_mismatch(session: Session) -> None:
-    seed(session, today=NOW.date())
-    from sqlalchemy import select
-
-    from backend.domain.models import Tender
-
-    tender = session.scalars(select(Tender).order_by(Tender.id)).first()
-    tender.relevance_score = 5 if tender.relevance_score != 5 else 1
-    stream = io.StringIO()
-    print_sample(session, load_scoring_config(), limit=20, now=NOW, out=stream)
-    assert "ATTENZIONE: ricalcolato" in stream.getvalue()
-
-
-def test_sample_main_reads_database_from_environment(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
-    from sqlalchemy import create_engine
-
-    from backend.domain.models import Base
-
-    url = f"sqlite:///{tmp_path / 'sample.db'}"
-    engine = create_engine(url)
-    Base.metadata.create_all(engine)
-    with Session(engine) as session:
-        seed(session)
-        session.commit()
-    monkeypatch.setenv("DATABASE_URL", url)
-    sample_main(["--limit", "5"])
-    out = capsys.readouterr().out
-    assert "5 gare stampate." in out
-    assert "criteri:" in out
+def test_real_plural_notice_matches_keyword_with_one_word_per_point(cfg: ConfigFactory) -> None:
+    """710485: "portali" nel titolo reale è riconosciuto come "portale"."""
+    config = cfg(keyword_words_per_point="1")
+    title = "Servizio per la realizzazione di Tesserini venatori e di portali faunistici"
+    assert _keywords(config, title) == ["portale"]

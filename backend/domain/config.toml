@@ -22,16 +22,26 @@ relevance_threshold = 3
 core_cpv_prefixes = ["722", "725"]
 core_cpv_points = 2
 # Altri CPV IT (prefissi): valgono other_cpv_points, se non c'e' gia' un CPV core.
+# Tenere allineata con filters.cpv_prefixes: un CPV che il filtro scarta non dovrebbe dare punti.
 it_cpv_prefixes = ["72", "48", "302", "324", "642"]
 other_cpv_points = 1
-# Parole chiave nel titolo o nella descrizione (parola intera, senza maiuscole).
-# Ogni keyword_words_per_point parole diverse trovate valgono 1 punto, al massimo keyword_max_points.
-# Niente "ai" da solo: in italiano e' anche la preposizione "ai".
+
+# Parole chiave nel titolo o nella descrizione (senza maiuscole, solo PAROLA INTERA).
+# Regole di corrispondenza (da tarare con Giuseppe):
+#  - una parola intera non trova i plurali: i plurali si scrivono come varianti nella stessa
+#    voce, separate da "|" ("portale|portali"). Le varianti di una voce contano UNA volta sola.
+#  - se una parola e' contenuta in una piu' lunga di un'altra voce ("software" dentro
+#    "sviluppo software") conta solo la piu' lunga.
+# Ogni keyword_words_per_point voci diverse trovate valgono 1 punto, al massimo keyword_max_points.
+# Deviazioni dal piano: "AI" e "data" NON sono keyword. "ai" in italiano e' la preposizione
+# ("ai sensi dell'art."), "data" e' la parola "data" (di scadenza); si usano "intelligenza
+# artificiale", "big data", "data warehouse", "data lake".
 keywords = [
-    "cloud", "cybersecurity", "sicurezza informatica", "sviluppo applicativo", "sviluppo software",
-    "intelligenza artificiale", "machine learning", "big data", "data warehouse", "data lake",
-    "business intelligence", "software", "applicativo", "piattaforma", "conservazione digitale",
-    "portale", "app", "datacenter", "data center",
+    "cloud", "cybersecurity", "sicurezza informatica", "sviluppo applicativo",
+    "sviluppo software", "intelligenza artificiale", "machine learning", "big data",
+    "data warehouse", "data lake", "business intelligence", "software",
+    "applicativo|applicativi", "piattaforma|piattaforme", "conservazione digitale",
+    "portale|portali", "app", "datacenter|data center",
 ]
 keyword_words_per_point = 2
 keyword_max_points = 2
