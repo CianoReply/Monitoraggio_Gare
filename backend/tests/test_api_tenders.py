@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 from openapi_schema_validator import OAS31Validator, oas31_format_checker
 
 from backend.api import tenders as tenders_module
+from backend.domain.repository import InvalidQueryError
 from backend.tests.api_db import make_app, make_seeded_engine
 from backend.tests.contract_utils import resolve
 
@@ -261,11 +262,11 @@ def test_invalid_filters_return_422(client: TestClient, params: dict) -> None:
     assert body["error"] == "validation_error"
 
 
-def test_repository_value_error_is_mapped_to_422(
+def test_repository_invalid_query_error_is_mapped_to_422(
     client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     def boom(*args: Any, **kwargs: Any) -> None:
-        raise ValueError("parametro non valido dal repository")
+        raise InvalidQueryError("parametro non valido dal repository")
 
     monkeypatch.setattr(tenders_module.repository, "list_tenders", boom)
     response = client.get("/tenders")
@@ -274,6 +275,19 @@ def test_repository_value_error_is_mapped_to_422(
         "error": "validation_error",
         "message": "parametro non valido dal repository",
     }
+
+
+def test_other_value_error_is_not_a_422(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Un ValueError che non è del dominio è un bug del server (500), non un errore del client."""
+
+    def boom(*args: Any, **kwargs: Any) -> None:
+        raise ValueError("errore interno qualsiasi")
+
+    monkeypatch.setattr(tenders_module.repository, "list_tenders", boom)
+    server_errors = TestClient(make_app(make_seeded_engine()), raise_server_exceptions=False)
+    response = server_errors.get("/tenders")
+    assert response.status_code == 500
+    assert response.json() == {"error": "internal_error", "message": "Errore interno del server."}
 
 
 def test_repository_inverted_ranges_message_comes_from_repository(client: TestClient) -> None:

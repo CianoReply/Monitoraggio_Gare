@@ -18,6 +18,13 @@
 
 <!-- Note -->
 
+## 2026-10-15 – Follow-up InvalidQueryError
+- Fatto: `tenders.py` e `runs.py` catturano solo `repository.InvalidQueryError` (422 `validation_error`); un altro `ValueError` diventa un 500 `internal_error`, perché è un bug del server e non un errore del client. Test in `test_api_tenders.py` e `test_api_runs.py`.
+- Da fare: nulla di aperto per il modulo api, a parte i passi umani (GitHub per T3.6, `docker compose up` per T0.7).
+- Decisioni: `convert.aware` resta (innocuo con i datetime già aware UTC; serve ancora ai dati di test).
+- Impatto sugli altri dev: nessuno.
+
+
 ## 2026-10-15 – Correzioni della revisione T4.3 (fix/api-hardening)
 - Fatto: valori estremi a 422 (id oltre 2147483647, `page` oltre 1.000.000, anni fuori da 1900-2999, importi oltre 10^16, NUL in `q` e nei corpi, intervallo di `/deadlines` oltre 366 giorni); corpi di `POST` report e `PATCH` campo = modelli del dominio (parità `/openapi.json` verde, nessun modello duplicato); `POST /runs` risponde 409 subito se il lock è occupato; all'avvio le esecuzioni `running` rimaste si chiudono `failed`, alla chiusura si attende il job (timeout breve); `AllowedHostsMiddleware` (`ALLOWED_HOSTS`), `CORS_ORIGINS="*"` vietato, `DOCS_ENABLED`, `allow_headers` espliciti, `.dockerignore` senza `backend/tests`, avvertenza sulla password nel `.env.example`; messaggi 422/404/405 in italiano; tolti `assert` in `stats.py` e l'alias `_aware`.
 - Da fare: quando DEV-2 unisce `InvalidQueryError`, in `tenders.py` e `runs.py` catturare solo quella al posto di `ValueError` (piccolo follow-up).

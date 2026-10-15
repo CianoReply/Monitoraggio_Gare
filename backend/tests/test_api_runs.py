@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from backend.api import runs as runs_module
 from backend.domain.database import create_session_factory
 from backend.domain.models import IngestionRun, RunStatus
+from backend.domain.repository import InvalidQueryError
 from backend.ingestion import pipeline
 from backend.tests.api_db import (
     FIXED_NOW,
@@ -365,3 +366,24 @@ def test_job_without_session_factory_reuses_the_cached_one(
     assert used["count"] == 1
     with factory() as session:
         assert session.scalar(select(IngestionRun).where(IngestionRun.run_date == YESTERDAY))
+
+
+def test_runs_invalid_query_error_is_422_but_other_value_error_is_500(
+    engine: Engine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def invalid(*args: Any, **kwargs: Any) -> None:
+        raise InvalidQueryError("limit non valido dal repository")
+
+    def other(*args: Any, **kwargs: Any) -> None:
+        raise ValueError("errore interno qualsiasi")
+
+    client = TestClient(make_app(engine), raise_server_exceptions=False)
+    monkeypatch.setattr(runs_module.repository, "list_runs", invalid)
+    response = client.get("/runs")
+    assert response.status_code == 422
+    assert response.json() == {
+        "error": "validation_error",
+        "message": "limit non valido dal repository",
+    }
+    monkeypatch.setattr(runs_module.repository, "list_runs", other)
+    assert client.get("/runs").status_code == 500
