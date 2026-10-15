@@ -9,6 +9,7 @@ from typing import Any
 
 import pytest
 from sqlalchemy import StaticPool, create_engine, func, select
+from sqlalchemy.exc import DataError
 from sqlalchemy.orm import Session, sessionmaker
 
 from backend.domain import repository
@@ -223,8 +224,10 @@ def test_notice_with_failed_chain_lookup_is_skipped(factory: sessionmaker[Sessio
 
     deps = make_deps(factory, fetch=lambda day: [*day_notices(), changes[0]], lookup=failing_lookup)
     summary = run_daily_ingestion(DAY, deps)
-    assert summary.status is RunStatus.SUCCESS
+    # gli altri avvisi sono salvati, ma il giorno resta da rielaborare
+    assert summary.status is RunStatus.FAILED
     assert summary.fetched_count == 10 and summary.new_count == 9 and summary.skipped_count == 1
+    assert "1 rettifiche non collegate" in (summary.error_message or "")
 
 
 def test_recovery_processes_failed_day_and_next_one(factory: sessionmaker[Session]) -> None:
@@ -352,10 +355,28 @@ def test_unexpected_error_on_one_notice_skips_only_that_notice(
 
     summary = run_daily_ingestion(DAY, make_deps(factory, recorder=FailingRecorder()))
     assert summary.status is RunStatus.SUCCESS
-    assert summary.skipped_count == 1
+    # la gara resta salvata: fallisce solo l'elaborazione dei suoi documenti
+    assert summary.skipped_count == 0 and summary.documents_failed_count == 1
     with factory() as session:
         saved = session.scalars(select(Tender.publication_number)).all()
-    assert poisoned not in saved and len(saved) == 8
+    assert poisoned in saved and len(saved) == 9
+
+
+def test_notice_rejected_by_the_database_is_skipped(
+    factory: sessionmaker[Session], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    poisoned = day_notices()[0]["publication-number"]
+    real_save = pipeline.save_notice
+
+    def picky_save(session: Session, tender: Any, evaluation: Any, lookup: Any) -> Any:
+        if tender.publication_number == poisoned:
+            raise DataError("INSERT", {}, ValueError("valore fuori scala"))
+        return real_save(session, tender, evaluation, lookup)
+
+    monkeypatch.setattr(pipeline, "save_notice", picky_save)
+    summary = run_daily_ingestion(DAY, make_deps(factory))
+    assert summary.status is RunStatus.SUCCESS
+    assert summary.skipped_count == 1 and summary.new_count == 8
 
 
 def test_recovery_stops_when_another_run_is_in_progress(
@@ -416,3 +437,13 @@ def test_main_reports_failures_and_busy(monkeypatch: pytest.MonkeyPatch) -> None
 
     monkeypatch.setattr(pipeline, "run_pending_days", busy)
     assert pipeline.main([]) == 2
+
+
+def test_public_error_message_hides_database_details_and_urls() -> None:
+    db_error = DataError("INSERT INTO tenders VALUES (%(x)s)", {"x": "segreto"}, ValueError("boom"))
+    assert pipeline.public_error_message(db_error) == (
+        "DataError: errore del database (dettagli nel log)"
+    )
+    message = pipeline.public_error_message(ConnectionError("errore su https://user:pw@host/x?k=1"))
+    assert message == "ConnectionError: errore su <url>"
+    assert pipeline.public_error_message(RuntimeError()) == "RuntimeError"

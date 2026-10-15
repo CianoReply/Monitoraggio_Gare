@@ -30,6 +30,7 @@ TED_NOTICE_URL = "https://ted.europa.eu/it/notice/-/detail/{publication_number}"
 MISSING_TITLE = "(titolo non indicato)"
 MISSING_BUYER = "(ente non indicato)"
 MISSING_NOTICE_TYPE = "unknown"
+_UUID = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 _CPV_DIGITS = re.compile(r"^(\d{8})(?:-\d)?$")
 _CENT = Decimal("0.01")
 # Colonna `estimated_value` Numeric(18, 2): al massimo 16 cifre intere.
@@ -199,6 +200,14 @@ def normalize_cpv_codes(raw: dict[str, Any]) -> list[str]:
     return list(codes)
 
 
+def is_http_url(value: Any) -> bool:
+    """Indica se il valore è un URL `http` o `https` (niente `javascript:`, `data:`, ...)."""
+    if not isinstance(value, str):
+        return False
+    lowered = value.strip().lower()
+    return lowered.startswith(("http://", "https://")) and len(lowered) > len("https://")
+
+
 def notice_url(raw: dict[str, Any], publication_number: str) -> str:
     """Link alla pagina dell'avviso su TED, in italiano se disponibile."""
     links = raw.get("links")
@@ -206,7 +215,7 @@ def notice_url(raw: dict[str, Any], publication_number: str) -> str:
     if isinstance(html, dict):
         for lang in ("ITA", "ENG"):
             url = html.get(lang)
-            if isinstance(url, str) and url.strip() and len(url) <= MAX_URL:
+            if is_http_url(url) and len(url) <= MAX_URL:
                 return url.strip()
     return TED_NOTICE_URL.format(publication_number=publication_number)
 
@@ -227,7 +236,11 @@ def change_reference(raw: dict[str, Any]) -> str | None:
     value = first_value(raw.get("change-notice-version-identifier"))
     if not isinstance(value, str) or "-" not in value:
         return None
-    return value.rsplit("-", 1)[0]
+    identifier = value.strip().rsplit("-", 1)[0]
+    if not _UUID.match(identifier):
+        logger.warning("change-notice-version-identifier non valido ignorato: %r", value[:80])
+        return None
+    return identifier.lower()
 
 
 def is_change_notice(raw: dict[str, Any]) -> bool:
@@ -284,7 +297,11 @@ def parse_notice(raw: dict[str, Any], parent_publication_number: str | None = No
     deadline = earliest_deadline(raw)
     if deadline is None:
         _warn_missing(publication_number, "deadline-receipt-tender")
-    documents = [u for u in as_list(raw.get("document-url-lot")) if isinstance(u, str)]
+    documents = [
+        u.strip()
+        for u in as_list(raw.get("document-url-lot"))
+        if is_http_url(u) and len(u.strip()) <= MAX_URL
+    ]
 
     return TenderCreate(
         publication_number=publication_number,
@@ -299,7 +316,7 @@ def parse_notice(raw: dict[str, Any], parent_publication_number: str | None = No
         publication_date=publication_date,
         submission_deadline=deadline,
         ted_url=notice_url(raw, publication_number),
-        documents_url=documents[0][:MAX_URL] if documents else None,
+        documents_url=documents[0] if documents else None,
         parent_publication_number=parent_publication_number,
         raw_data=raw,
     )
