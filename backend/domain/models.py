@@ -165,7 +165,7 @@ class Report(Base):
 
     tender: Mapped[Tender] = relationship(back_populates="report")
     fields: Mapped[list[ReportField]] = relationship(
-        back_populates="report", cascade="all, delete-orphan"
+        back_populates="report", cascade="all, delete-orphan", order_by="ReportField.id"
     )
 
 

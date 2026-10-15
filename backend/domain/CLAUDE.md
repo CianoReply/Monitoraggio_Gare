@@ -8,7 +8,7 @@
 - `repository.py`: `upsert_tender`, `list_tenders` (filtri e paginazione), `get_tender` (T2.1)
 - `filters.py`: una funzione per regola, esito "tenuta" o "scartata con motivo" (T2.2)
 - `scoring.compute_score(tender, config, now=None) -> int` e `scoring.evaluate_tender(tender, filter_result, config, now=None) -> TenderEvaluation` (T2.3)
-- `documents.process_tender_documents(session, tender, client=None) -> list[Document]` (T2.4) e `report_schema.json` con le regole di verifica (T2.5)
+- `documents.process_tender_documents(session, tender, client=None) -> list[Document]` (T2.4); `reports.py` e `report_schema.json` per i report (T2.5)
 
 ## Task del modulo
 T2.1 schema e migrazioni · T2.2 filtri · T2.3 punteggio · T2.4 documenti · T2.5 report · T5.1–T5.3 Skill `analisi-gara`
@@ -65,3 +65,11 @@ T2.1 schema e migrazioni · T2.2 filtri · T2.3 punteggio · T2.4 documenti · T
 
 ## Registro delle esecuzioni (T1.5)
 - In `repository.py` (solo `flush`): `start_run(session, run_date, now=None)`, `finish_run(session, run, status=success|failed, fetched_count, new_count, updated_count, relevant_count, error_message, now=None)`, `get_running_run`, `has_successful_run(session, run_date)`, `last_successful_run_date`, `list_runs(session, limit=20)` (più recenti prima, per `GET /runs`).
+
+## Report (T2.5)
+- `report_schema.json` è il formato del report della Skill e coincide con `ReportCreate` e `FieldReview` di `docs/API_CONTRACT.yaml` (lo verifica un test; la validazione è in codice con pydantic, senza jsonschema). I modelli `ReportCreate` e `FieldReview` di `reports.py` si possono usare anche come corpo delle richieste.
+- Funzioni di `reports.py` (solo `flush`): `create_report(session, tender_id, payload, now=None)`, `get_report_for_tender(session, tender_id)`, `get_report(session, report_id)`, `review_field(session, report_id, field_id, review, now=None)` (`confirm` / `correct`), `compute_report_status(report)`.
+- Errori (hanno `code` e `message`, da mappare nell'API): `ReportValidationError` 422 (`validation_error`, `.errors` elenca i problemi), `TenderNotFoundError` 404 (`tender_not_found`), `ReportNotFoundError` 404 (`report_not_found`), `FieldNotFoundError` 404 (`field_not_found`), `ReportAlreadyExistsError` 409 (`report_already_exists`, ADR-008).
+- Regole: il report nasce `to_review`, campi `to_verify`, `ai_label` "Contenuto generato con IA – da revisionare". `correct` salva il valore della Skill in `original_value` (solo alla prima correzione). Dopo ogni revisione il report è `verified` solo se tutti i campi critici sono `verified` (senza campi critici: alla prima revisione); allora `ai_label` = "Contenuto generato con IA – revisionato da [nome], [AAAA-MM-GG]" con l'ultimo revisore e la data di Europe/Rome. Gli orari si salvano in UTC e `now` deve avere il fuso orario (ValueError). Dopo una rettifica `repository.reset_report_to_review` lo riporta a `to_review` senza toccare campi ed etichetta.
+- Lunghezze: il contratto non ha `maxLength`, quindi `create_report` e `review_field` controllano `label` (200), `source_doc` (500) e `reviewer` (200) dopo lo schema e rispondono `ReportValidationError` (422), mai un errore del database. Due richieste concorrenti sullo stesso report: il perdente riceve `ReportAlreadyExistsError` (409) grazie a un savepoint.
+- Punti aperti (decisi dal lead, da portare all'utente): (1) un report senza campi critici diventa `verified` alla prima revisione; (2) dopo una rettifica `reset_report_to_review` lascia i campi `verified`, quindi basta una sola nuova revisione di un campo qualsiasi perché il report torni `verified` (riverifica parziale).

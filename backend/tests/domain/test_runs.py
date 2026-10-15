@@ -1,6 +1,7 @@
 """Test del registro delle esecuzioni (start_run, finish_run, ...)."""
 
 from datetime import UTC, date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import pytest
 from sqlalchemy.orm import Session
@@ -138,3 +139,28 @@ def test_list_runs_empty_and_invalid_limit(session: Session) -> None:
     assert list_runs(session) == []
     with pytest.raises(ValueError, match="limit"):
         list_runs(session, limit=0)
+
+
+ROME = ZoneInfo("Europe/Rome")
+
+
+def test_run_times_are_stored_in_utc(session: Session) -> None:
+    local = datetime(2026, 10, 15, 8, 0, tzinfo=ROME)  # 06:00 UTC (ora legale)
+    run = start_run(session, date(2026, 10, 14), now=local)
+    finish_run(
+        session, run, status=RunStatus.SUCCESS, now=datetime(2026, 10, 15, 8, 30, tzinfo=ROME)
+    )
+    session.expire(run)  # rilegge dal database: SQLite non conserva il fuso
+    assert run.started_at.replace(tzinfo=UTC) == datetime(2026, 10, 15, 6, 0, tzinfo=UTC)
+    assert run.finished_at is not None
+    assert run.finished_at.replace(tzinfo=UTC) == datetime(2026, 10, 15, 6, 30, tzinfo=UTC)
+    assert (run.finished_at - run.started_at) == timedelta(minutes=30)
+
+
+def test_naive_times_are_rejected(session: Session) -> None:
+    with pytest.raises(ValueError, match="fuso orario"):
+        start_run(session, date(2026, 10, 14), now=datetime(2026, 10, 15, 8, 0))
+    run = start_run(session, date(2026, 10, 14), now=T0)
+    with pytest.raises(ValueError, match="fuso orario"):
+        finish_run(session, run, status=RunStatus.SUCCESS, now=datetime(2026, 10, 15, 8, 0))
+    assert run.status == RunStatus.RUNNING and run.finished_at is None

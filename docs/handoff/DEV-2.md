@@ -18,6 +18,13 @@
 
 <!-- Note -->
 
+## 2026-10-15 – T2.5 Archiviazione dei report
+- Fatto: `report_schema.json` (stesso schema di `ReportCreate` e `FieldReview` del contratto, test di confronto e test di equivalenza con jsonschema se presente), `reports.py` con `create_report`, `get_report_for_tender`, `get_report`, `review_field`, `compute_report_status`, modelli pydantic di validazione ed eccezioni dedicate (404/409/422).
+- Da fare: T5.1-T5.3 (Skill) restano bloccati in attesa dei prompt di Giuseppe. In T4.3 proporre di aggiungere `maxLength` al contratto (label 200, source_doc 500, reviewer 200) e a `report_schema.json`: oggi i limiti si controllano solo in codice.
+- Decisioni: validazione con pydantic (nessun jsonschema nel codice); la parità tra `report_schema.json` e i modelli è verificata da un test deterministico sui vincoli (required, minLength, minItems, minimum, enum, additionalProperties, format) e dal confronto con il contratto; i test con la libreria jsonschema sono facoltativi (si saltano se non c'è); un report senza campi critici diventa `verified` alla prima revisione (regola letterale del contratto); `ai_label` "verificato" riporta l'ultimo revisore e la data di Europe/Rome (orari salvati in UTC); dopo `reset_report_to_review` l'etichetta resta l'ultima finché non è riverificato; creazione concorrente: savepoint e 409.
+- Punti aperti per l'utente (decisi dal lead): (1) un report senza campi critici diventa `verified` alla prima revisione; (2) dopo una rettifica i campi restano `verified`, quindi una sola nuova revisione riporta il report a `verified` (riverifica parziale).
+- Impatto sugli altri dev: DEV-3 (T3.3/T3.4) chiama le funzioni di `reports.py` e mappa `ReportError.code`/`message` agli errori del contratto (404 `tender_not_found` / `report_not_found` / `field_not_found`, 409 `report_already_exists`, 422 `validation_error`); può usare `ReportCreate` e `FieldReview` come corpo delle richieste. DEV-1 (T1.4) usa già `reset_report_to_review`.
+
 ## 2026-10-15 – T2.4 Documenti di gara
 - Fatto: `documents.py` (`classify_link`, `download_document`, `process_tender_documents`), sezione `[documents]` in `config.toml` con `load_documents_config`, test con `httpx.MockTransport` (nessuna rete).
 - Da fare: verificare su link reali di TED quali estensioni dirette compaiono (finora solo piattaforme di gara); un'eventuale colonna per il motivo dell'errore richiede una modifica al modello dati (non fatta, il motivo va nel log).
