@@ -18,6 +18,14 @@
 
 <!-- Note -->
 
+## 2026-10-15 – T0.7 Ambiente locale con Docker (file pronti, avvio reale DA VERIFICARE)
+- Fatto: `Dockerfile` (python:3.12-slim, utente non root), `docker-compose.yml` (servizi `db` PostgreSQL 16 con healthcheck e `api`, che applica `alembic -c backend/domain/alembic.ini upgrade head` e poi avvia uvicorn; porte solo su 127.0.0.1; volumi `db_data` e `documents`), `.dockerignore`, `.env.example` completato (POSTGRES_*, porte, CORS_ORIGINS) e sezione Docker in `docs/ONBOARDING.md`. `backend/tests/test_docker_setup.py` fa controlli statici. Con valore vuoto `CORS_ORIGINS` ora vale il predefinito (`backend/api/main.py`).
+- Verificato qui: `alembic upgrade head` su SQLite, `uvicorn` locale con `GET /health` 200 e `GET /tenders` 200. Docker non è installato su questa macchina: build, `docker compose up` e `/health` nel container sono IN ATTESA UMANA / DA VERIFICARE.
+- Passi umani: su ogni computer `docker compose up --build`, poi `curl http://localhost:8000/health`; segnalare nel proprio handoff ogni errore (in particolare: build dell'immagine, sintassi `$${POSTGRES_USER}` nell'healthcheck, avvio migrazioni).
+- Decisioni: password predefinita `radar_dev` solo per sviluppo locale (porte non esposte fuori dal computer); la CI ora costruisce l'immagine (il job `docker-build` trova il `Dockerfile`), rendere obbligatorio il controllo `Build immagine Docker` nella protezione di `main` solo dopo una prima esecuzione riuscita.
+- Impatto sugli altri dev: DEV-1 e DEV-2 possono usare `docker compose up` al posto dell'ambiente virtuale; i dati fittizi con `docker compose exec api python -m backend.domain.seed`.
+
+
 ## 2026-10-15 – T3.6 Qualità, sicurezza e CI (file pronti, esecuzione su GitHub DA VERIFICARE)
 - Fatto: `.github/workflows/ci.yml` (job `lint`: `ruff check` e `ruff format --check`; job `test`: prima `pytest -m contract` cioè la conformità al contratto, poi l'intera suite; job `test-postgres`: servizio PostgreSQL 16 con `TEST_POSTGRES_URL`, solo `-k postgres`; job `docker-build`, saltato finché non esiste un `Dockerfile`, T0.7; timeout di 15 minuti; permessi in sola lettura) e `.github/workflows/claude.yml` (`@claude` con `anthropics/claude-code-action`). Il marker `contract` è registrato in `backend/tests/conftest.py` (non in `pyproject.toml`, file condiviso) e applicato a `test_api_contract.py`, `test_api_skeleton.py` e al test di conformità di `test_api_tenders.py`. `backend/tests/test_ci_workflows.py` controlla la struttura dei due file. Nessun accesso a GitHub: i workflow non sono mai stati eseguiti.
 - Sequenza operativa, tutti passi IN ATTESA UMANA:
