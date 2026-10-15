@@ -21,6 +21,9 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
         "markers", "contract: test di conformità dell'API a docs/API_CONTRACT.yaml (CI)"
     )
+    config.addinivalue_line(
+        "markers", "e2e: test end-to-end TED finto -> job -> database -> API (CI, nessuna rete)"
+    )
 
 
 @pytest.fixture(autouse=True)
