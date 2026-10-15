@@ -1,11 +1,15 @@
 """Endpoint delle gare e dei loro documenti (dati di prova in T3.1)."""
 
-from datetime import date
+from datetime import UTC, date, datetime
+from decimal import Decimal
 from typing import Annotated, Literal
+from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
 
 from backend.api import sample_data
+from backend.api.deps import get_session
 from backend.api.errors import ApiError, error_responses
 from backend.api.schemas import (
     DocumentList,
@@ -14,8 +18,30 @@ from backend.api.schemas import (
     Tender,
     TenderList,
 )
+from backend.domain import repository
+from backend.domain.repository import TenderRow
 
+ROME = ZoneInfo("Europe/Rome")
 router = APIRouter(tags=["tenders"])
+
+
+def _aware(value: datetime) -> datetime:
+    """SQLite restituisce datetime senza fuso: sono sempre UTC (il repository salva in UTC)."""
+    return value if value.tzinfo else value.replace(tzinfo=UTC)
+
+
+def tender_from_row(row: TenderRow) -> Tender:
+    """Converte una riga del repository nello schema del contratto.
+
+    La scadenza è mostrata in Europe/Rome; `created_at` e `updated_at` restano in UTC.
+    """
+    tender = row.tender
+    data = {name: getattr(tender, name) for name in Tender.model_fields if name != "report_status"}
+    if tender.submission_deadline is not None:
+        data["submission_deadline"] = _aware(tender.submission_deadline).astimezone(ROME)
+    data["created_at"] = _aware(tender.created_at)
+    data["updated_at"] = _aware(tender.updated_at)
+    return Tender.model_validate({**data, "report_status": row.report_status})
 
 
 @router.get(
@@ -26,12 +52,13 @@ router = APIRouter(tags=["tenders"])
     responses=error_responses(422),
 )
 def list_tenders(
+    session: Annotated[Session, Depends(get_session)],
     min_score: Annotated[int | None, Query(ge=1, le=5)] = None,
     cpv: Annotated[str | None, Query(pattern=r"^[0-9]{2,8}$")] = None,
     deadline_from: date | None = None,
     deadline_to: date | None = None,
-    min_value: Annotated[float | None, Query(ge=0)] = None,
-    max_value: Annotated[float | None, Query(ge=0)] = None,
+    min_value: Annotated[float | None, Query(ge=0, allow_inf_nan=False)] = None,
+    max_value: Annotated[float | None, Query(ge=0, allow_inf_nan=False)] = None,
     report_status: ReportStatusFilter | None = None,
     q: Annotated[str | None, Query(min_length=1, max_length=200)] = None,
     include_discarded: bool = False,
@@ -39,13 +66,31 @@ def list_tenders(
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 20,
 ) -> TenderList:
-    if deadline_from and deadline_to and deadline_from > deadline_to:
-        raise ApiError(422, "validation_error", "deadline_from non può essere dopo deadline_to.")
-    if min_value is not None and max_value is not None and min_value > max_value:
-        raise ApiError(422, "validation_error", "min_value non può essere maggiore di max_value.")
-    # T3.2: sostituire con repository.list_tenders
-    items = sample_data.TENDERS
-    return TenderList(items=items, total=len(items), page=page, page_size=page_size)
+    # Filtri, ordinamento e paginazione sono del repository: qui solo traduzione dei tipi.
+    try:
+        result = repository.list_tenders(
+            session,
+            min_score=min_score,
+            cpv=cpv,
+            deadline_from=deadline_from,
+            deadline_to=deadline_to,
+            min_value=None if min_value is None else Decimal(str(min_value)),
+            max_value=None if max_value is None else Decimal(str(max_value)),
+            report_status=report_status,
+            q=q,
+            include_discarded=include_discarded,
+            sort=sort,
+            page=page,
+            page_size=page_size,
+        )
+    except ValueError as exc:
+        raise ApiError(422, "validation_error", str(exc)) from exc
+    return TenderList(
+        items=[tender_from_row(row) for row in result.items],
+        total=result.total,
+        page=result.page,
+        page_size=result.page_size,
+    )
 
 
 @router.get(
