@@ -156,20 +156,22 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T1.3 – Parser: dal formato TED al nostro modello
 - Responsabile: DEV-1
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge 206ef37)
 - Dipende da: T1.2, T0.4, T2.1
 - Branch: feat/ted-parser
 - Durata stimata: 2 giorni
 - Obiettivo: trasformare ogni avviso TED in un oggetto `Tender` conforme al modello dati.
 - Note: dipendenza da T2.1 aggiunta in T0.4 (ADR-006: `TenderCreate` vive in `backend/domain/schemas.py`).
 - Finito quando:
-  - [ ] tutte le fixture vengono convertite senza errori
-  - [ ] un avviso privo di importo e scadenza restituisce `null` per quei campi
-  - [ ] la tabella di mappatura è documentata
+  - [x] tutte le fixture vengono convertite senza errori
+  - [x] un avviso privo di importo e scadenza restituisce `null` per quei campi
+  - [x] la tabella di mappatura è documentata
+- Esito: 1 giro di revisione (robustezza: importi fuori scala, URL e stringhe lunghe, valute, offset, input inattesi). Tabella in `backend/ingestion/MAPPING.md`, collegata dal CLAUDE.md del modulo (il piano la voleva nel CLAUDE.md, che ha il limite di 30 righe). `parse_notice` solleva `NoticeParseError` solo senza numero o data di pubblicazione; `parse_notices` non solleva mai.
+
 
 ### T1.4 – Deduplica e gestione delle rettifiche
 - Responsabile: DEV-1
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T1.3, T2.1
 - Branch: feat/dedup
 - Durata stimata: 1,5 giorni
