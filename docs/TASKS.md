@@ -222,18 +222,19 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T2.2 – Filtri automatici
 - Responsabile: DEV-2
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge 10513aa)
 - Dipende da: T2.1
 - Branch: feat/filters
 - Durata stimata: 1,5 giorni
 - Obiettivo: scartare con regole semplici le gare non utili, prima di assegnare il punteggio.
 - Finito quando:
-  - [ ] ogni regola ha almeno 2 test (un caso tenuto e uno scartato)
-  - [ ] cambiando la soglia nel file di configurazione cambia il risultato, senza modifiche al codice
+  - [x] ogni regola ha almeno 2 test (un caso tenuto e uno scartato)
+  - [x] cambiando la soglia nel file di configurazione cambia il risultato, senza modifiche al codice
+- Esito: 2 giri di revisione; configurazione in `backend/domain/config.toml` (ADR-013); tipi di avviso con codici eForms esatti; `buyer_country` obbligatorio (codici ISO a 3 lettere, passati dal chiamante).
 
 ### T2.3 – Punteggio di pertinenza
 - Responsabile: DEV-2
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T2.2
 - Branch: feat/relevance-score
 - Durata stimata: 2 giorni
