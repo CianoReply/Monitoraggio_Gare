@@ -1,0 +1,14 @@
+# Configurazione del modulo domain: soglie, CPV e parole chiave stanno qui, mai nel codice.
+# Si usa TOML (tomllib) invece di YAML perche' pyyaml non e' tra le dipendenze concordate (ADR-013).
+
+[filters]
+# Importo minimo in euro: sotto la soglia la gara e' scartata; senza importo e' tenuta.
+min_value_eur = 50000
+# Una gara e' tenuta se almeno un suo CPV inizia con uno di questi prefissi.
+cpv_prefixes = ["72", "48", "302", "324", "642"]
+# Paesi ammessi per l'ente appaltante: codici ISO a 3 lettere, come li restituisce TED (es. ["ITA"]).
+allowed_countries = ["ITA"]
+# Tipi di avviso ammessi (confronto esatto, senza maiuscole): sono i bandi di gara della
+# codelist eForms "notice-type". Tutti gli altri (can-* esiti, pin-* preinformazioni, ecc.)
+# sono scartati. DA VERIFICARE: gli avvisi pre-eForms, che hanno altri codici.
+accepted_notice_types = ["cn-standard", "cn-social", "cn-desg"]

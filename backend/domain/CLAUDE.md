@@ -16,7 +16,7 @@ T2.1 schema e migrazioni · T2.2 filtri · T2.3 punteggio · T2.4 documenti · T
 ## Regole specifiche
 - Unico modulo che accede direttamente al database; non importa `ingestion` né `api`.
 - I modelli seguono esattamente `docs/ARCHITECTURE.md`; per cambiarli serve una PR approvata da tutti.
-- Soglie, CPV, parole chiave e pesi stanno in `config.yaml`, mai nel codice.
+- Soglie, CPV, parole chiave e pesi stanno in `backend/domain/config.toml` (TOML, letto con `config.py`; pyyaml non è tra le dipendenze), mai nel codice.
 - Ogni gara scartata salva il motivo in `discard_reason`.
 - Il punteggio è deterministico: nessuna chiamata a LLM.
 - Download solo per gare con `is_relevant = true`, massimo 50 MB per file, nessun login automatico.
@@ -37,3 +37,11 @@ T2.1 schema e migrazioni · T2.2 filtri · T2.3 punteggio · T2.4 documenti · T
 - `upsert_tender(session, TenderCreate, TenderEvaluation)`: la gara si salva solo già valutata (punteggio 1-5 obbligatorio, ADR-010); il job calcola filtri e punteggio prima, nella stessa transazione.
 - `list_tenders` segue `GET /tenders` del contratto (sort `relevance|deadline|published`, `include_discarded`, `report_status` derivato incluso negli item, intervalli di scadenza in giorni Europe/Rome). `is_relevant`, `publication_from/to` sono solo per uso interno (`/deadlines`, `/stats`).
 - DA VERIFICARE: il filtro `cpv` (CAST della colonna JSON a testo + LIKE) è testato solo su SQLite. Su PostgreSQL esiste `test_cpv_prefix_filter_on_postgres`, saltato senza `TEST_POSTGRES_URL` (es. `postgresql+psycopg://user:pwd@localhost/test`; il test ricrea e poi cancella le tabelle: usare un database di prova).
+
+## Filtri (T2.2)
+- Carica la configurazione una volta: `config = load_filters_config()` (da `config.toml`, sezione `[filters]`), poi `filters.apply_filters(tender, buyer_country=..., config=config, now=None) -> FilterResult(kept, reason)`; `reason` va in `discard_reason`. Una funzione per regola: `filter_country`, `filter_cpv`, `filter_notice_type`, `filter_deadline`, `filter_min_value`.
+- `buyer_country` è obbligatorio (lo passa il chiamante: `TenderCreate` non ha il paese): codice ISO a 3 lettere o lista di codici come li dà TED (es. `["ITA"]`). `None` = non noto, la gara è tenuta (la query TED già filtra).
+- Tipo di avviso: confronto esatto sui codici eForms `notice-type` (ammessi `cn-standard`, `cn-social`, `cn-desg`); `can-*` e `pin-*` scartati. Le rettifiche (`parent_publication_number` valorizzato) passano.
+- `currency=None` con importo = euro. Importi in altre valute non si confrontano con la soglia.
+- `now` deve avere il fuso orario (altrimenti `ValueError`).
+- DA VERIFICARE: i codici `notice-type` degli avvisi pre-eForms.
