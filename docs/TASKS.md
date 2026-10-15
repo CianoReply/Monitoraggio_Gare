@@ -342,14 +342,16 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T3.5 – Scadenze, statistiche ed esecuzioni
 - Responsabile: DEV-3
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge a54bc53)
 - Dipende da: T3.2, T1.6
 - Branch: feat/api-dashboard
 - Durata stimata: 1,5 giorni
 - Obiettivo: fornire i dati per dashboard e calendario.
 - Finito quando:
-  - [ ] gli indicatori di `/stats` coincidono con un conteggio manuale sui dati di `seed.py`
-  - [ ] con due `POST /runs` consecutivi, il primo restituisce `202` e il secondo `409`
+  - [x] gli indicatori di `/stats` coincidono con un conteggio manuale sui dati di `seed.py`
+  - [x] con due `POST /runs` consecutivi, il primo restituisce `202` e il secondo `409`
+- Esito: 2 giri di revisione. `POST /runs` avvia `run_pending_days` in un thread (202, 409 se un'esecuzione è in corso); senza giorni da recuperare rielabora ieri. Un solo worker.
+
 
 ### T3.6 – Qualità, sicurezza e CI
 - Responsabile: DEV-3
@@ -372,17 +374,19 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T4.1 – Collegamento dei moduli
 - Responsabile: Tutti (coordina DEV-1)
-- Stato: [ ] da fare
+- Stato: [x] fatto (2026-10-15, merge e5dd0f7 (parte api 868a0c1))
 - Dipende da: Fasi 1A, 1B, 1C (T1.1–T1.6, T2.1–T2.5, T3.1–T3.6)
 - Branch: feat/integration
 - Durata stimata: 2 giorni
 - Obiettivo: unire i moduli e seguire il flusso completo TED → database → filtri → punteggio → API su un giorno reale.
 - Finito quando:
-  - [ ] un'esecuzione reale completa porta gare visibili in `GET /tenders`
+  - [x] un'esecuzione reale completa porta gare visibili in `GET /tenders`
+- Esito: Esecuzione reale del 2026-10-15 con `python -m backend.ingestion.pipeline --date 2026-10-14` su un database migrato: 9 avvisi, 9 gare nuove, 5 rilevanti, 6 visibili in `GET /tenders` (gli esiti sono scartati), `/runs` success. Test d'integrazione offline in `backend/tests/test_integration.py`; avvio di log JSON e scheduler (`ENABLE_SCHEDULER`) nel ciclo di vita dell'API; compose con `--workers 1`.
+
 
 ### T4.2 – Test end-to-end
 - Responsabile: DEV-3 (con DEV-1 e DEV-2)
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T4.1
 - Branch: test/e2e
 - Durata stimata: 1,5 giorni

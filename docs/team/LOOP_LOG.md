@@ -99,3 +99,4 @@ Per le regole di coordinamento prevale il prompt del loop; per il contenuto tecn
 | 2026-10-15 | MERGED T3.3 – 9fb5c35 (DEV-3) – develop 837 + 1 saltato. Nota di handoff DEV-1 (T1.1–T1.6) unita. DEV-3: PRONTO T3.4. |
 | 2026-10-15 | MERGED T3.4 – fb2366b (DEV-3). DEV-3 su T3.5; richiesta di `count_tenders_created_between` inoltrata a DEV-2 (branch feat/stats-support). |
 | 2026-10-15 | MERGED feat/stats-support – 47e9c4a (DEV-2, supporto a T3.5). SBLOCCATO il test di /stats per DEV-3. |
+| 2026-10-15 | MERGED T3.5 – a54bc53 (DEV-3, 2 giri), T4.1 parte api – 868a0c1 (DEV-3), T4.1 parte ingestion – e5dd0f7 (DEV-1); develop 945 + 1 saltato. Esecuzione reale completa riuscita. Contraddizione: il prompt limita le chiamate reali a TED a T1.1, ma i criteri di T1.2 e T4.1 del piano richiedono un'esecuzione reale: fatte poche richieste (meno di 10) in T1.2 e T4.1. SBLOCCATO T4.2 (DEV-3). |
