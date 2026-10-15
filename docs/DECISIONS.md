@@ -19,6 +19,7 @@
 | ADR-011 | Integrazione su `develop` con revisione del lead e una sola persona | Accettata |
 | ADR-012 | Gare scartate e stato del report nell'API | Accettata |
 | ADR-013 | Configurazione in TOML invece di YAML | Accettata |
+| ADR-014 | Una rettifica aggiorna la riga della gara originale | Proposta |
 
 ---
 
@@ -99,3 +100,9 @@
 - **Decisione:** la configurazione del dominio è in `backend/domain/config.toml`, letta con `tomllib` della libreria standard; T2.3 vi aggiunge la sezione `[scoring]`.
 - **Motivazione:** nessuna nuova dipendenza; TOML è leggibile quanto YAML per una configurazione piatta.
 - **Conseguenze:** dove il piano dice `config.yaml` si intende `backend/domain/config.toml`. Se un giorno servisse YAML, si cambierà con un nuovo ADR e l'autorizzazione della dipendenza.
+
+## ADR-014 – Una rettifica aggiorna la riga della gara originale
+- **Contesto:** su TED una rettifica è un change notice con un proprio `publication_number`, collegato all'avviso precedente da `change-notice-version-identifier`; le modifiche possono formare una catena (T1.1). Il piano (T1.4) chiede di aggiornare la gara originale e di salvare il collegamento in `parent_publication_number`.
+- **Decisione:** la rettifica aggiorna la riga del primo avviso della catena già salvato (di solito l'originale): restano `publication_number`, data di pubblicazione e `parent_publication_number` della riga, gli altri campi e `raw_data` prendono i valori della rettifica, il report torna `to_review`. Non si crea una riga per la rettifica. `parent_publication_number` si usa solo per una rettifica salvata a sé perché l'originale non è nel database. Un avviso più vecchio di quello già applicato (data, poi numero) non sovrascrive la riga.
+- **Motivazione:** una gara compare una sola volta in `GET /tenders`, sempre con i dati più recenti; l'ordine di arrivo da TED non è garantito.
+- **Conseguenze:** sulla riga aggiornata il segnale della rettifica è `raw_data` (`change-notice-version-identifier`); `ted_url` punta all'ultima rettifica. Limite noto: se l'originale arriva dopo una rettifica salvata a sé restano due righe. Stato "Proposta" fino all'approvazione dell'utente.

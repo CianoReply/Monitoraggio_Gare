@@ -20,7 +20,9 @@ from backend.domain.schemas import TenderEvaluation
 from backend.ingestion.dedup import (
     MAX_CHAIN_DEPTH,
     ChainLink,
+    ChainLookupError,
     TedNoticeLookup,
+    notice_order_key,
     resolve_chain,
     save_notice,
 )
@@ -78,26 +80,30 @@ def add_report(session: Session, tender: Tender, status: ReportStatus) -> Report
 
 def test_resolve_chain_walks_to_the_original() -> None:
     chain = resolve_chain(RAW[SECOND_CHANGE], lookup)
-    assert [link.publication_number for link in chain] == [FIRST_CHANGE, ORIGINAL]
-    assert chain[0] == ChainLink(FIRST_CHANGE, "68d34303-2d11-45ec-ae35-19a735ee975d")
+    assert [link.publication_number for link in chain.links] == [FIRST_CHANGE, ORIGINAL]
+    assert chain.links[0] == ChainLink(FIRST_CHANGE, "68d34303-2d11-45ec-ae35-19a735ee975d")
+    assert chain.complete
 
 
 def test_resolve_chain_of_a_non_change_notice_is_empty() -> None:
-    assert resolve_chain(RAW[ORIGINAL], lookup) == []
+    chain = resolve_chain(RAW[ORIGINAL], lookup)
+    assert chain.links == [] and chain.complete
 
 
 def test_resolve_chain_stops_when_ted_does_not_find_the_notice(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     with caplog.at_level(logging.WARNING):
-        assert resolve_chain(RAW[SECOND_CHANGE], lambda _: None) == []
+        chain = resolve_chain(RAW[SECOND_CHANGE], lambda _: None)
+    assert chain.links == [] and not chain.complete
     assert "non trovato" in caplog.text
 
 
 def test_resolve_chain_stops_on_cycles() -> None:
     looping = {"publication-number": "1-2026", "change-notice-version-identifier": "abc-01"}
     chain = resolve_chain(looping, lambda _: looping)
-    assert [link.publication_number for link in chain] == ["1-2026"]
+    assert [link.publication_number for link in chain.links] == ["1-2026"]
+    assert not chain.complete
 
 
 def test_resolve_chain_has_a_maximum_depth() -> None:
@@ -108,7 +114,8 @@ def test_resolve_chain_has_a_maximum_depth() -> None:
         return {"publication-number": f"{n}-2026", "change-notice-version-identifier": f"id{n}-01"}
 
     start = {"change-notice-version-identifier": "start-01"}
-    assert len(resolve_chain(start, endless)) == MAX_CHAIN_DEPTH
+    chain = resolve_chain(start, endless)
+    assert len(chain.links) == MAX_CHAIN_DEPTH and not chain.complete
 
 
 def test_ted_notice_lookup_caches_results() -> None:
@@ -200,4 +207,79 @@ def test_reimporting_the_original_does_not_undo_a_change(session: Session) -> No
     save(session, FIRST_CHANGE)
     outcome = save(session, ORIGINAL)
     assert outcome.created is False
+    assert outcome.skipped_as_older is True
     assert outcome.tender.raw_data["publication-number"] == FIRST_CHANGE
+
+
+def test_resolve_chain_wraps_lookup_errors() -> None:
+    def failing(_: str) -> dict[str, Any] | None:
+        raise TimeoutError("TED non risponde")
+
+    with pytest.raises(ChainLookupError, match="TED non risponde"):
+        resolve_chain(RAW[FIRST_CHANGE], failing)
+
+
+def test_resolve_chain_stops_on_predecessor_without_number() -> None:
+    chain = resolve_chain(RAW[FIRST_CHANGE], lambda _: {"notice-identifier": "x"})
+    assert chain.links == [] and not chain.complete
+
+
+def test_notice_order_key_orders_by_date_then_number() -> None:
+    assert notice_order_key(RAW[ORIGINAL]) < notice_order_key(RAW[FIRST_CHANGE])
+    assert notice_order_key(RAW[FIRST_CHANGE]) < notice_order_key(RAW[SECOND_CHANGE])
+    same_day = {"publication-date": "2026-10-14+02:00"}
+    assert notice_order_key({**same_day, "publication-number": "9-2026"}) < notice_order_key(
+        {**same_day, "publication-number": "10-2026"}
+    )
+    assert notice_order_key({}) == ("", 0, 0)
+
+
+def deadline_of(tender: Tender) -> datetime | None:
+    deadline = tender.submission_deadline
+    return deadline.replace(tzinfo=UTC) if deadline and deadline.tzinfo is None else deadline
+
+
+def test_changes_in_reverse_order_keep_the_newest(session: Session) -> None:
+    save(session, ORIGINAL)
+    newest = save(session, SECOND_CHANGE).tender
+    newest_deadline = deadline_of(newest)
+    outcome = save(session, FIRST_CHANGE)
+    assert outcome.skipped_as_older is True
+    assert outcome.tender.raw_data["publication-number"] == SECOND_CHANGE
+    assert deadline_of(outcome.tender) == newest_deadline
+    assert count_tenders(session) == 1
+
+
+def test_same_change_imported_twice_is_idempotent(session: Session) -> None:
+    save(session, ORIGINAL)
+    first = save(session, FIRST_CHANGE)
+    second = save(session, FIRST_CHANGE)
+    assert second.skipped_as_older is False
+    assert deadline_of(second.tender) == deadline_of(first.tender)
+    assert count_tenders(session) == 1
+
+
+def test_lookup_error_writes_nothing(session: Session) -> None:
+    def failing(_: str) -> dict[str, Any] | None:
+        raise ConnectionError("rete giù")
+
+    with pytest.raises(ChainLookupError):
+        save_notice(session, parse_notice(RAW[FIRST_CHANGE]), EVALUATION, failing)
+    assert count_tenders(session) == 0
+
+
+def test_truncated_chain_links_farthest_notice_reached(session: Session) -> None:
+    def partial(identifier: str) -> dict[str, Any] | None:
+        notice = lookup(identifier)
+        return notice if notice and notice["publication-number"] == FIRST_CHANGE else None
+
+    outcome = save_notice(session, parse_notice(RAW[SECOND_CHANGE]), EVALUATION, partial)
+    assert outcome.chain_complete is False
+    assert outcome.tender.parent_publication_number == FIRST_CHANGE
+
+
+def test_original_arriving_after_standalone_change_is_a_known_limit(session: Session) -> None:
+    save(session, FIRST_CHANGE)
+    save(session, ORIGINAL)
+    # Limite documentato in dedup.py e ADR-014: restano due righe per la stessa gara.
+    assert count_tenders(session) == 2
