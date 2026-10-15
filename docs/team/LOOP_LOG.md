@@ -81,3 +81,4 @@ Per le regole di coordinamento prevale il prompt del loop; per il contenuto tecn
 | 2026-10-15 | Revisione T2.1: MODIFICHE RICHIESTE giro 1 (list_tenders non allineato al contratto; test di database.py; seed). |
 | 2026-10-15 | CHECKPOINT APPROVATO dall'utente: modello dati e contratto; ADR-012 accettata; relevance_score NOT NULL con gara salvata già valutata (stessa transazione); ai_label iniziale approvato; pydantic>=2 da dichiarare in pyproject (in T2.1). T0.5 [x]. Ripresa del loop. |
 | 2026-10-15 | SBLOCCATO T3.1 (DEV-3). |
+| 2026-10-15 | MERGED T2.1 – e23e9d9 – develop 69 + 1 saltato (2 giri). SBLOCCATI T2.2 e T2.5 (DEV-2). Revisione T3.1: MODIFICHE RICHIESTE giro 1. OK di DEV-2 e DEV-3 sugli hook T0.3. tzdata (zoneinfo su Windows) da chiedere all'utente. |

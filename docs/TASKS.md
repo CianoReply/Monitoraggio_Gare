@@ -205,21 +205,22 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T2.1 – Schema del database e migrazioni
 - Responsabile: DEV-2
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge e23e9d9)
 - Dipende da: T0.4
 - Branch: feat/db-schema
 - Durata stimata: 1,5 giorni
 - Obiettivo: creare nel database le tabelle concordate in T0.4.
 - Finito quando:
-  - [ ] `alembic upgrade head` crea tutte le tabelle su un database vuoto
-  - [ ] `alembic downgrade base` le rimuove senza errori
-  - [ ] `seed.py` popola il database
-  - [ ] i test del repository passano
+  - [x] `alembic upgrade head` crea tutte le tabelle su un database vuoto
+  - [x] `alembic downgrade base` le rimuove senza errori
+  - [x] `seed.py` popola il database
+  - [x] i test del repository passano
 - Note: include `backend/domain/schemas.py` con `TenderCreate` (ADR-006), l'inizializzazione di Alembic (`alembic init`) e i comandi delle migrazioni in `CLAUDE.md`.
+- Esito: 2 giri di revisione; 69 test + 1 saltato (filtro `cpv` su PostgreSQL: DA VERIFICARE con `TEST_POSTGRES_URL`). Decisione dell'utente: `relevance_score` NOT NULL, `upsert_tender` riceve `TenderEvaluation`. Alembic in `backend/domain/alembic.ini`.
 
 ### T2.2 – Filtri automatici
 - Responsabile: DEV-2
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T2.1
 - Branch: feat/filters
 - Durata stimata: 1,5 giorni
@@ -254,7 +255,7 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T2.5 – Archiviazione dei report
 - Responsabile: DEV-2
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T2.1
 - Branch: feat/reports
 - Durata stimata: 1,5 giorni
