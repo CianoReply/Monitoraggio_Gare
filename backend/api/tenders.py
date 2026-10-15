@@ -1,6 +1,6 @@
-"""Endpoint delle gare e dei loro documenti (dati di prova in T3.1)."""
+"""Endpoint delle gare e dei loro documenti."""
 
-from datetime import UTC, date, datetime
+from datetime import date
 from decimal import Decimal
 from typing import Annotated, Literal
 from zoneinfo import ZoneInfo
@@ -8,10 +8,11 @@ from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from backend.api import sample_data
+from backend.api.convert import aware as _aware
 from backend.api.deps import get_session
 from backend.api.errors import ApiError, error_responses
 from backend.api.schemas import (
+    Document,
     DocumentList,
     PositiveId,
     ReportStatusFilter,
@@ -19,15 +20,12 @@ from backend.api.schemas import (
     TenderList,
 )
 from backend.domain import repository
+from backend.domain.models import Document as DocumentModel
+from backend.domain.models import Tender as TenderModel
 from backend.domain.repository import TenderRow
 
 ROME = ZoneInfo("Europe/Rome")
 router = APIRouter(tags=["tenders"])
-
-
-def _aware(value: datetime) -> datetime:
-    """SQLite restituisce datetime senza fuso: sono sempre UTC (il repository salva in UTC)."""
-    return value if value.tzinfo else value.replace(tzinfo=UTC)
 
 
 def tender_from_row(row: TenderRow) -> Tender:
@@ -100,9 +98,33 @@ def list_tenders(
     response_model=Tender,
     responses=error_responses(404, 422),
 )
-def get_tender(id: PositiveId) -> Tender:
-    # T3.3: sostituire con repository
-    return sample_data.get_sample_tender(id)
+def get_tender(id: PositiveId, session: Annotated[Session, Depends(get_session)]) -> Tender:
+    tender = repository.get_tender(session, id)
+    if tender is None:
+        raise tender_not_found(id)
+    return tender_from_row(TenderRow(tender, _report_status(tender)))
+
+
+def tender_not_found(tender_id: int) -> ApiError:
+    """Errore 404 `tender_not_found`."""
+    return ApiError(404, "tender_not_found", f"La gara {tender_id} non esiste.")
+
+
+def _report_status(tender: TenderModel) -> ReportStatusFilter:
+    """Stato del report della gara (relazione del dominio): `none` se non esiste."""
+    return "none" if tender.report is None else tender.report.status.value
+
+
+def _document_from_model(document: DocumentModel) -> Document:
+    return Document(
+        id=document.id,
+        tender_id=document.tender_id,
+        name=document.name,
+        url=document.url,
+        status=document.status.value,
+        local_path=document.local_path,
+        downloaded_at=_aware(document.downloaded_at) if document.downloaded_at else None,
+    )
 
 
 @router.get(
@@ -112,7 +134,11 @@ def get_tender(id: PositiveId) -> Tender:
     response_model=DocumentList,
     responses=error_responses(404, 422),
 )
-def list_tender_documents(id: PositiveId) -> DocumentList:
-    # T3.3: sostituire con repository
-    sample_data.get_sample_tender(id)
-    return DocumentList(items=[d for d in sample_data.DOCUMENTS if d.tender_id == id])
+def list_tender_documents(
+    id: PositiveId, session: Annotated[Session, Depends(get_session)]
+) -> DocumentList:
+    tender = repository.get_tender(session, id)
+    if tender is None:
+        raise tender_not_found(id)
+    documents = sorted(tender.documents, key=lambda d: d.id)
+    return DocumentList(items=[_document_from_model(d) for d in documents])
