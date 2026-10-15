@@ -14,6 +14,7 @@ info:
     - Date `date` in formato `AAAA-MM-GG`; datetime in ISO 8601 con fuso orario.
     - Errori sempre nel formato `{ "error": "codice", "message": "descrizione" }`
       (anche i `422` di validazione, con `error: "validation_error"`).
+    - Valori degli esempi fittizi; formato di `publication_number`, `notice_type` e `ted_url` DA VERIFICARE in T1.1.
     - Autenticazione: non prevista in questa versione (il nome del revisore arriva nella richiesta).
     - Le gare scartate dai filtri (`discard_reason` valorizzato, ADR-010) restano nel database:
       `GET /tenders` le esclude salvo `include_discarded=true`; `GET /tenders/{id}` le restituisce sempre.
@@ -35,7 +36,8 @@ paths:
       summary: Elenco gare
       description: |
         Ordinamento predefinito (`sort=relevance`): punteggio decrescente, poi scadenza crescente
-        (gare senza scadenza in fondo). Tutti i filtri sono in AND.
+        (gare senza scadenza in fondo). Tutti i filtri sono in AND. Intervalli incoerenti
+        (`deadline_from` > `deadline_to`, `min_value` > `max_value`) rispondono `422` `validation_error`.
       parameters:
         - name: min_score
           in: query
@@ -49,15 +51,15 @@ paths:
           example: "72"
         - name: deadline_from
           in: query
-          description: Scadenza offerte dal giorno indicato (inclusivo).
+          description: Scadenza offerte dal giorno indicato (inclusivo). Se maggiore di `deadline_to` risponde `422` (`validation_error`).
           schema: {type: string, format: date}
         - name: deadline_to
           in: query
-          description: Scadenza offerte fino al giorno indicato (inclusivo).
+          description: Scadenza offerte fino al giorno indicato (inclusivo). Se minore di `deadline_from` risponde `422` (`validation_error`).
           schema: {type: string, format: date}
         - name: min_value
           in: query
-          description: Importo stimato minimo (inclusivo). Le gare senza importo sono escluse se il filtro è presente.
+          description: Importo stimato minimo (inclusivo). Le gare senza importo sono escluse se il filtro è presente. Se maggiore di `max_value` risponde `422` (`validation_error`).
           schema: {type: number, minimum: 0}
         - name: max_value
           in: query
@@ -73,16 +75,20 @@ paths:
           schema: {type: string, minLength: 1, maxLength: 200}
         - name: include_discarded
           in: query
-          description: Se `true` include anche le gare scartate dai filtri.
+          description: |
+            Parametro aggiuntivo non previsto dal piano (ADR-012). Se `true` include anche le gare scartate
+            dai filtri (`discard_reason` valorizzato); predefinito `false`.
           schema: {type: boolean, default: false}
         - name: sort
           in: query
           description: |
             `relevance` = punteggio decrescente poi scadenza crescente; `deadline` = scadenza crescente;
-            `published` = data di pubblicazione decrescente.
+            `published` = data di pubblicazione decrescente. Con `deadline` le gare senza scadenza
+            sono in fondo.
           schema: {type: string, enum: [relevance, deadline, published], default: relevance}
         - name: page
           in: query
+          description: Numero di pagina (da 1). Una pagina oltre l'ultima risponde `200` con `items` vuoto e `total` corretto.
           schema: {type: integer, minimum: 1, default: 1}
         - name: page_size
           in: query
@@ -146,7 +152,7 @@ paths:
                 estimated_value: 890000.00
                 currency: "EUR"
                 publication_date: "2026-10-13"
-                submission_deadline: "2026-11-05T13:00:00+01:00"
+                submission_deadline: "2026-10-21T13:00:00+02:00"
                 ted_url: "https://ted.europa.eu/it/notice/-/detail/231877-2026"
                 documents_url: null
                 relevance_score: 4
@@ -211,7 +217,7 @@ paths:
                 summary: "Accordo quadro triennale per sviluppo e manutenzione evolutiva del sistema informativo regionale. Importo a base di gara 2,4 milioni di euro. Requisiti di fatturato specifico e certificazione ISO 27001."
                 status: to_review
                 generated_at: "2026-10-14T09:15:00+00:00"
-                ai_label: "Contenuto generato con IA - da revisionare"
+                ai_label: "Contenuto generato con IA – da revisionare"
                 fields:
                   - id: 71
                     report_id: 7
@@ -277,7 +283,7 @@ paths:
                 summary: "Migrazione cloud e gestione sistemi per 36 mesi."
                 status: to_review
                 generated_at: "2026-10-14T09:15:00+00:00"
-                ai_label: "Contenuto generato con IA - da revisionare"
+                ai_label: "Contenuto generato con IA – da revisionare"
                 fields:
                   - id: 81
                     report_id: 8
@@ -310,7 +316,7 @@ paths:
           (solo la prima correzione lo imposta) e il campo diventa `verified`.
         In entrambi i casi si salvano `reviewer` e `reviewed_at`. Dopo ogni modifica lo stato del report è
         ricalcolato: `verified` solo se tutti i campi critici sono `verified`, altrimenti `to_review`.
-        Risponde con il report aggiornato.
+        Risponde con il report aggiornato. `action=correct` senza `value` risponde `422` `validation_error`.
       parameters:
         - name: id
           in: path
@@ -344,7 +350,7 @@ paths:
                 summary: "Accordo quadro triennale per sviluppo e manutenzione evolutiva del sistema informativo regionale."
                 status: verified
                 generated_at: "2026-10-14T09:15:00+00:00"
-                ai_label: "Contenuto generato con IA - revisionato da Giuseppe Rossi, 2026-10-15"
+                ai_label: "Contenuto generato con IA – revisionato da Giuseppe Rossi, 2026-10-15"
                 fields:
                   - id: 71
                     report_id: 7
@@ -372,12 +378,13 @@ paths:
       summary: Scadenze per il calendario
       description: |
         Gare rilevanti (`is_relevant = true`) con scadenza offerte nell'intervallo, in ordine di scadenza.
-        `days_left` = giorni di calendario tra oggi e la scadenza (0 = oggi). `urgency`: `high` se
+        `days_left` = giorni di calendario tra oggi e la scadenza (0 = oggi), calcolati sulla data
+        odierna in fuso Europe/Rome. Se `to` < `from` risponde `422` `validation_error`. `urgency`: `high` se
         `days_left` <= 3, `medium` se <= 7, `low` altrimenti.
       parameters:
         - name: from
           in: query
-          description: Inizio intervallo (inclusivo). Predefinito oggi.
+          description: Inizio intervallo (inclusivo). Predefinito oggi (Europe/Rome).
           schema: {type: string, format: date}
         - name: to
           in: query
@@ -395,7 +402,7 @@ paths:
                     publication_number: "231877-2026"
                     title: "Fornitura di servizi cloud e migrazione dei sistemi dell'ente"
                     buyer_name: "Comune di Bologna"
-                    submission_deadline: "2026-11-05T13:00:00+01:00"
+                    submission_deadline: "2026-10-21T13:00:00+02:00"
                     relevance_score: 4
                     days_left: 6
                     urgency: medium
@@ -546,7 +553,7 @@ components:
           type: array
           items: {type: string, pattern: '^[0-9]{8}$'}
         notice_type: {type: string}
-        estimated_value: {type: [number, "null"], description: "Importo stimato; null se TED non lo fornisce."}
+        estimated_value: {type: [number, "null"], description: "Importo in euro, al massimo due decimali; null se assente."}
         currency: {type: [string, "null"], minLength: 3, maxLength: 3}
         publication_date: {type: string, format: date}
         submission_deadline: {type: [string, "null"], format: date-time}
@@ -559,7 +566,9 @@ components:
         report_status:
           type: string
           enum: [none, to_review, verified]
-          description: "`none` se la gara non ha un report."
+          description: |
+            Parametro/campo aggiuntivo non previsto dal piano (ADR-012), derivato da `reports.status`
+            del report della gara; `none` se la gara non ha un report.
         created_at: {type: string, format: date-time}
         updated_at: {type: string, format: date-time}
     TenderList:
@@ -631,12 +640,21 @@ components:
           enum: [to_review, verified]
           description: "`verified` solo se tutti i campi critici sono `verified`."
         generated_at: {type: string, format: date-time}
-        ai_label: {type: string, description: Etichetta di trasparenza sull'uso dell'IA.}
+        ai_label:
+          type: string
+          description: |
+            Etichetta di trasparenza (ARCHITECTURE.md 4.3). Alla creazione è
+            "Contenuto generato con IA – da revisionare". Quando il report diventa `verified` è
+            impostata a "Contenuto generato con IA – revisionato da [nome], [data]" con l'ultimo revisore e la data
+            (AAAA-MM-GG). Se il report torna `to_review` resta l'ultima etichetta finché non è riverificato.
         fields:
           type: array
           items: {$ref: '#/components/schemas/ReportField'}
     ReportCreate:
       type: object
+      additionalProperties: false
+      description: |
+        Il `report_schema.json` di T2.5 dovrà coincidere con questo schema.
       required: [summary, fields]
       properties:
         summary: {type: string, minLength: 1}
@@ -646,6 +664,7 @@ components:
           minItems: 1
           items:
             type: object
+            additionalProperties: false
             required: [label, value, source_doc, is_critical]
             properties:
               label: {type: string, minLength: 1}
@@ -655,7 +674,14 @@ components:
               is_critical: {type: boolean}
     FieldReview:
       type: object
+      additionalProperties: false
       required: [action, reviewer]
+      if:
+        properties:
+          action: {const: correct}
+        required: [action]
+      then:
+        required: [value]
       properties:
         action: {type: string, enum: [confirm, correct]}
         value: {type: string, minLength: 1, description: "Obbligatorio con `correct`, ignorato con `confirm`."}
@@ -691,7 +717,7 @@ components:
       type: object
       required: [new_tenders_today, relevant_tenders, deadlines_next_7_days, reports_to_verify]
       properties:
-        new_tenders_today: {type: integer, minimum: 0, description: Gare inserite oggi.}
+        new_tenders_today: {type: integer, minimum: 0, description: "Gare con `created_at` nella data odierna in fuso Europe/Rome."}
         relevant_tenders: {type: integer, minimum: 0, description: Gare con punteggio >= 3 e non scartate (`is_relevant`).}
         deadlines_next_7_days: {type: integer, minimum: 0, description: Gare rilevanti con scadenza nei prossimi 7 giorni.}
         reports_to_verify: {type: integer, minimum: 0, description: Report con stato `to_review`.}
