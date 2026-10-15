@@ -30,6 +30,7 @@ Per avere PostgreSQL e API con un solo comando serve Docker con Compose v2 (DA V
 
 - Il compose legge le variabili dal file `.env` (passo 5); se manca o i valori sono vuoti valgono i predefiniti di sviluppo, quindi `docker compose up` funziona anche subito dopo il clone. Variabili: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_PORT`, `API_PORT`, `CORS_ORIGINS`, `INGESTION_SCHEDULE`, `TED_API_URL`, `TED_CPV_PREFIXES`. Nel compose l'API avvia anche lo scheduler del job giornaliero (`ENABLE_SCHEDULER=true`, un solo worker).
 - Le migrazioni (`alembic -c backend/domain/alembic.ini upgrade head`) si applicano a ogni avvio dell'API.
+- **Sicurezza dell'ambiente locale:** l'API non ha autenticazione e `reviewer` non è un'identità verificata: tienila su `localhost` o su una rete fidata, mai su Internet. La password predefinita del database (`radar_dev`) è nota a tutti: va bene solo perché le porte sono su `127.0.0.1`; altrove imposta `POSTGRES_PASSWORD`. Altre variabili: `ALLOWED_HOSTS` (Host ammessi, vuoto = `localhost,127.0.0.1,testserver`), `DOCS_ENABLED=false` per spegnere `/docs` e `/openapi.json`; `CORS_ORIGINS` non accetta `*`.
 - Database e API sono raggiungibili solo da `localhost`. Il database ha dati persistenti nel volume `db_data`.
 - Senza Docker si lavora con l'ambiente virtuale e `uvicorn backend.api.main:app --reload`, con `DATABASE_URL` impostata (es. `sqlite:///radar.db`).
 

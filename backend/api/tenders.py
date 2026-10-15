@@ -8,16 +8,21 @@ from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from backend.api.convert import aware as _aware
+from backend.api.convert import aware
 from backend.api.deps import get_session
 from backend.api.errors import ApiError, error_responses
 from backend.api.schemas import (
+    MAX_AMOUNT,
+    NO_NUL,
+    YEAR_RANGE,
     Document,
     DocumentList,
+    PageNumber,
     PositiveId,
     ReportStatusFilter,
     Tender,
     TenderList,
+    at_most,
 )
 from backend.domain import repository
 from backend.domain.models import Document as DocumentModel
@@ -36,9 +41,9 @@ def tender_from_row(row: TenderRow) -> Tender:
     tender = row.tender
     data = {name: getattr(tender, name) for name in Tender.model_fields if name != "report_status"}
     if tender.submission_deadline is not None:
-        data["submission_deadline"] = _aware(tender.submission_deadline).astimezone(ROME)
-    data["created_at"] = _aware(tender.created_at)
-    data["updated_at"] = _aware(tender.updated_at)
+        data["submission_deadline"] = aware(tender.submission_deadline).astimezone(ROME)
+    data["created_at"] = aware(tender.created_at)
+    data["updated_at"] = aware(tender.updated_at)
     return Tender.model_validate({**data, "report_status": row.report_status})
 
 
@@ -53,15 +58,19 @@ def list_tenders(
     session: Annotated[Session, Depends(get_session)],
     min_score: Annotated[int | None, Query(ge=1, le=5)] = None,
     cpv: Annotated[str | None, Query(pattern=r"^[0-9]{2,8}$")] = None,
-    deadline_from: date | None = None,
-    deadline_to: date | None = None,
-    min_value: Annotated[float | None, Query(ge=0, allow_inf_nan=False)] = None,
-    max_value: Annotated[float | None, Query(ge=0, allow_inf_nan=False)] = None,
+    deadline_from: Annotated[date | None, YEAR_RANGE] = None,
+    deadline_to: Annotated[date | None, YEAR_RANGE] = None,
+    min_value: Annotated[
+        float | None, Query(ge=0, allow_inf_nan=False), at_most(MAX_AMOUNT)
+    ] = None,
+    max_value: Annotated[
+        float | None, Query(ge=0, allow_inf_nan=False), at_most(MAX_AMOUNT)
+    ] = None,
     report_status: ReportStatusFilter | None = None,
-    q: Annotated[str | None, Query(min_length=1, max_length=200)] = None,
+    q: Annotated[str | None, Query(min_length=1, max_length=200), NO_NUL] = None,
     include_discarded: bool = False,
     sort: Literal["relevance", "deadline", "published"] = "relevance",
-    page: Annotated[int, Query(ge=1)] = 1,
+    page: PageNumber = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 20,
 ) -> TenderList:
     # Filtri, ordinamento e paginazione sono del repository: qui solo traduzione dei tipi.
@@ -123,7 +132,7 @@ def _document_from_model(document: DocumentModel) -> Document:
         url=document.url,
         status=document.status.value,
         local_path=document.local_path,
-        downloaded_at=_aware(document.downloaded_at) if document.downloaded_at else None,
+        downloaded_at=aware(document.downloaded_at) if document.downloaded_at else None,
     )
 
 

@@ -16,6 +16,12 @@ def spec() -> dict:
     return data
 
 
+@pytest.fixture(autouse=True)
+def _no_real_database(monkeypatch: pytest.MonkeyPatch) -> None:
+    """I test non toccano mai il database vero: `DATABASE_URL` dell'ambiente viene ignorata."""
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+
+
 def pytest_configure(config: pytest.Config) -> None:
     """Registra i marker del progetto (pyproject.toml è condiviso e non si tocca)."""
     config.addinivalue_line(
