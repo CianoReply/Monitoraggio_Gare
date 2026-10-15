@@ -328,3 +328,24 @@ def list_runs(session: Session, limit: int = DEFAULT_RUNS_LIMIT) -> list[Ingesti
             .limit(limit)
         )
     )
+
+
+def count_tenders_created_between(session: Session, start: datetime, end: datetime) -> int:
+    """Numero di gare inserite con `start <= created_at < end` (per `/stats`).
+
+    `start` e `end` devono avere il fuso orario e sono convertiti in UTC (SQLite salva senza
+    fuso). `ValueError` se uno è naive o se `start > end`.
+    """
+    if start.tzinfo is None or end.tzinfo is None:
+        raise ValueError("start e end devono avere il fuso orario (datetime aware)")
+    start_utc, end_utc = start.astimezone(UTC), end.astimezone(UTC)
+    if start_utc > end_utc:
+        raise ValueError("start non può superare end")
+    return (
+        session.scalar(
+            select(func.count())
+            .select_from(Tender)
+            .where(Tender.created_at >= start_utc, Tender.created_at < end_utc)
+        )
+        or 0
+    )

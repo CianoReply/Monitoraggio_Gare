@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from backend.domain.models import Report, ReportField, ReportStatus, Tender, VerificationStatus
 from backend.domain.repository import (
+    count_tenders_created_between,
     get_tender,
     get_tender_by_publication_number,
     list_tenders,
@@ -312,3 +313,51 @@ def test_reset_report_to_review_without_report_returns_false(session: Session) -
     tender = _add(session, "a")
     assert reset_report_to_review(session, tender) is False
     assert session.query(Report).count() == 0
+
+
+def _created_at(session: Session, number: str, moment: datetime) -> None:
+    tender = _add(session, number)
+    tender.created_at = moment
+    session.flush()
+
+
+def test_count_tenders_created_between_uses_half_open_interval(session: Session) -> None:
+    _created_at(session, "before", datetime(2026, 10, 14, 21, 59, 59, tzinfo=UTC))
+    _created_at(session, "start", datetime(2026, 10, 14, 22, 0, tzinfo=UTC))
+    _created_at(session, "inside", datetime(2026, 10, 15, 10, 0, tzinfo=UTC))
+    _created_at(session, "end", datetime(2026, 10, 15, 22, 0, tzinfo=UTC))
+    start = datetime(2026, 10, 14, 22, 0, tzinfo=UTC)
+    end = datetime(2026, 10, 15, 22, 0, tzinfo=UTC)
+    assert count_tenders_created_between(session, start, end) == 2  # start incluso, end escluso
+    assert count_tenders_created_between(session, end, end) == 0
+
+
+def test_count_tenders_converts_time_zones_to_utc(session: Session) -> None:
+    rome = timezone(timedelta(hours=2))
+    _created_at(session, "a", datetime(2026, 10, 14, 22, 30, tzinfo=UTC))  # 00:30 del 15 a Roma
+    _created_at(session, "b", datetime(2026, 10, 15, 21, 30, tzinfo=UTC))  # 23:30 del 15 a Roma
+    _created_at(session, "c", datetime(2026, 10, 15, 22, 30, tzinfo=UTC))  # 00:30 del 16 a Roma
+    day_start = datetime(2026, 10, 15, 0, 0, tzinfo=rome)
+    day_end = datetime(2026, 10, 16, 0, 0, tzinfo=rome)
+    assert count_tenders_created_between(session, day_start, day_end) == 2
+    session.expire_all()  # SQLite rilegge senza fuso: il conteggio resta corretto
+    assert count_tenders_created_between(session, day_start, day_end) == 2
+
+
+def test_count_tenders_empty_and_default_created_at(session: Session) -> None:
+    now = datetime.now(UTC)
+    window = (now - timedelta(minutes=5), now + timedelta(minutes=5))
+    assert count_tenders_created_between(session, *window) == 0
+    _add(session, "new")  # created_at = adesso
+    assert count_tenders_created_between(session, *window) == 1
+
+
+def test_count_tenders_rejects_naive_and_inverted_ranges(session: Session) -> None:
+    aware = datetime(2026, 10, 15, tzinfo=UTC)
+    naive = datetime(2026, 10, 15)
+    with pytest.raises(ValueError, match="fuso orario"):
+        count_tenders_created_between(session, naive, aware)
+    with pytest.raises(ValueError, match="fuso orario"):
+        count_tenders_created_between(session, aware, naive)
+    with pytest.raises(ValueError, match="start non può superare end"):
+        count_tenders_created_between(session, aware + timedelta(days=1), aware)
