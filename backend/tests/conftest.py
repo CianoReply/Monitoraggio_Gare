@@ -1,5 +1,6 @@
 """Fixture condivise dai test."""
 
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -20,3 +21,14 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
         "markers", "contract: test di conformità dell'API a docs/API_CONTRACT.yaml (CI)"
     )
+
+
+@pytest.fixture(autouse=True)
+def _join_manual_run_thread() -> Iterator[None]:
+    """Attende il thread di `POST /runs` avviato da un test, così non invade il successivo."""
+    yield
+    from backend.api import runs
+
+    thread = runs._job_thread
+    if thread is not None:
+        thread.join(timeout=10)

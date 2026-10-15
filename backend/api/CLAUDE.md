@@ -25,6 +25,8 @@ T0.5 contratto · T0.7 Docker · T3.1 scheletro · T3.2 elenco gare · T3.3 dett
 - Ambiente Docker (T0.7).
 - Avvio locale dell'API (T3.1): `uvicorn backend.api.main:app --reload`, documentazione su `/docs`. Da riportare nel `CLAUDE.md` radice (file condiviso: proposta al lead).
 - CORS (T3.1): origini da `CORS_ORIGINS` (separate da virgola), predefinite `http://localhost:3000` e `http://localhost:5173`; l'indirizzo reale del frontend è DA VERIFICARE.
-- Stato: `GET /tenders`, dettaglio, documenti, report (GET/POST) e revisione dei campi (PATCH) leggono e scrivono tramite il dominio con la sessione `deps.get_session` (`DATABASE_URL`); gli errori di `backend/domain/reports.py` sono mappati in `errors.py` (404/409/422) e il commit lo fa l'API. `/deadlines`, `/stats` e `/runs` usano ancora i dati di prova di `sample_data.py` (T3.5).
+- Stato: tutti gli endpoint del contratto leggono e scrivono tramite il dominio con la sessione `deps.get_session` (`DATABASE_URL`); gli errori di `backend/domain/reports.py` sono mappati in `errors.py` (404/409/422) e il commit lo fa l'API.
+- `POST /runs` (`runs.py`): avvia in un thread il recupero dei giorni mancanti (`pipeline.run_pending_days`) o, se non ce ne sono, rielabora ieri; risponde `202` con l'id della prima nuova esecuzione, `409 run_in_progress` se c'è una riga `running` recente, un thread già attivo o il lock del job. Vale solo con un solo worker (il lock è nel processo).
+- Orologio e job sono sostituibili nei test con `deps.get_now` e `deps.get_pipeline_deps` (vedi `backend/tests/api_db.py`: `make_app` usa un TED finto, mai la rete; i test con thread usano `make_seeded_engine(file_backed=True)`).
 - Test con database: `backend/tests/api_db.py` (`make_seeded_engine`, `make_app`) crea un SQLite in memoria con `seed.py` e sostituisce `get_session`.
 - Pipeline CI e test di conformità al contratto (T3.6).

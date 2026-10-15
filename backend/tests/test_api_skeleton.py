@@ -15,7 +15,8 @@ from backend.tests.contract_utils import HTTP_METHODS, resolve
 pytestmark = pytest.mark.contract
 
 # Le gare, i documenti e i report leggono dal database: qui un SQLite in memoria con il seed.
-app = make_app(make_seeded_engine())
+# File temporaneo: `POST /runs` avvia un thread che scrive, con connessione propria.
+app = make_app(make_seeded_engine(file_backed=True))
 client = TestClient(app)
 
 
