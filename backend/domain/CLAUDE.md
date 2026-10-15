@@ -39,8 +39,9 @@ T2.1 schema e migrazioni · T2.2 filtri · T2.3 punteggio · T2.4 documenti · T
 - DA VERIFICARE: il filtro `cpv` (CAST della colonna JSON a testo + LIKE) è testato solo su SQLite. Su PostgreSQL esiste `test_cpv_prefix_filter_on_postgres`, saltato senza `TEST_POSTGRES_URL` (es. `postgresql+psycopg://user:pwd@localhost/test`; il test ricrea e poi cancella le tabelle: usare un database di prova).
 
 ## Filtri (T2.2)
-- `filters.apply_filters(tender, buyer_country=None, config=None, now=None) -> FilterResult(kept, reason)`; `reason` va in `discard_reason`. Una funzione per regola: `filter_country`, `filter_cpv`, `filter_notice_type`, `filter_deadline`, `filter_min_value`.
-- Parametri nella sezione `[filters]` di `config.toml` (soglia in euro, prefissi CPV, paesi, termini del tipo di avviso).
-- `TenderCreate` non ha il paese dell'ente: lo passa il chiamante (`buyer_country`); se è `None` la regola Paese tiene la gara. DA VERIFICARE in T1.1/T1.3 come ottenerlo.
-- DA VERIFICARE: i valori reali di `notice_type` e dei codici paese di TED (i termini in `config.toml` sono ipotesi).
-- Una rettifica (con `parent_publication_number`) passa il filtro sul tipo di avviso; importi non in euro non si confrontano con la soglia.
+- Carica la configurazione una volta: `config = load_filters_config()` (da `config.toml`, sezione `[filters]`), poi `filters.apply_filters(tender, buyer_country=..., config=config, now=None) -> FilterResult(kept, reason)`; `reason` va in `discard_reason`. Una funzione per regola: `filter_country`, `filter_cpv`, `filter_notice_type`, `filter_deadline`, `filter_min_value`.
+- `buyer_country` è obbligatorio (lo passa il chiamante: `TenderCreate` non ha il paese): codice ISO a 3 lettere o lista di codici come li dà TED (es. `["ITA"]`). `None` = non noto, la gara è tenuta (la query TED già filtra).
+- Tipo di avviso: confronto esatto sui codici eForms `notice-type` (ammessi `cn-standard`, `cn-social`, `cn-desg`); `can-*` e `pin-*` scartati. Le rettifiche (`parent_publication_number` valorizzato) passano.
+- `currency=None` con importo = euro. Importi in altre valute non si confrontano con la soglia.
+- `now` deve avere il fuso orario (altrimenti `ValueError`).
+- DA VERIFICARE: i codici `notice-type` degli avvisi pre-eForms.

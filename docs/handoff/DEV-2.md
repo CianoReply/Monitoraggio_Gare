@@ -18,6 +18,12 @@
 
 <!-- Note -->
 
+## 2026-10-15 – T2.2 Filtri automatici
+- Fatto: `filters.py` (cinque regole + `apply_filters` -> `FilterResult(kept, reason)`), `config.py` e `config.toml` (sezione `[filters]`), test.
+- Da fare: T2.3 aggiungerà la sezione `[scoring]` nello stesso `config.toml`; verificare i codici `notice-type` degli avvisi pre-eForms (DA VERIFICARE).
+- Decisioni: configurazione in TOML (`tomllib`) e non YAML (ADR-013); la config si carica una volta e si passa alle funzioni; tipo di avviso con confronto esatto sui codici eForms (ammessi `cn-standard`, `cn-social`, `cn-desg`); rettifiche tenute se `parent_publication_number` è valorizzato; `buyer_country` obbligatorio e fornito dal chiamante (`None` = non noto = tenuta).
+- Impatto sugli altri dev: DEV-1 in T1.5 chiama `apply_filters(tender, buyer_country=<codici TED, es. ["ITA"]>, config=config)` e salva `reason` in `discard_reason` (via `TenderEvaluation`); il parser (T1.3) valorizza `parent_publication_number` per i change notice e fornisce datetime con fuso.
+
 ## 2026-10-15 – T2.1 Schema del database e migrazioni
 - Fatto: modelli (5 tabelle), migrazione `0001`, `TenderCreate` e `TenderEvaluation` in `schemas.py`, repository (`upsert_tender`, `get_tender`, `list_tenders`), `seed.py` (20 gare), test su SQLite. Mergiato su develop (e23e9d9).
 - Da fare: verificare il filtro `cpv` su PostgreSQL (`TEST_POSTGRES_URL`); `tzdata` per `zoneinfo` su Windows (dipendenza da decidere con l'utente).

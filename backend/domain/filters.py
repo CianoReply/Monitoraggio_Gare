@@ -3,15 +3,19 @@
 Ogni regola riceve la gara (`TenderCreate`) e i parametri letti da `config.toml`; il motivo
 dello scarto è il testo da salvare in `tenders.discard_reason`. I filtri su Paese e CPV
 ripetono, come controllo di sicurezza, quelli già presenti nella query a TED (T1.2).
+
+La configurazione si carica una volta con `config.load_filters_config()` e si passa a
+`apply_filters`: le funzioni non rileggono il file a ogni gara.
 """
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal
 
-from backend.domain.config import FiltersConfig, load_filters_config
+from backend.domain.config import FiltersConfig
 from backend.domain.schemas import TenderCreate
 
 EURO = "EUR"
@@ -33,57 +37,73 @@ class FilterResult:
         return cls(False, reason)
 
 
-def filter_country(buyer_country: str | None, config: FiltersConfig | None = None) -> FilterResult:
-    """Paese: l'ente appaltante deve essere in Italia.
+def filter_country(
+    buyer_country: str | Sequence[str] | None, config: FiltersConfig
+) -> FilterResult:
+    """Paese: l'ente appaltante deve essere in Italia (codici ISO a 3 lettere, es. "ITA").
 
-    `TenderCreate` non ha un campo paese: lo passa il chiamante (parser, T1.3). Se non è
-    noto (`None`) la gara è tenuta, perché la query a TED già filtra per paese.
+    `buyer_country` è il valore di TED: un codice o la lista di codici degli enti. `TenderCreate`
+    non ha un campo paese, quindi lo passa il chiamante. `None` significa "paese non noto":
+    in quel caso la gara è TENUTA, perché la query a TED già filtra per paese. Con più enti
+    basta che uno sia in un paese ammesso.
     """
-    config = config or load_filters_config()
-    if buyer_country is None or buyer_country.strip().upper() in config.allowed_countries:
+    if buyer_country is None:
         return FilterResult.keep()
-    return FilterResult.discard(f"Ente appaltante non italiano ({buyer_country.strip()})")
+    countries = [buyer_country] if isinstance(buyer_country, str) else list(buyer_country)
+    normalized = [c.strip().upper() for c in countries]
+    if any(c in config.allowed_countries for c in normalized):
+        return FilterResult.keep()
+    return FilterResult.discard(f"Ente appaltante non italiano ({', '.join(normalized)})")
 
 
-def filter_cpv(tender: TenderCreate, config: FiltersConfig | None = None) -> FilterResult:
+def filter_cpv(tender: TenderCreate, config: FiltersConfig) -> FilterResult:
     """Categoria IT: almeno un CPV deve iniziare con uno dei prefissi configurati."""
-    config = config or load_filters_config()
-    prefixes = tuple(config.cpv_prefixes)
-    if any(code.startswith(prefixes) for code in tender.cpv_codes):
+    if any(code.startswith(config.cpv_prefixes) for code in tender.cpv_codes):
         return FilterResult.keep()
     return FilterResult.discard("Nessun CPV nella categoria IT")
 
 
-def filter_notice_type(tender: TenderCreate, config: FiltersConfig | None = None) -> FilterResult:
-    """Tipo di avviso: bando o preinformazione, non aggiudicazione.
+def filter_notice_type(tender: TenderCreate, config: FiltersConfig) -> FilterResult:
+    """Tipo di avviso: solo i bandi (codici eForms `notice-type`, confronto esatto).
 
-    Una rettifica (con `parent_publication_number`) passa: la gestisce la deduplica (T1.4).
+    Una rettifica ha lo stesso tipo dell'originale e si riconosce da `parent_publication_number`
+    (valorizzato dal parser, T1.3): è tenuta, la gestisce la deduplica (T1.4).
     """
-    config = config or load_filters_config()
     if tender.parent_publication_number:
         return FilterResult.keep()
     notice_type = tender.notice_type.strip().lower()
-    if any(term in notice_type for term in config.rejected_notice_type_terms):
-        return FilterResult.discard(f"Tipo di avviso non ammesso ({tender.notice_type})")
-    if any(term in notice_type for term in config.accepted_notice_type_terms):
+    if notice_type in config.accepted_notice_types:
         return FilterResult.keep()
-    return FilterResult.discard(f"Tipo di avviso non ammesso ({tender.notice_type})")
+    if notice_type.startswith("can-") or notice_type in ("veat", "compl"):
+        detail = "esito, non bando"
+    elif notice_type.startswith("pin-"):
+        detail = "preinformazione, non bando"
+    else:
+        detail = "non è un bando"
+    return FilterResult.discard(f"Tipo di avviso {notice_type}: {detail}")
 
 
 def filter_deadline(tender: TenderCreate, now: datetime | None = None) -> FilterResult:
-    """Scadenza: l'offerta si può ancora presentare (scadenza futura o assente)."""
-    now = now or datetime.now(UTC)
+    """Scadenza: l'offerta si può ancora presentare (scadenza futura o assente).
+
+    `now` deve avere il fuso orario (ValueError se naive); senza `now` si usa l'ora corrente UTC.
+    Il confronto è tra istanti, quindi indipendente dal fuso in cui sono espressi.
+    """
+    if now is None:
+        now = datetime.now(UTC)
+    elif now.tzinfo is None:
+        raise ValueError("now deve avere il fuso orario (datetime aware)")
     if tender.submission_deadline is None or tender.submission_deadline > now:
         return FilterResult.keep()
     return FilterResult.discard("Scadenza offerte già passata")
 
 
-def filter_min_value(tender: TenderCreate, config: FiltersConfig | None = None) -> FilterResult:
+def filter_min_value(tender: TenderCreate, config: FiltersConfig) -> FilterResult:
     """Importo minimo: importo >= soglia (in euro) oppure importo assente.
 
-    Un importo in valuta diversa dall'euro non si confronta (nessun cambio): la gara è tenuta.
+    Se `currency` è `None` l'importo è trattato come euro. Un importo in un'altra valuta non
+    si confronta con la soglia (nessun cambio): la gara è tenuta.
     """
-    config = config or load_filters_config()
     value: Decimal | None = tender.estimated_value
     if value is None or (tender.currency or EURO) != EURO or value >= config.min_value_eur:
         return FilterResult.keep()
@@ -95,20 +115,25 @@ def filter_min_value(tender: TenderCreate, config: FiltersConfig | None = None) 
 def apply_filters(
     tender: TenderCreate,
     *,
-    buyer_country: str | None = None,
-    config: FiltersConfig | None = None,
+    buyer_country: str | Sequence[str] | None,
+    config: FiltersConfig,
     now: datetime | None = None,
 ) -> FilterResult:
-    """Applica tutte le regole nell'ordine Paese, CPV, tipo, scadenza, importo.
+    """Applica le regole nell'ordine Paese, CPV, tipo, scadenza, importo.
 
-    Restituisce l'esito della prima regola che scarta, altrimenti "tenuta".
+    Restituisce l'esito della prima regola che scarta, altrimenti "tenuta". `buyer_country`
+    è obbligatorio (vedi `filter_country`; `None` esplicito = non noto = tenuta). `config` si
+    carica una sola volta con `load_filters_config()` e si riusa per tutte le gare.
     """
-    config = config or load_filters_config()
-    results = (
-        filter_country(buyer_country, config),
-        filter_cpv(tender, config),
-        filter_notice_type(tender, config),
-        filter_deadline(tender, now),
-        filter_min_value(tender, config),
+    rules = (
+        lambda: filter_country(buyer_country, config),
+        lambda: filter_cpv(tender, config),
+        lambda: filter_notice_type(tender, config),
+        lambda: filter_deadline(tender, now),
+        lambda: filter_min_value(tender, config),
     )
-    return next((r for r in results if not r.kept), FilterResult.keep())
+    for rule in rules:
+        result = rule()
+        if not result.kept:
+            return result
+    return FilterResult.keep()
