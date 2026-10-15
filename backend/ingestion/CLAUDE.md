@@ -25,3 +25,4 @@ T1.1 studio API TED · T1.2 client · T1.3 parser · T1.4 deduplica e rettifiche
 
 ## Da completare
 - Formato dei log JSON (T1.6).
+- Job (`pipeline.py`, `scheduler.py`): `run_pending_days` alle 06:00 Europe/Rome (`INGESTION_SCHEDULE`); lo scheduler si avvia con `start_scheduler()` dall'app (T4.1), con un solo worker (lock solo nel processo).
