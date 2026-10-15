@@ -1,0 +1,16 @@
+# Configurazione del modulo domain: soglie, CPV e parole chiave stanno qui, mai nel codice.
+# (Il piano parla di config.yaml; si usa TOML perche' pyyaml non e' tra le dipendenze concordate.)
+
+[filters]
+# Importo minimo in euro: sotto la soglia la gara e' scartata; senza importo e' tenuta.
+min_value_eur = 50000
+# Una gara e' tenuta se almeno un suo CPV inizia con uno di questi prefissi.
+cpv_prefixes = ["72", "48", "302", "324", "642"]
+# Paesi ammessi per l'ente appaltante (codici paese, maiuscoli).
+# DA VERIFICARE in T1.1: formato del codice paese restituito da TED (2 o 3 lettere).
+allowed_countries = ["IT", "ITA"]
+# Tipo di avviso (confronto senza maiuscole). Una gara e' tenuta se il tipo contiene un
+# termine ammesso e non contiene un termine escluso (aggiudicazioni e simili).
+# DA VERIFICARE in T1.1: valori reali di notice_type restituiti da TED.
+accepted_notice_type_terms = ["bando", "preinformazione", "cn-", "pin-", "contract notice", "prior information"]
+rejected_notice_type_terms = ["aggiudicazione", "award", "can-", "result"]

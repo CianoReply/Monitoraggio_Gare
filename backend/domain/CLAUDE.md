@@ -16,7 +16,7 @@ T2.1 schema e migrazioni · T2.2 filtri · T2.3 punteggio · T2.4 documenti · T
 ## Regole specifiche
 - Unico modulo che accede direttamente al database; non importa `ingestion` né `api`.
 - I modelli seguono esattamente `docs/ARCHITECTURE.md`; per cambiarli serve una PR approvata da tutti.
-- Soglie, CPV, parole chiave e pesi stanno in `config.yaml`, mai nel codice.
+- Soglie, CPV, parole chiave e pesi stanno in `backend/domain/config.toml` (TOML, letto con `config.py`; pyyaml non è tra le dipendenze), mai nel codice.
 - Ogni gara scartata salva il motivo in `discard_reason`.
 - Il punteggio è deterministico: nessuna chiamata a LLM.
 - Download solo per gare con `is_relevant = true`, massimo 50 MB per file, nessun login automatico.
@@ -37,3 +37,10 @@ T2.1 schema e migrazioni · T2.2 filtri · T2.3 punteggio · T2.4 documenti · T
 - `upsert_tender(session, TenderCreate, TenderEvaluation)`: la gara si salva solo già valutata (punteggio 1-5 obbligatorio, ADR-010); il job calcola filtri e punteggio prima, nella stessa transazione.
 - `list_tenders` segue `GET /tenders` del contratto (sort `relevance|deadline|published`, `include_discarded`, `report_status` derivato incluso negli item, intervalli di scadenza in giorni Europe/Rome). `is_relevant`, `publication_from/to` sono solo per uso interno (`/deadlines`, `/stats`).
 - DA VERIFICARE: il filtro `cpv` (CAST della colonna JSON a testo + LIKE) è testato solo su SQLite. Su PostgreSQL esiste `test_cpv_prefix_filter_on_postgres`, saltato senza `TEST_POSTGRES_URL` (es. `postgresql+psycopg://user:pwd@localhost/test`; il test ricrea e poi cancella le tabelle: usare un database di prova).
+
+## Filtri (T2.2)
+- `filters.apply_filters(tender, buyer_country=None, config=None, now=None) -> FilterResult(kept, reason)`; `reason` va in `discard_reason`. Una funzione per regola: `filter_country`, `filter_cpv`, `filter_notice_type`, `filter_deadline`, `filter_min_value`.
+- Parametri nella sezione `[filters]` di `config.toml` (soglia in euro, prefissi CPV, paesi, termini del tipo di avviso).
+- `TenderCreate` non ha il paese dell'ente: lo passa il chiamante (`buyer_country`); se è `None` la regola Paese tiene la gara. DA VERIFICARE in T1.1/T1.3 come ottenerlo.
+- DA VERIFICARE: i valori reali di `notice_type` e dei codici paese di TED (i termini in `config.toml` sono ipotesi).
+- Una rettifica (con `parent_publication_number`) passa il filtro sul tipo di avviso; importi non in euro non si confrontano con la soglia.
