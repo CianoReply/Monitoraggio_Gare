@@ -1,12 +1,50 @@
-"""Endpoint dei report e della revisione dei campi (dati di prova in T3.1)."""
+"""Endpoint dei report e della revisione dei campi."""
 
-from fastapi import APIRouter
+from typing import Annotated
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 from backend.api import sample_data
+from backend.api.convert import aware
+from backend.api.deps import get_session
 from backend.api.errors import ApiError, error_responses
 from backend.api.schemas import FieldReview, PositiveId, Report, ReportCreate
+from backend.api.schemas import ReportField as ReportFieldSchema
+from backend.domain import reports as domain_reports
+from backend.domain.models import Report as ReportModel
+from backend.domain.models import ReportField as ReportFieldModel
 
 router = APIRouter(tags=["reports"])
+
+
+def _field_from_model(field: ReportFieldModel) -> ReportFieldSchema:
+    return ReportFieldSchema(
+        id=field.id,
+        report_id=field.report_id,
+        label=field.label,
+        value=field.value,
+        original_value=field.original_value,
+        source_doc=field.source_doc,
+        source_page=field.source_page,
+        is_critical=field.is_critical,
+        verification_status=field.verification_status.value,
+        reviewer=field.reviewer,
+        reviewed_at=aware(field.reviewed_at) if field.reviewed_at else None,
+    )
+
+
+def report_from_model(report: ReportModel) -> Report:
+    """Converte il report del dominio nello schema del contratto (datetime sempre con fuso)."""
+    return Report(
+        id=report.id,
+        tender_id=report.tender_id,
+        summary=report.summary,
+        status=report.status.value,
+        generated_at=aware(report.generated_at),
+        ai_label=report.ai_label,
+        fields=[_field_from_model(f) for f in report.fields],
+    )
 
 
 @router.get(
@@ -16,12 +54,8 @@ router = APIRouter(tags=["reports"])
     response_model=Report,
     responses=error_responses(404, 422),
 )
-def get_tender_report(id: PositiveId) -> Report:
-    # T3.3: sostituire con repository
-    sample_data.get_sample_tender(id)
-    if sample_data.REPORT_101.tender_id != id:
-        raise ApiError(404, "report_not_found", f"La gara {id} non ha ancora un report.")
-    return sample_data.REPORT_101
+def get_tender_report(id: PositiveId, session: Annotated[Session, Depends(get_session)]) -> Report:
+    return report_from_model(domain_reports.get_report_for_tender(session, id))
 
 
 @router.post(
@@ -32,12 +66,15 @@ def get_tender_report(id: PositiveId) -> Report:
     response_model=Report,
     responses=error_responses(404, 409, 422),
 )
-def create_tender_report(id: PositiveId, body: ReportCreate) -> Report:
-    # T3.3: sostituire con repository (validazione con lo schema di T2.5)
-    sample_data.get_sample_tender(id)
-    if sample_data.REPORT_101.tender_id == id:
-        raise ApiError(409, "report_already_exists", f"La gara {id} ha già un report.")
-    return sample_data.REPORT_CREATED
+def create_tender_report(
+    id: PositiveId, body: ReportCreate, session: Annotated[Session, Depends(get_session)]
+) -> Report:
+    # Validazione e regole (un solo report per gara) sono del dominio; qui solo la transazione:
+    # il dominio fa flush, il commit spetta all'API.
+    payload = body.model_dump(mode="json", exclude_unset=True)
+    report = domain_reports.create_report(session, id, payload)
+    session.commit()
+    return report_from_model(report)
 
 
 @router.patch(
@@ -48,7 +85,7 @@ def create_tender_report(id: PositiveId, body: ReportCreate) -> Report:
     responses=error_responses(404, 422),
 )
 def review_report_field(id: PositiveId, field_id: PositiveId, body: FieldReview) -> Report:
-    # T3.4: sostituire con repository e ricalcolo dello stato del report
+    # T3.4: sostituire con domain.reports.review_field
     report = sample_data.REPORT_101
     if id != report.id:
         raise ApiError(404, "report_not_found", f"Il report {id} non esiste.")

@@ -14,15 +14,32 @@ from backend.tests.contract_utils import HTTP_METHODS, resolve
 
 pytestmark = pytest.mark.contract
 
-# GET /tenders legge dal database (T3.2): qui un SQLite in memoria con i dati di seed.
+# Le gare, i documenti e i report leggono dal database: qui un SQLite in memoria con il seed.
 app = make_app(make_seeded_engine())
 client = TestClient(app)
 
+
+def _fresh_client() -> TestClient:
+    """Client con un database nuovo, per i test che scrivono."""
+    return TestClient(make_app(make_seeded_engine()))
+
+
+def _find_tender_ids(test_client: TestClient) -> tuple[int, int]:
+    """Id di una gara con report e di una senza, ricavati dal seed."""
+    items = test_client.get("/tenders", params={"page_size": 100, "include_discarded": True})
+    tenders = items.json()["items"]
+    with_report = next(t["id"] for t in tenders if t["report_status"] != "none")
+    without_report = next(t["id"] for t in tenders if t["report_status"] == "none")
+    return with_report, without_report
+
+
+WITH_REPORT, WITHOUT_REPORT = _find_tender_ids(client)
+
 ENDPOINTS: list[tuple[str, str, int]] = [
     ("get", "/tenders", 200),
-    ("get", "/tenders/101", 200),
-    ("get", "/tenders/101/documents", 200),
-    ("get", "/tenders/101/report", 200),
+    ("get", f"/tenders/{WITH_REPORT}", 200),
+    ("get", f"/tenders/{WITH_REPORT}/documents", 200),
+    ("get", f"/tenders/{WITH_REPORT}/report", 200),
     ("get", "/deadlines", 200),
     ("get", "/stats", 200),
     ("get", "/runs", 200),
@@ -128,7 +145,7 @@ def test_endpoint_returns_sample_data_conforming_to_contract(
 
 
 def test_post_report_and_patch_field_conform_to_contract(spec: dict) -> None:
-    created = client.post("/tenders/102/report", json=REPORT_BODY)
+    created = _fresh_client().post(f"/tenders/{WITHOUT_REPORT}/report", json=REPORT_BODY)
     assert created.status_code == 201
     _assert_matches_contract(spec, "post", "/tenders/{id}/report", created)
 
@@ -184,7 +201,9 @@ def test_not_found_uses_error_format() -> None:
             "error": "tender_not_found",
             "message": "La gara 999 non esiste.",
         }
-    assert client.get("/tenders/102/report").json()["error"] == "report_not_found"
+    missing = client.get(f"/tenders/{WITHOUT_REPORT}/report")
+    assert missing.status_code == 404
+    assert missing.json()["error"] == "report_not_found"
     assert client.get("/nonexistent").json()["error"] == "not_found"
     patch = client.patch("/reports/7/fields/999", json={"action": "confirm", "reviewer": "A"})
     assert patch.status_code == 404
@@ -194,7 +213,7 @@ def test_not_found_uses_error_format() -> None:
 
 
 def test_second_report_returns_409() -> None:
-    response = client.post("/tenders/101/report", json=REPORT_BODY)
+    response = client.post(f"/tenders/{WITH_REPORT}/report", json=REPORT_BODY)
     assert response.status_code == 409
     assert response.json()["error"] == "report_already_exists"
 
@@ -273,14 +292,15 @@ def test_invalid_review_body_returns_422(body: dict) -> None:
     ],
 )
 def test_invalid_report_body_returns_422(body: dict) -> None:
-    response = client.post("/tenders/102/report", json=body)
+    response = client.post(f"/tenders/{WITHOUT_REPORT}/report", json=body)
     assert response.status_code == 422
     assert response.json()["error"] == "validation_error"
 
 
 def test_report_accepts_explicit_generated_at() -> None:
     body = {**REPORT_BODY, "generated_at": "2026-10-14T09:15:00+00:00"}
-    assert client.post("/tenders/102/report", json=body).status_code == 201
+    created = _fresh_client().post(f"/tenders/{WITHOUT_REPORT}/report", json=body)
+    assert created.status_code == 201
 
 
 def test_deadlines_accepts_from_parameter() -> None:
@@ -289,7 +309,7 @@ def test_deadlines_accepts_from_parameter() -> None:
 
 
 def test_method_not_allowed_uses_error_format() -> None:
-    response = client.delete("/tenders/101")
+    response = client.delete(f"/tenders/{WITH_REPORT}")
     assert response.status_code == 405
     assert response.json()["error"] == "method_not_allowed"
 

@@ -8,6 +8,23 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.api.schemas import Error
+from backend.domain.reports import (
+    FieldNotFoundError,
+    ReportAlreadyExistsError,
+    ReportError,
+    ReportNotFoundError,
+    ReportValidationError,
+    TenderNotFoundError,
+)
+
+# Codice HTTP degli errori del dominio dei report (il codice applicativo è `exc.code`).
+REPORT_ERROR_STATUS: dict[type[ReportError], int] = {
+    TenderNotFoundError: 404,
+    ReportNotFoundError: 404,
+    FieldNotFoundError: 404,
+    ReportAlreadyExistsError: 409,
+    ReportValidationError: 422,
+}
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +69,12 @@ async def _http_handler(_: Request, exc: Exception) -> JSONResponse:
     return _response(exc.status_code, code, str(exc.detail))
 
 
+async def _report_error_handler(_: Request, exc: Exception) -> JSONResponse:
+    assert isinstance(exc, ReportError)
+    status = next((s for cls, s in REPORT_ERROR_STATUS.items() if isinstance(exc, cls)), 500)
+    return _response(status, exc.code, exc.message)
+
+
 async def _unhandled_handler(_: Request, exc: Exception) -> JSONResponse:
     logger.error("Errore non gestito", exc_info=exc)
     return _response(500, "internal_error", "Errore interno del server.")
@@ -60,6 +83,7 @@ async def _unhandled_handler(_: Request, exc: Exception) -> JSONResponse:
 def register_error_handlers(app: FastAPI) -> None:
     """Registra gli handler: tutti gli errori escono come `{ "error", "message" }`."""
     app.add_exception_handler(ApiError, _api_error_handler)
+    app.add_exception_handler(ReportError, _report_error_handler)
     app.add_exception_handler(RequestValidationError, _validation_handler)
     app.add_exception_handler(StarletteHTTPException, _http_handler)
     app.add_exception_handler(Exception, _unhandled_handler)
