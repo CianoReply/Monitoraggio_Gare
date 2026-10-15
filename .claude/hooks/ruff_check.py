@@ -6,9 +6,21 @@ così Claude può correggere subito. Esce con 0 negli altri casi.
 """
 
 import json
+import os
 import shutil
 import subprocess
 import sys
+from pathlib import Path
+
+
+def venv_ruff() -> str | None:
+    """Cerca ruff nell'ambiente virtuale del progetto, se non è nel PATH."""
+    project_dir = Path(os.environ.get("CLAUDE_PROJECT_DIR") or ".")
+    for candidate in (".venv/Scripts/ruff.exe", ".venv/bin/ruff"):
+        path = project_dir / candidate
+        if path.exists():
+            return str(path)
+    return None
 
 
 def main() -> int:
@@ -21,7 +33,7 @@ def main() -> int:
     if not file_path.endswith(".py"):
         return 0
 
-    ruff = shutil.which("ruff")
+    ruff = shutil.which("ruff") or venv_ruff()
     if ruff is None:
         print("Hook ruff: comando 'ruff' non trovato; attiva l'ambiente virtuale.", file=sys.stderr)
         return 1
