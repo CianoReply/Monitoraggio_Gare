@@ -75,3 +75,6 @@ Per le regole di coordinamento prevale il prompt del loop; per il contenuto tecn
 | 2026-10-15 | Assegnati T2.1 a DEV-2 e T0.5 a DEV-3 (stato [~]); avviati i teammate. |
 | 2026-10-15 | DEV-3: PRONTO PER MERGE T0.5 (ee1ff63, 8/8 test). Revisione code-reviewer: MODIFICHE RICHIESTE giro 1 (esempi incoerenti, test degli esempi contro gli schemi, regole di validazione, ai_label, DA VERIFICARE TED). Aggiunte include_discarded e report_status accettate (ADR-012 a cura del lead). |
 | 2026-10-15 | DEV-1: T0.3 hook PreToolUse (.env bloccato anche via Bash; ask su API_CONTRACT/ARCHITECTURE), Stop (test), fallback ruff nel venv, ADR-011 proposta, su setup/claude-hooks (51f9b2c, d5bca24). Merge dopo T0.5 per non interferire con DEV-3; serve OK di DEV-2 e DEV-3 su .claude/. |
+| 2026-10-15 | MERGED T0.5 – ab2f877 – develop 12/12 (2 giri di revisione). ADR-012 proposta. DEV-3 OK sugli hook di T0.3 (osservazioni non bloccanti: durata dello Stop, python3 su Windows). |
+| 2026-10-15 | DEV-2: PRONTO PER MERGE T2.1 (01d30df, 34/34). Revisione avviata. |
+| 2026-10-15 | CHECKPOINT UMANO fine Fase 0: team fermo, nessun turno di merge concesso fino all approvazione dell utente. |

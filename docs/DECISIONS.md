@@ -16,6 +16,7 @@
 | ADR-008 | Al massimo un report per gara | Accettata |
 | ADR-009 | Recupero dei giorni falliti con `run_date` | Accettata |
 | ADR-010 | Punteggio per ogni gara salvata | Accettata |
+| ADR-012 | Gare scartate e stato del report nell'API | Proposta |
 
 ---
 
@@ -78,3 +79,9 @@
 - **Decisione:** il punteggio si calcola per tutte le gare salvate, anche quelle scartate. `is_relevant` è `true` solo se la gara non è scartata e il voto è ≥ soglia.
 - **Motivazione:** il criterio di T2.3 resta verificabile su tutte le righe e si può spiegare perché una gara scartata avrebbe avuto un certo voto.
 - **Conseguenze:** le gare scartate restano in `tenders` con `discard_reason`; se e come esporle nell'API si decide in T0.5.
+
+## ADR-012 – Gare scartate e stato del report nell'API
+- **Contesto:** ADR-010 rimandava a T0.5 la scelta su come esporre le gare scartate; il piano prevede il filtro `report_status` su `GET /tenders`, ma il modello dati non ha uno stato del report nella gara.
+- **Decisione:** `GET /tenders` esclude le gare scartate salvo il parametro aggiuntivo `include_discarded=true` (predefinito `false`); `GET /tenders/{id}` restituisce sempre la gara. L'oggetto `Tender` dell'API espone il campo derivato `report_status` (`none` / `to_review` / `verified`), calcolato da `reports.status` (`none` se la gara non ha report), senza nuova colonna.
+- **Motivazione:** l'elenco mostra di default solo ciò che serve; le gare scartate restano consultabili e spiegabili (ADR-010). Il frontend filtra e mostra lo stato del report senza una chiamata per gara.
+- **Conseguenze:** `repository.list_tenders` (DEV-2) implementa `include_discarded` e restituisce `report_status`; contratto in [API_CONTRACT.yaml](API_CONTRACT.yaml) (T0.5). Stato "Proposta" fino al checkpoint umano di fine Fase 0.

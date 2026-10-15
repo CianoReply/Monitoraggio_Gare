@@ -92,9 +92,10 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 - Durata stimata: 1 giorno
 - Obiettivo: definire prima del codice cosa esporrà il backend; è il secondo accordo tra i moduli e permette di progettare il frontend in anticipo.
 - Finito quando:
-  - [ ] il file supera la validazione OpenAPI (ad esempio con `openapi-spec-validator`)
-  - [ ] tutti e tre i dev hanno approvato
+  - [x] il file supera la validazione OpenAPI (ad esempio con `openapi-spec-validator`)
+  - [ ] tutti e tre i dev hanno approvato (DEV-1 e DEV-2: OK nel loop; IN ATTESA UMANA: checkpoint di fine Fase 0)
   - [ ] da questo momento il file si modifica solo con una PR approvata da tutti
+- Note: unito in `develop` il 2026-10-15 (merge ab2f877), 2 giri di revisione; resta `[~]` fino al checkpoint umano. Aggiunte al piano in ADR-012.
 - Note: produce `docs/API_CONTRACT.yaml` (OpenAPI 3) con gli 11 endpoint del piano, errori `404`/`409`/`422`, formato errore `{ "error": "codice", "message": "descrizione" }` e un esempio per endpoint.
 
 ### T0.6 – Compilazione di `docs/TASKS.md` e dei file di coordinamento
