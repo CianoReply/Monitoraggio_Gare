@@ -179,3 +179,31 @@ def load_scoring_config(path: Path | None = None) -> ScoringConfig:
         deadline_urgent_days=urgent_days,
         deadline_urgent_points=_integer(section, "deadline_urgent_points", where),
     )
+
+
+@dataclass(frozen=True)
+class DocumentsConfig:
+    """Parametri della gestione dei documenti di gara (T2.4)."""
+
+    direct_file_extensions: tuple[str, ...]
+    max_file_bytes: int
+    request_timeout_seconds: float
+
+
+def load_documents_config(path: Path | None = None) -> DocumentsConfig:
+    """Carica e valida la sezione `[documents]`."""
+    path = path or DEFAULT_CONFIG_PATH
+    section = _section(path, "documents")
+    where = f"{path}: documents"
+    extensions = _string_list(section, "direct_file_extensions", where, lower=True)
+    if not all(e.startswith(".") and len(e) > 1 for e in extensions):
+        raise ConfigError(f'{where}.direct_file_extensions: servono estensioni come ".pdf"')
+    max_mb = _number(section, "max_file_mb", where, minimum=0)
+    timeout = _number(section, "request_timeout_seconds", where, minimum=0)
+    if max_mb <= 0 or timeout <= 0:
+        raise ConfigError(f"{where}: max_file_mb e request_timeout_seconds devono essere > 0")
+    return DocumentsConfig(
+        direct_file_extensions=extensions,
+        max_file_bytes=int(max_mb * 1024 * 1024),
+        request_timeout_seconds=float(timeout),
+    )

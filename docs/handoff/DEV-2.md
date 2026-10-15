@@ -18,6 +18,12 @@
 
 <!-- Note -->
 
+## 2026-10-15 – T2.4 Documenti di gara
+- Fatto: `documents.py` (`classify_link`, `download_document`, `process_tender_documents`), sezione `[documents]` in `config.toml` con `load_documents_config`, test con `httpx.MockTransport` (nessuna rete).
+- Da fare: verificare su link reali di TED quali estensioni dirette compaiono (finora solo piattaforme di gara); un'eventuale colonna per il motivo dell'errore richiede una modifica al modello dati (non fatta, il motivo va nel log).
+- Decisioni: download solo per link diretti a `.pdf`/`.zip`; piattaforme e link assenti -> riga `not_accessible` (il login non si automatizza); `pending` solo per errori temporanei (rete, 5xx), che si riprovano alla chiamata successiva; 4xx e file oltre 50 MB sono `not_accessible` e non si riprovano; un'altra pagina HTML al posto del file è rifiutata; `DOCUMENTS_DIR` predefinita `/data/documents`.
+- Impatto sugli altri dev: DEV-1 in T1.5 chiama `process_tender_documents(session, tender)` per ogni gara salvata (fa solo flush, il commit è del job); DEV-3 per T3.3 legge `tender.documents`; in Docker `DOCUMENTS_DIR` deve puntare a un volume scrivibile.
+
 ## 2026-10-15 – T2.3 Punteggio di pertinenza
 - Fatto: `scoring.py` (`compute_score`, `score_breakdown`, `evaluate_tender`), sezione `[scoring]` in `config.toml` con `load_scoring_config`, `scoring_sample.py` per la validazione, seed che calcola i voti con le regole, test su 9 avvisi reali della fixture TED e 7 casi sintetici.
 - Da fare: validazione di Giuseppe su 20 gare reali (IN ATTESA UMANA; `python -m backend.domain.scoring_sample --limit 20` dopo che il job ha riempito il database) e taratura di pesi, CPV core e parole chiave in `config.toml`.
