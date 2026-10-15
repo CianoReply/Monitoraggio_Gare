@@ -383,3 +383,36 @@ def test_recovery_stops_at_first_failed_day(factory: sessionmaker[Session]) -> N
     summaries = run_pending_days(make_deps(factory, fetch))
     assert [s.run_date for s in summaries] == [date(2026, 10, 12)]
     assert calls == [date(2026, 10, 12)]
+
+
+@pytest.fixture
+def quiet_logging(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("backend.ingestion.logging_config.configure_logging", lambda: None)
+
+
+@pytest.mark.usefixtures("quiet_logging")
+def test_main_runs_the_given_day(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[date] = []
+
+    def fake_run(day: date, deps: PipelineDeps | None = None) -> Any:
+        calls.append(day)
+        return pipeline.RunSummary(run_id=1, run_date=day, status=RunStatus.SUCCESS)
+
+    monkeypatch.setattr(pipeline, "run_daily_ingestion", fake_run)
+    monkeypatch.setattr(pipeline, "run_pending_days", lambda: [])
+    assert pipeline.main(["--date", "2026-10-14"]) == 0
+    assert calls == [date(2026, 10, 14)]
+    assert pipeline.main([]) == 0
+
+
+@pytest.mark.usefixtures("quiet_logging")
+def test_main_reports_failures_and_busy(monkeypatch: pytest.MonkeyPatch) -> None:
+    failed = pipeline.RunSummary(run_id=1, run_date=DAY, status=RunStatus.FAILED)
+    monkeypatch.setattr(pipeline, "run_pending_days", lambda: [failed])
+    assert pipeline.main([]) == 1
+
+    def busy() -> list[Any]:
+        raise RunAlreadyRunningError("in corso")
+
+    monkeypatch.setattr(pipeline, "run_pending_days", busy)
+    assert pipeline.main([]) == 2

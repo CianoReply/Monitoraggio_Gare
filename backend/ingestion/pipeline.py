@@ -317,3 +317,29 @@ def run_pending_days(deps: PipelineDeps | None = None) -> list[RunSummary]:
         if summary.status is RunStatus.FAILED:
             break
     return summaries
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Esecuzione manuale: `python -m backend.ingestion.pipeline [--date AAAA-MM-GG]`.
+
+    Senza `--date` recupera i giorni mancanti fino a ieri; con `--date` elabora quel giorno.
+    Restituisce 0 se tutte le esecuzioni sono riuscite, 1 altrimenti (2 se un'altra è in corso).
+    """
+    import argparse
+
+    from backend.ingestion.logging_config import configure_logging
+
+    parser = argparse.ArgumentParser(description="Job di raccolta delle gare da TED")
+    parser.add_argument("--date", type=date.fromisoformat, help="giorno di pubblicazione TED")
+    args = parser.parse_args(argv)
+    configure_logging()
+    try:
+        summaries = [run_daily_ingestion(args.date)] if args.date else run_pending_days()
+    except RunAlreadyRunningError as exc:
+        logger.error("%s", exc)
+        return 2
+    return 0 if all(s.status is RunStatus.SUCCESS for s in summaries) else 1
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())
