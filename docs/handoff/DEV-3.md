@@ -18,6 +18,13 @@
 
 <!-- Note -->
 
+## 2026-10-15 – T4.1 parte api: ciclo di vita dell'app
+- Fatto: `lifespan` di FastAPI in `backend/api/main.py` (configura il log JSON; con `ENABLE_SCHEDULER=true` avvia lo scheduler e lo ferma con `shutdown(wait=False)`); `ENABLE_SCHEDULER` e `INGESTION_SCHEDULE` in `.env.example` e nel servizio `api` del compose, che ora avvia uvicorn con `--workers 1`. Test in `test_api_lifespan.py`.
+- Da fare: T4.2 (test end-to-end, dopo T4.1 completo); i passi umani su GitHub (T3.6) e la prova di `docker compose up` (T0.7).
+- Decisioni: il valore è accettato se vale `true` senza distinzione di maiuscole; qualunque altro valore lascia lo scheduler spento. Senza `with TestClient(...)` il ciclo di vita non parte, quindi i test normali non toccano log e scheduler.
+- Impatto sugli altri dev: con più worker lo scheduler partirebbe più volte (i lock sono solo nel processo): tenere un solo worker.
+
+
 ## 2026-10-15 – T3.5 Scadenze, statistiche ed esecuzioni (nota anche per T3.4)
 - Fatto T3.4: `PATCH /reports/{id}/fields/{field_id}` chiama `domain.reports.review_field` e fa il commit; test in `test_api_review.py`.
 - Fatto T3.5: `GET /deadlines` (gare rilevanti nell'intervallo da `list_tenders`, `days_left` e `urgency` sulla data odierna Europe/Rome), `GET /stats` (quattro indicatori da `list_tenders` e `count_tenders_created_between`), `GET /runs` (`list_runs`), `POST /runs` (thread con `run_pending_days`, 202/409). Tolti i dati di prova (`sample_data.py`). Orologio e dipendenze del job iniettabili (`deps.get_now`, `deps.get_pipeline_deps`).
