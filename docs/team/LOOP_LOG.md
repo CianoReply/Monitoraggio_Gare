@@ -84,3 +84,4 @@ Per le regole di coordinamento prevale il prompt del loop; per il contenuto tecn
 | 2026-10-15 | MERGED T2.1 – e23e9d9 – develop 69 + 1 saltato (2 giri). SBLOCCATI T2.2 e T2.5 (DEV-2). Revisione T3.1: MODIFICHE RICHIESTE giro 1. OK di DEV-2 e DEV-3 sugli hook T0.3. tzdata (zoneinfo su Windows) da chiedere all'utente. |
 | 2026-10-15 | MERGED T0.3 – 38991d7 – develop 96 + 1 saltato. Blocco via Bash dei file di segreti verificato in locale. T0.3 [x]: SBLOCCATI T1.1 (DEV-1, in corso) e T3.6 (DEV-3, dopo T3.1). |
 | 2026-10-15 | MERGED T3.1 – 1cd7ba0 – develop 144 + 1 saltato (2 giri). SBLOCCATI T3.2 (in corso) e T3.6 (DEV-3). Revisione T2.2: MODIFICHE RICHIESTE giro 1. ADR-013 (TOML). T1.1: fixture reali TED raccolte (avvisi IT del 2026-10-14 e change notice). |
+| 2026-10-15 | MERGED T1.1 – 58008a5 – develop 151 + 1 saltato. T1.2 in corso (DEV-1). DEV-2: PRONTO T2.2 giro 2. DEV-3: PRONTO T3.2 (revisione avviata). |

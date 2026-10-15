@@ -128,20 +128,21 @@ Se uno di questi task ritarda, ritardano anche gli altri:
 
 ### T1.1 – Studio dell'API di TED
 - Responsabile: DEV-1
-- Stato: [~] in corso
+- Stato: [x] fatto (2026-10-15, merge 58008a5)
 - Dipende da: T0.3
 - Branch: research/ted-api
 - Durata stimata: 1 giorno
 - Obiettivo: capire con precisione come interrogare TED prima di scrivere il client.
 - Finito quando:
-  - [ ] tutte e 9 le domande hanno risposta o sono marcate "DA VERIFICARE"
-  - [ ] una richiesta reale di prova restituisce gare italiane IT
-  - [ ] i dubbi aperti di T0.4 sono chiusi o riportati
+  - [x] tutte e 9 le domande hanno risposta o sono marcate "DA VERIFICARE"
+  - [x] una richiesta reale di prova restituisce gare italiane IT
+  - [x] i dubbi aperti di T0.4 sono chiusi o riportati
 - Note: produce `docs/TED_API_NOTES.md` e 2–3 risposte reali di TED in `backend/tests/fixtures/`; usa il subagent `ted-api-researcher`.
+- Esito: `docs/TED_API_NOTES.md` con risposte verificate da chiamate reali; 3 fixture e `test_ted_fixtures.py`. Scoperte: limite campi × limit ≤ 10.000, `429` sulle raffiche, rettifiche come change notice collegati via `change-notice-version-identifier` → `notice-identifier` (catena), scadenza offerte = `deadline-receipt-tender-*` (non `deadline`). Q7 e pre-eForms DA VERIFICARE.
 
 ### T1.2 – Client API di TED
 - Responsabile: DEV-1
-- Stato: [ ] da fare
+- Stato: [~] in corso
 - Dipende da: T1.1
 - Branch: feat/ted-client
 - Durata stimata: 2 giorni
