@@ -32,3 +32,4 @@ T0.5 contratto · T0.7 Docker · T3.1 scheletro · T3.2 elenco gare · T3.3 dett
 - Orologio e job sono sostituibili nei test con `deps.get_now` e `deps.get_pipeline_deps` (vedi `backend/tests/api_db.py`: `make_app` usa un TED finto, mai la rete; i test con thread usano `make_seeded_engine(file_backed=True)`).
 - Test con database: `backend/tests/api_db.py` (`make_seeded_engine`, `make_app`) crea un SQLite in memoria con `seed.py` e sostituisce `get_session`.
 - Pipeline CI e test di conformità al contratto (T3.6).
+- Ciclo di vita (`main.lifespan`, T4.1): configura il log JSON (`configure_logging`) e avvia lo scheduler del job giornaliero (`start_scheduler`, orario `INGESTION_SCHEDULE`) solo con `ENABLE_SCHEDULER=true`; alla chiusura `shutdown(wait=False)`. Predefinito spento (test e sviluppo); il compose lo accende e avvia uvicorn con `--workers 1` perché i lock valgono solo nel processo. I test usano `with TestClient(app)` solo per provare il ciclo di vita.
