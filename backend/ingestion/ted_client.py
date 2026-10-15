@@ -73,6 +73,7 @@ NOTICE_FIELDS: tuple[str, ...] = (
 MAX_FIELDS_PER_PAGE = 10_000
 MAX_PAGE_SIZE = 250
 RETRY_DELAYS: tuple[float, ...] = (1.0, 2.0, 4.0)
+MAX_PAGES = 100  # 100 × 200 = 20.000 avvisi, ben oltre il volume di un giorno
 
 
 class TedApiError(Exception):
@@ -135,14 +136,16 @@ class TedClient:
         clock: Callable[[], float] = time.monotonic,
     ) -> None:
         self.config = config or TedClientConfig.from_env()
+        self._owns_http = http_client is None
         self._http = http_client or httpx.Client(timeout=self.config.timeout)
         self._sleep = sleep
         self._clock = clock
         self._last_request_at: float | None = None
 
     def close(self) -> None:
-        """Chiude la connessione HTTP."""
-        self._http.close()
+        """Chiude la connessione HTTP, solo se l'ha creata il client stesso."""
+        if self._owns_http:
+            self._http.close()
 
     def __enter__(self) -> "TedClient":
         return self
@@ -168,16 +171,23 @@ class TedClient:
                 response = self._http.post(
                     self.config.api_url, json=body, timeout=self.config.timeout
                 )
-            except httpx.TransportError as exc:
+            except httpx.RequestError as exc:
                 last_error = f"errore di rete: {exc.__class__.__name__}: {exc}"
             else:
                 if response.status_code == 200:
-                    return response.json()
-                if not is_retryable_status(response.status_code):
+                    try:
+                        data = response.json()
+                    except ValueError:
+                        data = None
+                    if isinstance(data, dict):
+                        return data
+                    last_error = f"risposta 200 non valida: {response.text[:200]!r}"
+                elif not is_retryable_status(response.status_code):
                     raise TedApiError(
                         f"TED ha risposto {response.status_code}: {response.text[:500]}"
                     )
-                last_error = f"TED ha risposto {response.status_code}"
+                else:
+                    last_error = f"TED ha risposto {response.status_code}: {response.text[:200]!r}"
             if attempt < attempts:
                 delay = RETRY_DELAYS[attempt - 1]
                 logger.warning(
@@ -191,23 +201,35 @@ class TedClient:
         raise TedApiError(f"TED non raggiungibile dopo {attempts} richieste: {last_error}")
 
     def search(self, query: str, fields: Iterable[str] = NOTICE_FIELDS) -> list[dict[str, Any]]:
-        """Restituisce tutti gli avvisi della query, seguendo la paginazione `ITERATION`."""
+        """Restituisce tutti gli avvisi della query, seguendo la paginazione `ITERATION`.
+
+        Si ferma alla prima pagina vuota, senza token, con un token già visto o quando ha raccolto
+        `totalNoticeCount` avvisi; oltre `MAX_PAGES` pagine solleva `TedApiError`.
+        """
+        field_list = list(fields)
+        if len(field_list) * self.config.page_size > MAX_FIELDS_PER_PAGE:
+            raise ValueError("Troppi campi per la dimensione della pagina (limite TED 10.000).")
         body: dict[str, Any] = {
             "query": query,
-            "fields": list(fields),
+            "fields": field_list,
             "limit": self.config.page_size,
             "paginationMode": "ITERATION",
         }
         notices: list[dict[str, Any]] = []
-        while True:
+        seen_tokens: set[str] = set()
+        for _ in range(MAX_PAGES):
             data = self.post_search(body)
             page = data.get("notices") or []
             notices.extend(page)
+            total = data.get("totalNoticeCount")
             token = data.get("iterationNextToken")
-            if not page or not token:
-                break
+            if not page or not token or token in seen_tokens:
+                return notices
+            if isinstance(total, int) and len(notices) >= total:
+                return notices
+            seen_tokens.add(token)
             body = {**body, "iterationNextToken": token}
-        return notices
+        raise TedApiError(f"Paginazione interrotta dopo {MAX_PAGES} pagine: risultato incompleto.")
 
     def fetch_notices(self, publication_date: date) -> list[dict[str, Any]]:
         """Restituisce gli avvisi IT con ente italiano pubblicati nel giorno indicato."""

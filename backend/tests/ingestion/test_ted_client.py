@@ -222,11 +222,110 @@ def test_timeout_is_passed_to_each_request() -> None:
     assert seen == [{"connect": 30.0, "read": 30.0, "write": 30.0, "pool": 30.0}]
 
 
-def test_client_context_manager_closes_http_client() -> None:
+def test_close_leaves_external_http_client_open() -> None:
     http = httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(200)))
     with TedClient(TedClientConfig(), http):
         pass
-    assert http.is_closed
+    assert not http.is_closed
+    http.close()
+
+
+def test_close_closes_own_http_client() -> None:
+    client = TedClient(TedClientConfig())
+    client.close()
+    assert client._http.is_closed
+
+
+def test_post_search_returns_json_dict() -> None:
+    client = make_client(lambda r: httpx.Response(200, json={"notices": []}), FakeClock())
+    assert client.post_search({"query": "q"}) == {"notices": []}
+
+
+def test_invalid_200_body_is_retried() -> None:
+    responses = [
+        httpx.Response(200, text="<html>pagina di errore</html>"),
+        httpx.Response(200, json=["non", "un", "oggetto"]),
+        httpx.Response(200, json={"notices": []}),
+    ]
+    clock = FakeClock()
+    client = make_client(lambda r: responses.pop(0), clock, min_interval=0)
+    assert client.post_search({"query": "q"}) == {"notices": []}
+    assert clock.sleeps == [1.0, 2.0]
+
+
+def test_invalid_200_body_fails_after_retries() -> None:
+    client = make_client(lambda r: httpx.Response(200, text="<html/>"), FakeClock())
+    with pytest.raises(TedApiError, match="non valida"):
+        client.post_search({"query": "q"})
+
+
+def test_request_errors_beyond_transport_are_retried() -> None:
+    responses: list[Any] = [
+        httpx.TooManyRedirects("troppi redirect"),
+        httpx.Response(200, json={"notices": []}),
+    ]
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        item = responses.pop(0)
+        if isinstance(item, Exception):
+            raise item
+        return item
+
+    assert make_client(handler, FakeClock()).post_search({"query": "q"}) == {"notices": []}
+
+
+def test_search_stops_on_repeated_token() -> None:
+    calls = 0
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal calls
+        calls += 1
+        return httpx.Response(
+            200,
+            json={"notices": [{"publication-number": f"{calls}-2026"}], "iterationNextToken": "x"},
+        )
+
+    result = make_client(handler, FakeClock()).search("q")
+    assert calls == 2
+    assert len(result) == 2
+
+
+def test_search_stops_when_total_count_reached() -> None:
+    calls = 0
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal calls
+        calls += 1
+        return httpx.Response(
+            200,
+            json={
+                "notices": [{"publication-number": f"{calls}-2026"}],
+                "totalNoticeCount": 1,
+                "iterationNextToken": f"t{calls}",
+            },
+        )
+
+    assert len(make_client(handler, FakeClock()).search("q")) == 1
+    assert calls == 1
+
+
+def test_search_fails_after_max_pages(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(ted_client, "MAX_PAGES", 3)
+    calls = 0
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal calls
+        calls += 1
+        return httpx.Response(200, json={"notices": [{}], "iterationNextToken": f"t{calls}"})
+
+    with pytest.raises(TedApiError, match="3 pagine"):
+        make_client(handler, FakeClock()).search("q")
+
+
+def test_search_rejects_too_many_fields() -> None:
+    client = make_client(lambda r: httpx.Response(200, json={}), FakeClock())
+    with pytest.raises(ValueError):
+        client.search("q", fields=[f"f{i}" for i in range(51)])
 
 
 def test_module_fetch_notices_uses_a_client(monkeypatch: pytest.MonkeyPatch) -> None:
