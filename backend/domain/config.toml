@@ -12,3 +12,36 @@ allowed_countries = ["ITA"]
 # codelist eForms "notice-type". Tutti gli altri (can-* esiti, pin-* preinformazioni, ecc.)
 # sono scartati. DA VERIFICARE: gli avvisi pre-eForms, che hanno altri codici.
 accepted_notice_types = ["cn-standard", "cn-social", "cn-desg"]
+
+[scoring]
+# Voto 1-5 da un totale di punti (docs/source/PIANO_BACKEND.md, T2.3). Valori di partenza,
+# da tarare con Giuseppe: cambiarli qui non richiede modifiche al codice.
+# Una gara con voto >= relevance_threshold (e non scartata dai filtri) ha is_relevant = true.
+relevance_threshold = 3
+# CPV "core" (prefissi): 722 = sviluppo software, 725 = servizi informatici. Valgono core_cpv_points.
+core_cpv_prefixes = ["722", "725"]
+core_cpv_points = 2
+# Altri CPV IT (prefissi): valgono other_cpv_points, se non c'e' gia' un CPV core.
+it_cpv_prefixes = ["72", "48", "302", "324", "642"]
+other_cpv_points = 1
+# Parole chiave nel titolo o nella descrizione (parola intera, senza maiuscole).
+# Ogni keyword_words_per_point parole diverse trovate valgono 1 punto, al massimo keyword_max_points.
+# Niente "ai" da solo: in italiano e' anche la preposizione "ai".
+keywords = [
+    "cloud", "cybersecurity", "sicurezza informatica", "sviluppo applicativo", "sviluppo software",
+    "intelligenza artificiale", "machine learning", "big data", "data warehouse", "data lake",
+    "business intelligence", "software", "applicativo", "piattaforma", "conservazione digitale",
+    "portale", "app", "datacenter", "data center",
+]
+keyword_words_per_point = 2
+keyword_max_points = 2
+# Importo (in euro, o senza valuta) >= high_value_eur: high_value_points.
+high_value_eur = 1000000
+high_value_points = 1
+# Scadenza tra deadline_ok_min_days e deadline_ok_max_days (estremi inclusi): deadline_ok_points.
+deadline_ok_min_days = 10
+deadline_ok_max_days = 60
+deadline_ok_points = 1
+# Scadenza a meno di deadline_urgent_days giorni (o gia' passata): deadline_urgent_points (negativo).
+deadline_urgent_days = 5
+deadline_urgent_points = -1

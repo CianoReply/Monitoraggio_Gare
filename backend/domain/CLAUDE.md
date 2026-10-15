@@ -24,7 +24,7 @@ T2.1 schema e migrazioni · T2.2 filtri · T2.3 punteggio · T2.4 documenti · T
 - Per i test usa il subagent `test-writer`, anche in background o in un worktree.
 
 ## Da completare
-- Regole di punteggio tarate con Giuseppe (T2.3).
+- Taratura delle regole di punteggio con Giuseppe (T2.3, IN ATTESA UMANA).
 - Classificazione dei link ai documenti (T2.4).
 
 ## Database, migrazioni e seed (T2.1)
@@ -45,3 +45,9 @@ T2.1 schema e migrazioni · T2.2 filtri · T2.3 punteggio · T2.4 documenti · T
 - `currency=None` con importo = euro. Importi in altre valute non si confrontano con la soglia.
 - `now` deve avere il fuso orario (altrimenti `ValueError`).
 - DA VERIFICARE: i codici `notice-type` degli avvisi pre-eForms.
+
+## Punteggio di pertinenza (T2.3)
+- Pesi, CPV core, parole chiave e soglia stanno in `config.toml`, sezione `[scoring]` (`load_scoring_config()`); nessun LLM.
+- Regole (valori predefiniti, da tarare con Giuseppe): CPV core (prefissi 722, 725) +2, altrimenti altro CPV IT +1; parole chiave (parola intera, titolo o descrizione) +1 ogni 2 distinte trovate, max +2; importo >= 1.000.000 EUR (o senza valuta) +1; scadenza tra 10 e 60 giorni +1; scadenza a meno di 5 giorni o già passata -1. Voto = totale limitato a 1..5.
+- Funzioni: `compute_score(tender, config, now=None) -> int`; `score_breakdown(...)` spiega i criteri; `evaluate_tender(tender, filter_result, config, now=None) -> TenderEvaluation` da passare a `upsert_tender` (T1.5): punteggio SEMPRE calcolato (ADR-010), `is_relevant` = tenuta dai filtri e voto >= `relevance_threshold` (predefinita 3), `discard_reason` = motivo dei filtri.
+- Validazione con Giuseppe: `python -m backend.domain.scoring_sample --limit 20` (con `DATABASE_URL`) stampa le gare per voto con i criteri applicati e il motivo di scarto.

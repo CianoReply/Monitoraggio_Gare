@@ -16,7 +16,9 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.domain.config import load_scoring_config
 from backend.domain.database import create_db_engine, create_session_factory
+from backend.domain.filters import FilterResult
 from backend.domain.models import (
     Document,
     DocumentStatus,
@@ -29,9 +31,11 @@ from backend.domain.models import (
     VerificationStatus,
 )
 from backend.domain.repository import upsert_tender
-from backend.domain.schemas import TenderCreate, TenderEvaluation
+from backend.domain.schemas import TenderCreate
+from backend.domain.scoring import evaluate_tender
 
-# (titolo, ente, città, CPV, importo, giorni a scadenza (None = nessuna), punteggio, scarto)
+# (titolo, ente, città, CPV, importo, giorni a scadenza (None = nessuna), voto indicativo, scarto)
+# Il voto salvato lo calcola scoring.evaluate_tender (la colonna del voto è solo indicativa).
 _ROWS: list[tuple[str, str, str, list[str], str | None, int | None, int, str | None]] = [
     (
         "Sviluppo e manutenzione evolutiva del sistema informativo regionale",
@@ -271,11 +275,15 @@ def seed(session: Session, today: date | None = None) -> int:
     Restituisce il numero di gare create. Non fa commit.
     """
     today = today or date.today()
+    now = datetime.combine(today, time(12, 0), tzinfo=UTC)
+    scoring_config = load_scoring_config()
     created = 0
     for index, row in enumerate(_ROWS):
-        score, discard = row[6], row[7]
-        evaluation = TenderEvaluation(score, discard is None and score >= 3, discard)
-        tender, is_new = upsert_tender(session, _build(index, row, today), evaluation)
+        tender_data = _build(index, row, today)
+        discard = row[7]
+        filter_result = FilterResult.discard(discard) if discard else FilterResult.keep()
+        evaluation = evaluate_tender(tender_data, filter_result, scoring_config, now)
+        tender, is_new = upsert_tender(session, tender_data, evaluation)
         if not is_new:
             continue
         created += 1
