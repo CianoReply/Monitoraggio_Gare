@@ -1,0 +1,765 @@
+# Contratto API – Radar Gare IT (T0.5)
+# Accordo tra backend e frontend. Si modifica solo con una PR approvata da tutti e tre i dev.
+# Coerente con docs/ARCHITECTURE.md (sezione 4, modello dati) e le decisioni D1-D7 (ADR-006...010).
+# I dati negli esempi sono fittizi.
+openapi: 3.1.0
+info:
+  title: Radar Gare IT API
+  version: 1.0.0
+  description: |
+    Gare IT con ente appaltante italiano raccolte da TED, con punteggio di pertinenza (1-5),
+    documenti, report generato con la Skill e revisione umana dei campi.
+
+    Regole comuni:
+    - Date `date` in formato `AAAA-MM-GG`; datetime in ISO 8601 con fuso orario.
+    - Errori sempre nel formato `{ "error": "codice", "message": "descrizione" }`
+      (anche i `422` di validazione, con `error: "validation_error"`).
+    - Valori degli esempi fittizi; formato di `publication_number`, `notice_type` e `ted_url` DA VERIFICARE in T1.1.
+    - Autenticazione: non prevista in questa versione (il nome del revisore arriva nella richiesta).
+    - Le gare scartate dai filtri (`discard_reason` valorizzato, ADR-010) restano nel database:
+      `GET /tenders` le esclude salvo `include_discarded=true`; `GET /tenders/{id}` le restituisce sempre.
+servers:
+  - url: http://localhost:8000
+    description: Ambiente locale
+tags:
+  - name: tenders
+  - name: reports
+  - name: dashboard
+  - name: runs
+  - name: system
+
+paths:
+  /tenders:
+    get:
+      tags: [tenders]
+      operationId: listTenders
+      summary: Elenco gare
+      description: |
+        Ordinamento predefinito (`sort=relevance`): punteggio decrescente, poi scadenza crescente
+        (gare senza scadenza in fondo). Tutti i filtri sono in AND. Intervalli incoerenti
+        (`deadline_from` > `deadline_to`, `min_value` > `max_value`) rispondono `422` `validation_error`.
+      parameters:
+        - name: min_score
+          in: query
+          description: Punteggio minimo di pertinenza (inclusivo).
+          schema: {type: integer, minimum: 1, maximum: 5}
+          example: 3
+        - name: cpv
+          in: query
+          description: Prefisso CPV (2-8 cifre); la gara è inclusa se almeno uno dei suoi CPV inizia con il prefisso.
+          schema: {type: string, pattern: '^[0-9]{2,8}$'}
+          example: "72"
+        - name: deadline_from
+          in: query
+          description: Scadenza offerte dal giorno indicato (inclusivo). Se maggiore di `deadline_to` risponde `422` (`validation_error`).
+          schema: {type: string, format: date}
+        - name: deadline_to
+          in: query
+          description: Scadenza offerte fino al giorno indicato (inclusivo). Se minore di `deadline_from` risponde `422` (`validation_error`).
+          schema: {type: string, format: date}
+        - name: min_value
+          in: query
+          description: Importo stimato minimo (inclusivo). Le gare senza importo sono escluse se il filtro è presente. Se maggiore di `max_value` risponde `422` (`validation_error`).
+          schema: {type: number, minimum: 0}
+        - name: max_value
+          in: query
+          description: Importo stimato massimo (inclusivo). Le gare senza importo sono escluse se il filtro è presente.
+          schema: {type: number, minimum: 0}
+        - name: report_status
+          in: query
+          description: Stato del report della gara; `none` = nessun report.
+          schema: {type: string, enum: [none, to_review, verified]}
+        - name: q
+          in: query
+          description: Ricerca testuale (senza distinzione tra maiuscole e minuscole) su titolo, descrizione ed ente.
+          schema: {type: string, minLength: 1, maxLength: 200}
+        - name: include_discarded
+          in: query
+          description: |
+            Parametro aggiuntivo non previsto dal piano (ADR-012). Se `true` include anche le gare scartate
+            dai filtri (`discard_reason` valorizzato); predefinito `false`.
+          schema: {type: boolean, default: false}
+        - name: sort
+          in: query
+          description: |
+            `relevance` = punteggio decrescente poi scadenza crescente; `deadline` = scadenza crescente;
+            `published` = data di pubblicazione decrescente. Con `deadline` le gare senza scadenza
+            sono in fondo.
+          schema: {type: string, enum: [relevance, deadline, published], default: relevance}
+        - name: page
+          in: query
+          description: Numero di pagina (da 1). Una pagina oltre l'ultima risponde `200` con `items` vuoto e `total` corretto.
+          schema: {type: integer, minimum: 1, default: 1}
+        - name: page_size
+          in: query
+          schema: {type: integer, minimum: 1, maximum: 100, default: 20}
+      responses:
+        "200":
+          description: Pagina di gare.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/TenderList'}
+              example:
+                items:
+                  - id: 101
+                    publication_number: "228503-2026"
+                    title: "Servizi di sviluppo e manutenzione evolutiva del sistema informativo regionale"
+                    description: "Accordo quadro triennale per sviluppo software, manutenzione evolutiva e supporto applicativo."
+                    buyer_name: "Regione Lombardia - ARIA S.p.A."
+                    buyer_city: "Milano"
+                    cpv_codes: ["72200000", "72262000"]
+                    notice_type: "cn-standard"
+                    estimated_value: 2400000.00
+                    currency: "EUR"
+                    publication_date: "2026-10-12"
+                    submission_deadline: "2026-11-20T12:00:00+01:00"
+                    ted_url: "https://ted.europa.eu/it/notice/-/detail/228503-2026"
+                    documents_url: "https://www.ariaspa.it/gare/228503-2026"
+                    relevance_score: 5
+                    is_relevant: true
+                    discard_reason: null
+                    parent_publication_number: null
+                    report_status: to_review
+                    created_at: "2026-10-12T06:30:00+00:00"
+                    updated_at: "2026-10-12T06:30:00+00:00"
+                total: 1
+                page: 1
+                page_size: 20
+        "422": {$ref: '#/components/responses/ValidationError'}
+
+  /tenders/{id}:
+    get:
+      tags: [tenders]
+      operationId: getTender
+      summary: Dettaglio di una gara
+      parameters:
+        - {$ref: '#/components/parameters/TenderId'}
+      responses:
+        "200":
+          description: La gara.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Tender'}
+              example:
+                id: 102
+                publication_number: "231877-2026"
+                title: "Fornitura di servizi cloud e migrazione dei sistemi dell'ente"
+                description: "Servizi di migrazione verso cloud qualificato ACN e gestione dei sistemi per 36 mesi."
+                buyer_name: "Comune di Bologna"
+                buyer_city: "Bologna"
+                cpv_codes: ["72500000", "72310000"]
+                notice_type: "cn-standard"
+                estimated_value: 890000.00
+                currency: "EUR"
+                publication_date: "2026-10-13"
+                submission_deadline: "2026-10-21T13:00:00+02:00"
+                ted_url: "https://ted.europa.eu/it/notice/-/detail/231877-2026"
+                documents_url: null
+                relevance_score: 4
+                is_relevant: true
+                discard_reason: null
+                parent_publication_number: null
+                report_status: none
+                created_at: "2026-10-13T06:30:00+00:00"
+                updated_at: "2026-10-14T06:30:00+00:00"
+        "404": {$ref: '#/components/responses/NotFound'}
+        "422": {$ref: '#/components/responses/ValidationError'}
+
+  /tenders/{id}/documents:
+    get:
+      tags: [tenders]
+      operationId: listTenderDocuments
+      summary: Documenti della gara
+      description: Elenco vuoto se la gara non ha documenti; `404` solo se la gara non esiste.
+      parameters:
+        - {$ref: '#/components/parameters/TenderId'}
+      responses:
+        "200":
+          description: Documenti della gara.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DocumentList'}
+              example:
+                items:
+                  - id: 11
+                    tender_id: 101
+                    name: "Disciplinare.pdf"
+                    url: "https://www.ariaspa.it/gare/228503-2026/Disciplinare.pdf"
+                    status: downloaded
+                    local_path: "/data/documents/228503-2026/Disciplinare.pdf"
+                    downloaded_at: "2026-10-12T06:41:00+00:00"
+                  - id: 12
+                    tender_id: 101
+                    name: "Capitolato tecnico.pdf"
+                    url: "https://www.ariaspa.it/gare/228503-2026/Capitolato.pdf"
+                    status: not_accessible
+                    local_path: null
+                    downloaded_at: null
+        "404": {$ref: '#/components/responses/NotFound'}
+        "422": {$ref: '#/components/responses/ValidationError'}
+
+  /tenders/{id}/report:
+    get:
+      tags: [reports]
+      operationId: getTenderReport
+      summary: Report della gara
+      parameters:
+        - {$ref: '#/components/parameters/TenderId'}
+      responses:
+        "200":
+          description: Report con tutti i campi, fonti e stato di verifica.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Report'}
+              example:
+                id: 7
+                tender_id: 101
+                summary: "Accordo quadro triennale per sviluppo e manutenzione evolutiva del sistema informativo regionale. Importo a base di gara 2,4 milioni di euro. Requisiti di fatturato specifico e certificazione ISO 27001."
+                status: to_review
+                generated_at: "2026-10-14T09:15:00+00:00"
+                ai_label: "Contenuto generato con IA – da revisionare"
+                fields:
+                  - id: 71
+                    report_id: 7
+                    label: "Importo a base di gara"
+                    value: "2.400.000 EUR"
+                    original_value: null
+                    source_doc: "Disciplinare.pdf"
+                    source_page: 3
+                    is_critical: true
+                    verification_status: to_verify
+                    reviewer: null
+                    reviewed_at: null
+                  - id: 72
+                    report_id: 7
+                    label: "Scadenza offerte"
+                    value: "20/11/2026 ore 12:00"
+                    original_value: null
+                    source_doc: "Disciplinare.pdf"
+                    source_page: 1
+                    is_critical: false
+                    verification_status: to_verify
+                    reviewer: null
+                    reviewed_at: null
+        "404":
+          description: La gara non esiste oppure non ha ancora un report (codici `tender_not_found` / `report_not_found`).
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Error'}
+              example: {error: report_not_found, message: "La gara 101 non ha ancora un report."}
+        "422": {$ref: '#/components/responses/ValidationError'}
+    post:
+      tags: [reports]
+      operationId: createTenderReport
+      summary: Caricamento del report prodotto dalla Skill
+      description: |
+        Al massimo un report per gara (ADR-008): se esiste già, `409`. Il report nasce con stato
+        `to_review` e tutti i campi `to_verify`; `ai_label` è generata dal backend.
+      parameters:
+        - {$ref: '#/components/parameters/TenderId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ReportCreate'}
+            example:
+              summary: "Accordo quadro triennale per sviluppo e manutenzione evolutiva del sistema informativo regionale."
+              generated_at: "2026-10-14T09:15:00+00:00"
+              fields:
+                - label: "Importo a base di gara"
+                  value: "2.400.000 EUR"
+                  source_doc: "Disciplinare.pdf"
+                  source_page: 3
+                  is_critical: true
+      responses:
+        "201":
+          description: Report creato.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Report'}
+              example:
+                id: 8
+                tender_id: 102
+                summary: "Migrazione cloud e gestione sistemi per 36 mesi."
+                status: to_review
+                generated_at: "2026-10-14T09:15:00+00:00"
+                ai_label: "Contenuto generato con IA – da revisionare"
+                fields:
+                  - id: 81
+                    report_id: 8
+                    label: "Importo a base di gara"
+                    value: "890.000 EUR"
+                    original_value: null
+                    source_doc: "Disciplinare.pdf"
+                    source_page: 2
+                    is_critical: true
+                    verification_status: to_verify
+                    reviewer: null
+                    reviewed_at: null
+        "404": {$ref: '#/components/responses/NotFound'}
+        "409":
+          description: La gara ha già un report.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Error'}
+              example: {error: report_already_exists, message: "La gara 101 ha già un report."}
+        "422": {$ref: '#/components/responses/ValidationError'}
+
+  /reports/{id}/fields/{field_id}:
+    patch:
+      tags: [reports]
+      operationId: reviewReportField
+      summary: Conferma o correzione di un campo da parte del revisore
+      description: |
+        - `confirm`: il campo diventa `verified`.
+        - `correct`: `value` sostituisce il valore, il valore precedente è conservato in `original_value`
+          (solo la prima correzione lo imposta) e il campo diventa `verified`.
+        In entrambi i casi si salvano `reviewer` e `reviewed_at`. Dopo ogni modifica lo stato del report è
+        ricalcolato: `verified` solo se tutti i campi critici sono `verified`, altrimenti `to_review`.
+        Risponde con il report aggiornato. `action=correct` senza `value` risponde `422` `validation_error`.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificativo del report.
+          schema: {type: integer, minimum: 1}
+        - name: field_id
+          in: path
+          required: true
+          description: Identificativo del campo; deve appartenere al report.
+          schema: {type: integer, minimum: 1}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/FieldReview'}
+            examples:
+              confirm:
+                value: {action: confirm, reviewer: "Giuseppe Rossi"}
+              correct:
+                value: {action: correct, value: "2.450.000 EUR", reviewer: "Giuseppe Rossi"}
+      responses:
+        "200":
+          description: Report aggiornato.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Report'}
+              example:
+                id: 7
+                tender_id: 101
+                summary: "Accordo quadro triennale per sviluppo e manutenzione evolutiva del sistema informativo regionale."
+                status: verified
+                generated_at: "2026-10-14T09:15:00+00:00"
+                ai_label: "Contenuto generato con IA – revisionato da Giuseppe Rossi, 2026-10-15"
+                fields:
+                  - id: 71
+                    report_id: 7
+                    label: "Importo a base di gara"
+                    value: "2.450.000 EUR"
+                    original_value: "2.400.000 EUR"
+                    source_doc: "Disciplinare.pdf"
+                    source_page: 3
+                    is_critical: true
+                    verification_status: verified
+                    reviewer: "Giuseppe Rossi"
+                    reviewed_at: "2026-10-15T08:30:00+00:00"
+        "404":
+          description: Report o campo inesistente (codici `report_not_found` / `field_not_found`).
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Error'}
+              example: {error: field_not_found, message: "Il campo 999 non appartiene al report 7."}
+        "422": {$ref: '#/components/responses/ValidationError'}
+
+  /deadlines:
+    get:
+      tags: [dashboard]
+      operationId: listDeadlines
+      summary: Scadenze per il calendario
+      description: |
+        Gare rilevanti (`is_relevant = true`) con scadenza offerte nell'intervallo, in ordine di scadenza.
+        `days_left` = giorni di calendario tra oggi e la scadenza (0 = oggi), calcolati sulla data
+        odierna in fuso Europe/Rome. Se `to` < `from` risponde `422` `validation_error`. `urgency`: `high` se
+        `days_left` <= 3, `medium` se <= 7, `low` altrimenti.
+      parameters:
+        - name: from
+          in: query
+          description: Inizio intervallo (inclusivo). Predefinito oggi (Europe/Rome).
+          schema: {type: string, format: date}
+        - name: to
+          in: query
+          description: Fine intervallo (inclusivo). Predefinito oggi + 30 giorni. Deve essere >= `from`, altrimenti `422`.
+          schema: {type: string, format: date}
+      responses:
+        "200":
+          description: Scadenze nell'intervallo.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DeadlineList'}
+              example:
+                items:
+                  - tender_id: 102
+                    publication_number: "231877-2026"
+                    title: "Fornitura di servizi cloud e migrazione dei sistemi dell'ente"
+                    buyer_name: "Comune di Bologna"
+                    submission_deadline: "2026-10-21T13:00:00+02:00"
+                    relevance_score: 4
+                    days_left: 6
+                    urgency: medium
+        "422": {$ref: '#/components/responses/ValidationError'}
+
+  /stats:
+    get:
+      tags: [dashboard]
+      operationId: getStats
+      summary: Indicatori della dashboard
+      responses:
+        "200":
+          description: I quattro indicatori.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Stats'}
+              example:
+                new_tenders_today: 14
+                relevant_tenders: 37
+                deadlines_next_7_days: 5
+                reports_to_verify: 3
+
+  /runs:
+    get:
+      tags: [runs]
+      operationId: listRuns
+      summary: Storico delle esecuzioni
+      description: Dalla più recente (`started_at` decrescente).
+      parameters:
+        - name: limit
+          in: query
+          schema: {type: integer, minimum: 1, maximum: 100, default: 20}
+      responses:
+        "200":
+          description: Ultime esecuzioni.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RunList'}
+              example:
+                items:
+                  - id: 31
+                    run_date: "2026-10-14"
+                    started_at: "2026-10-15T06:00:02+00:00"
+                    finished_at: "2026-10-15T06:03:41+00:00"
+                    status: success
+                    fetched_count: 212
+                    new_count: 14
+                    updated_count: 2
+                    relevant_count: 9
+                    error_message: null
+        "422": {$ref: '#/components/responses/ValidationError'}
+    post:
+      tags: [runs]
+      operationId: startRun
+      summary: Avvio manuale del monitoraggio
+      description: |
+        Avvia `run_daily_ingestion` in background e risponde subito. `409` se un'esecuzione è già
+        in corso (`status = running`). Lo stato si segue con `GET /runs`.
+      responses:
+        "202":
+          description: Esecuzione avviata.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RunAccepted'}
+              example: {id: 32, status: running}
+        "409":
+          description: Un'esecuzione è già in corso.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Error'}
+              example: {error: run_in_progress, message: "L'esecuzione 32 è già in corso."}
+
+  /health:
+    get:
+      tags: [system]
+      operationId: getHealth
+      summary: Verifica che il servizio sia attivo
+      responses:
+        "200":
+          description: Servizio attivo.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Health'}
+              example: {status: ok}
+
+components:
+  parameters:
+    TenderId:
+      name: id
+      in: path
+      required: true
+      description: Identificativo interno della gara.
+      schema: {type: integer, minimum: 1}
+      example: 101
+  responses:
+    NotFound:
+      description: Risorsa inesistente (codice `tender_not_found`).
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+          example: {error: tender_not_found, message: "La gara 999 non esiste."}
+    ValidationError:
+      description: Parametri o corpo non validi (codice `validation_error`).
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+          example: {error: validation_error, message: "page_size: deve essere minore o uguale a 100."}
+  schemas:
+    Error:
+      type: object
+      required: [error, message]
+      properties:
+        error: {type: string, description: Codice stabile leggibile dalla macchina., example: tender_not_found}
+        message: {type: string, description: Descrizione per le persone., example: "La gara 999 non esiste."}
+    Tender:
+      type: object
+      description: Riga di `tenders` (ARCHITECTURE.md 4.1) esclusi `raw_data`, più `report_status`.
+      required:
+        - id
+        - publication_number
+        - title
+        - description
+        - buyer_name
+        - buyer_city
+        - cpv_codes
+        - notice_type
+        - estimated_value
+        - currency
+        - publication_date
+        - submission_deadline
+        - ted_url
+        - documents_url
+        - relevance_score
+        - is_relevant
+        - discard_reason
+        - parent_publication_number
+        - report_status
+        - created_at
+        - updated_at
+      properties:
+        id: {type: integer}
+        publication_number: {type: string, description: Numero di pubblicazione TED., example: "228503-2026"}
+        title: {type: string}
+        description: {type: [string, "null"]}
+        buyer_name: {type: string}
+        buyer_city: {type: [string, "null"]}
+        cpv_codes:
+          type: array
+          items: {type: string, pattern: '^[0-9]{8}$'}
+        notice_type: {type: string}
+        estimated_value: {type: [number, "null"], description: "Importo in euro, al massimo due decimali; null se assente."}
+        currency: {type: [string, "null"], minLength: 3, maxLength: 3}
+        publication_date: {type: string, format: date}
+        submission_deadline: {type: [string, "null"], format: date-time}
+        ted_url: {type: string}
+        documents_url: {type: [string, "null"]}
+        relevance_score: {type: integer, minimum: 1, maximum: 5}
+        is_relevant: {type: boolean}
+        discard_reason: {type: [string, "null"]}
+        parent_publication_number: {type: [string, "null"], description: "Per una rettifica: avviso originale."}
+        report_status:
+          type: string
+          enum: [none, to_review, verified]
+          description: |
+            Parametro/campo aggiuntivo non previsto dal piano (ADR-012), derivato da `reports.status`
+            del report della gara; `none` se la gara non ha un report.
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
+    TenderList:
+      type: object
+      required: [items, total, page, page_size]
+      properties:
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/Tender'}
+        total: {type: integer, minimum: 0, description: Gare che soddisfano i filtri (tutte le pagine).}
+        page: {type: integer, minimum: 1}
+        page_size: {type: integer, minimum: 1, maximum: 100}
+    Document:
+      type: object
+      required: [id, tender_id, name, url, status, local_path, downloaded_at]
+      properties:
+        id: {type: integer}
+        tender_id: {type: integer}
+        name: {type: string}
+        url: {type: [string, "null"]}
+        status: {type: string, enum: [downloaded, not_accessible, pending]}
+        local_path: {type: [string, "null"]}
+        downloaded_at: {type: [string, "null"], format: date-time}
+    DocumentList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/Document'}
+    ReportField:
+      type: object
+      required:
+        - id
+        - report_id
+        - label
+        - value
+        - original_value
+        - source_doc
+        - source_page
+        - is_critical
+        - verification_status
+        - reviewer
+        - reviewed_at
+      properties:
+        id: {type: integer}
+        report_id: {type: integer}
+        label: {type: string}
+        value: {type: string}
+        original_value: {type: [string, "null"], description: Valore prodotto dalla Skill, presente solo dopo una correzione.}
+        source_doc: {type: string}
+        source_page: {type: [integer, "null"], minimum: 1}
+        is_critical: {type: boolean}
+        verification_status:
+          type: string
+          enum: [to_verify, verified]
+          description: Etichette UI "Da verificare" / "Verificato".
+        reviewer: {type: [string, "null"]}
+        reviewed_at: {type: [string, "null"], format: date-time}
+    Report:
+      type: object
+      required: [id, tender_id, summary, status, generated_at, ai_label, fields]
+      properties:
+        id: {type: integer}
+        tender_id: {type: integer}
+        summary: {type: string}
+        status:
+          type: string
+          enum: [to_review, verified]
+          description: "`verified` solo se tutti i campi critici sono `verified`."
+        generated_at: {type: string, format: date-time}
+        ai_label:
+          type: string
+          description: |
+            Etichetta di trasparenza (ARCHITECTURE.md 4.3). Alla creazione è
+            "Contenuto generato con IA – da revisionare". Quando il report diventa `verified` è
+            impostata a "Contenuto generato con IA – revisionato da [nome], [data]" con l'ultimo revisore e la data
+            (AAAA-MM-GG). Se il report torna `to_review` resta l'ultima etichetta finché non è riverificato.
+        fields:
+          type: array
+          items: {$ref: '#/components/schemas/ReportField'}
+    ReportCreate:
+      type: object
+      additionalProperties: false
+      description: |
+        Il `report_schema.json` di T2.5 dovrà coincidere con questo schema.
+      required: [summary, fields]
+      properties:
+        summary: {type: string, minLength: 1}
+        generated_at: {type: string, format: date-time, description: Se assente è l'istante di caricamento.}
+        fields:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            additionalProperties: false
+            required: [label, value, source_doc, is_critical]
+            properties:
+              label: {type: string, minLength: 1}
+              value: {type: string, minLength: 1}
+              source_doc: {type: string, minLength: 1}
+              source_page: {type: [integer, "null"], minimum: 1}
+              is_critical: {type: boolean}
+    FieldReview:
+      type: object
+      additionalProperties: false
+      required: [action, reviewer]
+      if:
+        properties:
+          action: {const: correct}
+        required: [action]
+      then:
+        required: [value]
+      properties:
+        action: {type: string, enum: [confirm, correct]}
+        value: {type: string, minLength: 1, description: "Obbligatorio con `correct`, ignorato con `confirm`."}
+        reviewer: {type: string, minLength: 1, description: Nome del revisore.}
+    Deadline:
+      type: object
+      required:
+        - tender_id
+        - publication_number
+        - title
+        - buyer_name
+        - submission_deadline
+        - relevance_score
+        - days_left
+        - urgency
+      properties:
+        tender_id: {type: integer}
+        publication_number: {type: string}
+        title: {type: string}
+        buyer_name: {type: string}
+        submission_deadline: {type: string, format: date-time}
+        relevance_score: {type: integer, minimum: 1, maximum: 5}
+        days_left: {type: integer, minimum: 0}
+        urgency: {type: string, enum: [high, medium, low]}
+    DeadlineList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/Deadline'}
+    Stats:
+      type: object
+      required: [new_tenders_today, relevant_tenders, deadlines_next_7_days, reports_to_verify]
+      properties:
+        new_tenders_today: {type: integer, minimum: 0, description: "Gare con `created_at` nella data odierna in fuso Europe/Rome."}
+        relevant_tenders: {type: integer, minimum: 0, description: Gare con punteggio >= 3 e non scartate (`is_relevant`).}
+        deadlines_next_7_days: {type: integer, minimum: 0, description: Gare rilevanti con scadenza nei prossimi 7 giorni.}
+        reports_to_verify: {type: integer, minimum: 0, description: Report con stato `to_review`.}
+    Run:
+      type: object
+      required:
+        - id
+        - run_date
+        - started_at
+        - finished_at
+        - status
+        - fetched_count
+        - new_count
+        - updated_count
+        - relevant_count
+        - error_message
+      properties:
+        id: {type: integer}
+        run_date: {type: string, format: date, description: Giorno di pubblicazione TED elaborato.}
+        started_at: {type: string, format: date-time}
+        finished_at: {type: [string, "null"], format: date-time}
+        status: {type: string, enum: [running, success, failed]}
+        fetched_count: {type: integer, minimum: 0}
+        new_count: {type: integer, minimum: 0}
+        updated_count: {type: integer, minimum: 0}
+        relevant_count: {type: integer, minimum: 0}
+        error_message: {type: [string, "null"]}
+    RunList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/Run'}
+    RunAccepted:
+      type: object
+      required: [id, status]
+      properties:
+        id: {type: integer, description: Identificativo dell'esecuzione avviata.}
+        status: {type: string, enum: [running]}
+    Health:
+      type: object
+      required: [status]
+      properties:
+        status: {type: string, enum: [ok]}
