@@ -1,15 +1,12 @@
 """Verifica che docs/API_CONTRACT.yaml sia un documento OpenAPI valido (T0.5). Nessuna rete."""
 
 from collections.abc import Iterator
-from pathlib import Path
 from typing import Any
 
-import pytest
 from openapi_schema_validator import OAS31Validator, oas31_format_checker
 from openapi_spec_validator import validate
-from openapi_spec_validator.readers import read_from_filename
 
-CONTRACT = Path(__file__).resolve().parents[2] / "docs" / "API_CONTRACT.yaml"
+from backend.tests.contract_utils import HTTP_METHODS, resolve
 
 EXPECTED_OPERATIONS = {
     ("get", "/tenders"),
@@ -24,13 +21,6 @@ EXPECTED_OPERATIONS = {
     ("post", "/runs"),
     ("get", "/health"),
 }
-HTTP_METHODS = {"get", "post", "put", "patch", "delete"}
-
-
-@pytest.fixture(scope="module")
-def spec() -> dict:
-    data, _ = read_from_filename(str(CONTRACT))
-    return data
 
 
 def test_contract_is_valid_openapi(spec: dict) -> None:
@@ -72,20 +62,6 @@ def test_error_codes_are_documented(spec: dict) -> None:
 ERROR_REF = "#/components/schemas/Error"
 
 
-def _resolve(spec: dict, node: Any) -> Any:
-    """Risolve ricorsivamente i $ref locali (il contratto non ha riferimenti circolari)."""
-    if isinstance(node, dict):
-        if "$ref" in node:
-            target: Any = spec
-            for part in node["$ref"].removeprefix("#/").split("/"):
-                target = target[part]
-            return _resolve(spec, target)
-        return {key: _resolve(spec, value) for key, value in node.items()}
-    if isinstance(node, list):
-        return [_resolve(spec, value) for value in node]
-    return node
-
-
 def _operations(spec: dict) -> Iterator[tuple[str, str, dict]]:
     for path, item in spec["paths"].items():
         for method, op in item.items():
@@ -106,8 +82,8 @@ def test_every_example_matches_its_schema(spec: dict) -> None:
         medias += [(code, resp.get("content", {})) for code, resp in op["responses"].items()]
         for where, content in medias:
             for media in content.values():
-                schema = _resolve(spec, media["schema"])
-                resolved = _resolve(spec, media)
+                schema = resolve(spec, media["schema"])
+                resolved = resolve(spec, media)
                 for example in _examples(resolved):
                     validator = OAS31Validator(schema, format_checker=oas31_format_checker)
                     errors = [e.message for e in validator.iter_errors(example)]
@@ -145,7 +121,7 @@ def test_errors_use_single_format(spec: dict) -> None:
 
 
 def test_field_review_requires_value_for_correct(spec: dict) -> None:
-    schema = _resolve(spec, spec["components"]["schemas"]["FieldReview"])
+    schema = resolve(spec, spec["components"]["schemas"]["FieldReview"])
     validator = OAS31Validator(schema, format_checker=oas31_format_checker)
     assert validator.is_valid({"action": "confirm", "reviewer": "A"})
     assert validator.is_valid({"action": "correct", "value": "x", "reviewer": "A"})
