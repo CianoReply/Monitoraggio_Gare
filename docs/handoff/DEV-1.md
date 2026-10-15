@@ -18,6 +18,12 @@
 
 <!-- Note -->
 
+## 2026-10-15 – Chiusura del loop dell'agent team (lead DEV-1)
+- Fatto: tutti i task da T0.1 a T4.3 sono `[x]` su `develop` (66f06e7). Verifiche finali: ruff OK, 1140 test passati e 12 saltati (PostgreSQL), 4 scenari e2e, 66 test di contratto. T4.3: 4 revisioni (domain, api, ingestion, sicurezza) con 0 segnalazioni critiche, correzioni unite.
+- Da fare (persone): protezione di `main` e prima esecuzione della CI su GitHub (T0.1, T3.6, T4.2); `@claude` con SHA fissato e secret (T3.6); `docker compose up` su ogni computer (T0.7); validazione del punteggio con Giuseppe (T2.3); prompt di Giuseppe per T5.x; test PostgreSQL con `TEST_POSTGRES_URL`.
+- Decisioni da prendere (utente): ADR-014 e ADR-015 in stato Proposta; hook di `.claude/` su Windows (`python3`, maiuscole di `.env`, regole `deny`); versioni delle dipendenze non fissate e `tzdata`; `maxLength` e `local_path` nel contratto; riverifica dopo una rettifica; report senza campi critici; ADR-009 (giorni falliti prima dell'ultimo riuscito).
+- Impatto sugli altri dev: la PR `develop → main` va aperta e unita da una persona; dettagli in [team/LOOP_LOG.md](../team/LOOP_LOG.md).
+
 ## 2026-10-15 – T1.1–T1.6 Modulo ingestion (agent team, lead DEV-1)
 - Fatto: T0.3 (hook `PreToolUse`/`Stop`, ADR-011), T1.1 (`docs/TED_API_NOTES.md`, 3 fixture reali), T1.2 (`ted_client.py`), T1.3 (`parser.py`, `MAPPING.md`), T1.4 (`dedup.py`, ADR-014 proposta), T1.5 (`pipeline.py`, `scheduler.py`), T1.6 (`logging_config.py`), tutti uniti in `develop` con revisione del subagent code-reviewer.
 - Da fare: T4.1 (collegare scheduler e log JSON all'avvio dell'API, esecuzione reale completa); T4.3 (revisione incrociata).
