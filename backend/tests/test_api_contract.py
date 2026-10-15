@@ -3,10 +3,13 @@
 from collections.abc import Iterator
 from typing import Any
 
+import pytest
 from openapi_schema_validator import OAS31Validator, oas31_format_checker
 from openapi_spec_validator import validate
 
 from backend.tests.contract_utils import HTTP_METHODS, resolve
+
+pytestmark = pytest.mark.contract
 
 EXPECTED_OPERATIONS = {
     ("get", "/tenders"),

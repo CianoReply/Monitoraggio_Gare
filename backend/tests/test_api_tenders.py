@@ -50,6 +50,7 @@ def _deadline_day(tender: dict) -> Any:
     return datetime.fromisoformat(tender["submission_deadline"]).astimezone(ROME).date()
 
 
+@pytest.mark.contract
 def test_response_conforms_to_contract(client: TestClient, spec: dict) -> None:
     response = client.get("/tenders")
     assert response.status_code == 200

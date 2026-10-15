@@ -20,6 +20,7 @@ jobs:
   lint:
     name: Lint (ruff)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -36,6 +37,7 @@ jobs:
   test:
     name: Test (pytest, SQLite)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -45,13 +47,14 @@ jobs:
           cache-dependency-path: pyproject.toml
       - run: pip install -e ".[dev]"
       - name: Conformita' al contratto API
-        run: pytest backend/tests/test_api_contract.py backend/tests/test_api_skeleton.py -q
+        run: pytest -m contract -q
       - name: Intera suite
         run: pytest
 
   test-postgres:
     name: Test (pytest, PostgreSQL)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     services:
       postgres:
         image: postgres:16
@@ -77,14 +80,13 @@ jobs:
           cache: pip
           cache-dependency-path: pyproject.toml
       - run: pip install -e ".[dev]"
-      - name: Test del filtro CPV su PostgreSQL
+      - name: Test su PostgreSQL
         run: pytest backend/tests/domain -k postgres -rA
-      - name: Intera suite
-        run: pytest
 
   docker-build:
     name: Build immagine Docker
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     # Il Dockerfile arriva con T0.7: finche' non esiste il job viene saltato.
     if: ${{ hashFiles('Dockerfile') != '' }}
     steps:

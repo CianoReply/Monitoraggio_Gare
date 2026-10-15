@@ -4,6 +4,7 @@ PyYAML non è dichiarato in pyproject.toml: arriva come dipendenza transitiva di
 openapi-spec-validator (dev) ed è usato solo qui, nei test.
 """
 
+import re
 from pathlib import Path
 from typing import Any
 
@@ -49,7 +50,7 @@ def test_lint_job_checks_and_format_checks(ci: dict[str, Any]) -> None:
 
 def test_test_job_runs_contract_conformance_and_full_suite(ci: dict[str, Any]) -> None:
     commands = _run_commands(ci["jobs"]["test"])
-    assert any("test_api_contract.py" in c and "test_api_skeleton.py" in c for c in commands)
+    assert "pytest -m contract -q" in commands
     assert "pytest" in commands
 
 
@@ -69,7 +70,10 @@ def test_postgres_job_sets_test_postgres_url_for_its_service(ci: dict[str, Any])
     assert service["env"]["POSTGRES_PASSWORD"] in url
     assert service["env"]["POSTGRES_DB"] in url
     assert "--health-cmd" in service["options"]
-    assert any("-k postgres" in c for c in _run_commands(job))
+    # Solo i test PostgreSQL: l'intera suite gira già nel job `test`.
+    assert [c for c in _run_commands(job) if c.startswith("pytest")] == [
+        "pytest backend/tests/domain -k postgres -rA"
+    ]
 
 
 def test_docker_build_is_skipped_until_dockerfile_exists(ci: dict[str, Any]) -> None:
@@ -79,6 +83,25 @@ def test_docker_build_is_skipped_until_dockerfile_exists(ci: dict[str, Any]) -> 
 
 def test_ci_has_read_only_permissions(ci: dict[str, Any]) -> None:
     assert ci["permissions"] == {"contents": "read"}
+
+
+def test_every_job_has_a_timeout(ci: dict[str, Any]) -> None:
+    claude = _load("claude.yml")
+    for job in [*ci["jobs"].values(), *claude["jobs"].values()]:
+        assert 0 < job["timeout-minutes"] <= 15
+
+
+def test_python_version_is_at_least_3_12(ci: dict[str, Any]) -> None:
+    versions = [
+        step["with"]["python-version"]
+        for job in ci["jobs"].values()
+        for step in job["steps"]
+        if str(step.get("uses", "")).startswith("actions/setup-python")
+    ]
+    assert versions
+    for version in versions:
+        major, minor = (int(part) for part in str(version).split(".")[:2])
+        assert (major, minor) >= (3, 12)
 
 
 def test_claude_workflow_triggers_on_mentions() -> None:
@@ -92,13 +115,64 @@ def test_claude_workflow_triggers_on_mentions() -> None:
     assert any(u.startswith("anthropics/claude-code-action@") for u in uses)
 
 
+def test_claude_workflow_is_behind_switch_and_restricted_to_members() -> None:
+    condition = _load("claude.yml")["jobs"]["claude"]["if"]
+    assert condition.startswith("vars.CLAUDE_ENABLED == 'true'")
+    assert condition.count("author_association") == 4  # un controllo per ogni evento
+    for association in ("OWNER", "MEMBER", "COLLABORATOR"):
+        assert association in condition
+    for outsider in ("CONTRIBUTOR", "NONE", "FIRST_TIME_CONTRIBUTOR"):
+        assert outsider not in condition
+
+
+def test_claude_workflow_permissions_are_minimal() -> None:
+    permissions = _load("claude.yml")["jobs"]["claude"]["permissions"]
+    assert permissions == {"contents": "read", "pull-requests": "write", "issues": "write"}
+
+
 def test_claude_workflow_declares_unverified_authentication() -> None:
     text = (WORKFLOWS / "claude.yml").read_text(encoding="utf-8")
     assert "DA VERIFICARE" in text
-    assert "${{ secrets." in text
+    assert "SHA" in text  # promemoria per fissare l'action
+
+
+def _strings(node: Any) -> list[str]:
+    if isinstance(node, str):
+        return [node]
+    if isinstance(node, dict):
+        return [s for key, value in node.items() for s in (*_strings(key), *_strings(value))]
+    if isinstance(node, list):
+        return [s for value in node for s in _strings(value)]
+    return []
+
+
+@pytest.mark.parametrize("name", ["ci.yml", "claude.yml"])
+def test_secrets_are_only_used_inside_expressions(name: str) -> None:
+    for value in _strings(_load(name)):
+        for match in re.finditer(r"secrets\.", value):
+            before = value[: match.start()]
+            assert before.count("${{") > before.count("}}"), value
+
+
+@pytest.mark.parametrize("name", ["ci.yml", "claude.yml"])
+def test_no_pull_request_target(name: str) -> None:
+    assert "pull_request_target" not in _load(name)["on"]
+    code = [
+        line
+        for line in (WORKFLOWS / name).read_text(encoding="utf-8").splitlines()
+        if not line.lstrip().startswith("#")
+    ]
+    assert not any("pull_request_target" in line for line in code)
 
 
 def test_no_secret_value_is_committed() -> None:
     for path in WORKFLOWS.glob("*.yml"):
         text = path.read_text(encoding="utf-8")
         assert "sk-ant-" not in text, path.name
+
+
+def test_contract_marker_selects_conformance_tests() -> None:
+    root = Path(__file__).resolve().parent
+    for name in ("test_api_contract.py", "test_api_skeleton.py"):
+        assert "pytestmark = pytest.mark.contract" in (root / name).read_text(encoding="utf-8")
+    assert "@pytest.mark.contract" in (root / "test_api_tenders.py").read_text(encoding="utf-8")

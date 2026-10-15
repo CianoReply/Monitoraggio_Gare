@@ -12,6 +12,8 @@ from backend.api.main import create_app
 from backend.tests.api_db import make_app, make_seeded_engine
 from backend.tests.contract_utils import HTTP_METHODS, resolve
 
+pytestmark = pytest.mark.contract
+
 # GET /tenders legge dal database (T3.2): qui un SQLite in memoria con i dati di seed.
 app = make_app(make_seeded_engine())
 client = TestClient(app)
