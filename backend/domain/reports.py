@@ -236,18 +236,40 @@ def validate_field_review(payload: Mapping[str, Any] | FieldReview) -> FieldRevi
     return _validate(FieldReview, payload, "Revisione")
 
 
-def _check_lengths(what: str, checks: list[tuple[str, str, int]]) -> None:
-    """Controlla le lunghezze massime delle colonne: 422 chiaro invece di un errore del database.
+NUL = chr(0)
+MAX_SOURCE_PAGE = 2_147_483_647  # intero a 32 bit della colonna `source_page`
 
-    `checks` contiene (percorso del campo, valore, massimo).
-    """
-    errors = [
-        f"{where}: troppo lungo ({len(value)} caratteri, massimo {maximum})"
-        for where, value, maximum in checks
-        if len(value) > maximum
-    ]
+
+def _text_errors(where: str, value: str, maximum: int | None = None) -> list[str]:
+    """Problemi che il database non accetta: testo troppo lungo per la colonna o con NUL."""
+    errors = []
+    if maximum is not None and len(value) > maximum:
+        errors.append(f"{where}: troppo lungo ({len(value)} caratteri, massimo {maximum})")
+    if NUL in value:
+        errors.append(f"{where}: non può contenere il carattere NUL")
+    return errors
+
+
+def _check_report_limits(data: ReportCreate) -> None:
+    """Limiti delle colonne non dichiarati dal contratto: 422 chiaro, mai un errore del database."""
+    errors = _text_errors("summary", data.summary)
+    for i, field in enumerate(data.fields):
+        prefix = f"fields.{i}"
+        errors += _text_errors(f"{prefix}.label", field.label, MAX_LABEL_LENGTH)
+        errors += _text_errors(f"{prefix}.value", field.value)
+        errors += _text_errors(f"{prefix}.source_doc", field.source_doc, MAX_SOURCE_DOC_LENGTH)
+        if field.source_page is not None and field.source_page > MAX_SOURCE_PAGE:
+            errors.append(f"{prefix}.source_page: troppo grande (massimo {MAX_SOURCE_PAGE})")
     if errors:
-        raise ReportValidationError(what, errors)
+        raise ReportValidationError("Report", errors)
+
+
+def _check_review_limits(data: FieldReview) -> None:
+    errors = _text_errors("reviewer", data.reviewer, MAX_REVIEWER_LENGTH)
+    if data.value is not None:
+        errors += _text_errors("value", data.value)
+    if errors:
+        raise ReportValidationError("Revisione", errors)
 
 
 def _report_exists(session: Session, tender_id: int) -> bool:
@@ -289,17 +311,7 @@ def create_report(
     e l'etichetta "da revisionare"; `generated_at` è quello della Skill o l'istante di `now`.
     """
     data = validate_report(payload)
-    _check_lengths(
-        "Report",
-        [
-            (f"fields.{i}.{name}", getattr(f, name), maximum)
-            for i, f in enumerate(data.fields)
-            for name, maximum in (
-                ("label", MAX_LABEL_LENGTH),
-                ("source_doc", MAX_SOURCE_DOC_LENGTH),
-            )
-        ],
-    )
+    _check_report_limits(data)
     created_at = as_utc(now)
     if session.get(Tender, tender_id) is None:
         raise TenderNotFoundError(tender_id)
@@ -359,7 +371,7 @@ def review_field(
     Errori: `ReportValidationError` (422), `ReportNotFoundError` / `FieldNotFoundError` (404).
     """
     data = validate_field_review(review)
-    _check_lengths("Revisione", [("reviewer", data.reviewer, MAX_REVIEWER_LENGTH)])
+    _check_review_limits(data)
     moment = as_utc(now)
     report = get_report(session, report_id)
     field = next((f for f in report.fields if f.id == field_id), None)

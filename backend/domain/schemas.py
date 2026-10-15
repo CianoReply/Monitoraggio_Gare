@@ -16,6 +16,8 @@ from typing import Any
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator
 
 _CPV_RE = re.compile(r"^\d{8}$")
+NUL = chr(0)
+MAX_DISCARD_REASON_LENGTH = 500
 
 
 class TenderCreate(BaseModel):
@@ -30,7 +32,10 @@ class TenderCreate(BaseModel):
     buyer_city: str | None = Field(default=None, max_length=200)
     cpv_codes: list[str] = Field(default_factory=list)
     notice_type: str = Field(min_length=1, max_length=100)
-    estimated_value: Decimal | None = Field(default=None, ge=0)
+    # Numeric(18, 2) nel database: sotto 10^16, altrimenti PostgreSQL rifiuta il valore.
+    estimated_value: Decimal | None = Field(
+        default=None, ge=0, lt=Decimal(10) ** 16, allow_inf_nan=False
+    )
     currency: str | None = Field(default=None, min_length=3, max_length=3)
     publication_date: date
     submission_deadline: AwareDatetime | None = None
@@ -38,6 +43,25 @@ class TenderCreate(BaseModel):
     documents_url: str | None = Field(default=None, max_length=1000)
     parent_publication_number: str | None = Field(default=None, max_length=50)
     raw_data: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator(
+        "publication_number",
+        "title",
+        "description",
+        "buyer_name",
+        "buyer_city",
+        "notice_type",
+        "currency",
+        "ted_url",
+        "documents_url",
+        "parent_publication_number",
+    )
+    @classmethod
+    def _no_nul(cls, value: str | None) -> str | None:
+        """PostgreSQL non accetta il carattere NUL nei testi."""
+        if value is not None and NUL in value:
+            raise ValueError("non può contenere il carattere NUL")
+        return value
 
     @field_validator("cpv_codes")
     @classmethod
@@ -72,5 +96,11 @@ class TenderEvaluation:
     def __post_init__(self) -> None:
         if not 1 <= self.relevance_score <= 5:
             raise ValueError("relevance_score deve essere tra 1 e 5")
+        reason = self.discard_reason
+        if reason is not None and (len(reason) > MAX_DISCARD_REASON_LENGTH or NUL in reason):
+            raise ValueError(
+                f"discard_reason non valido: massimo {MAX_DISCARD_REASON_LENGTH} caratteri,"
+                " senza NUL"
+            )
         if self.is_relevant and self.discard_reason is not None:
             raise ValueError("una gara scartata non può essere rilevante")

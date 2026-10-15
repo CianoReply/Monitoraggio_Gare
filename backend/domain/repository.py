@@ -22,11 +22,16 @@ from backend.domain.timeutil import ROME, as_utc, utcnow
 DEFAULT_PAGE_SIZE = 20
 MAX_PAGE_SIZE = 100
 MAX_QUERY_LENGTH = 200
+MAX_OFFSET = 2**31 - 1  # oltre, l'OFFSET non sta nel tipo intero del database
 
 # Valori di `sort` del contratto API (docs/API_CONTRACT.yaml).
 SortKey = Literal["relevance", "deadline", "published"]
 # Stato del report derivato: `none` se la gara non ha report (ADR-012).
 ReportStatusFilter = Literal["none", "to_review", "verified"]
+
+
+class InvalidQueryError(ValueError):
+    """Parametro non valido di una lettura (filtri, ordinamento, paginazione): l'API dà 422."""
 
 
 class UpsertResult(NamedTuple):
@@ -107,8 +112,21 @@ def _escape_like(text: str) -> str:
 
 
 def _day_start_utc(day: date) -> datetime:
-    """Mezzanotte del giorno in Europe/Rome, espressa in UTC."""
-    return datetime.combine(day, time.min, tzinfo=ROME).astimezone(UTC)
+    """Mezzanotte del giorno in Europe/Rome, espressa in UTC.
+
+    `InvalidQueryError` se il giorno è fuori dall'intervallo rappresentabile (es. anno 1).
+    """
+    try:
+        return datetime.combine(day, time.min, tzinfo=ROME).astimezone(UTC)
+    except (OverflowError, ValueError) as exc:
+        raise InvalidQueryError(f"data fuori dall'intervallo supportato: {day}") from exc
+
+
+def _next_day(day: date) -> date:
+    try:
+        return day + timedelta(1)
+    except OverflowError as exc:
+        raise InvalidQueryError(f"data fuori dall'intervallo supportato: {day}") from exc
 
 
 def _order_by(sort: SortKey) -> list[ColumnElement]:
@@ -121,7 +139,7 @@ def _order_by(sort: SortKey) -> list[ColumnElement]:
     elif sort == "published":
         order = [Tender.publication_date.desc(), *deadline_asc]
     else:
-        raise ValueError(f"sort non valido: {sort!r}")
+        raise InvalidQueryError(f"sort non valido: {sort!r}")
     return [*order, Tender.id.asc()]
 
 
@@ -159,23 +177,27 @@ def list_tenders(
     Parametri non validi o intervalli invertiti sollevano `ValueError`.
     """
     if min_score is not None and not 1 <= min_score <= 5:
-        raise ValueError("min_score deve essere tra 1 e 5")
+        raise InvalidQueryError("min_score deve essere tra 1 e 5")
     if cpv is not None and not re.fullmatch(r"\d{2,8}", cpv):
-        raise ValueError("cpv deve essere un prefisso di 2-8 cifre")
+        raise InvalidQueryError("cpv deve essere un prefisso di 2-8 cifre")
     if (min_value is not None and min_value < 0) or (max_value is not None and max_value < 0):
-        raise ValueError("min_value e max_value devono essere >= 0")
+        raise InvalidQueryError("min_value e max_value devono essere >= 0")
     if min_value is not None and max_value is not None and min_value > max_value:
-        raise ValueError("min_value non può superare max_value")
+        raise InvalidQueryError("min_value non può superare max_value")
     if deadline_from is not None and deadline_to is not None and deadline_from > deadline_to:
-        raise ValueError("deadline_from non può superare deadline_to")
+        raise InvalidQueryError("deadline_from non può superare deadline_to")
     if report_status is not None and report_status not in ("none", "to_review", "verified"):
-        raise ValueError(f"report_status non valido: {report_status!r}")
+        raise InvalidQueryError(f"report_status non valido: {report_status!r}")
+    if q is not None and chr(0) in q:
+        raise InvalidQueryError("q non può contenere il carattere NUL")
     if q is not None and len(q) > MAX_QUERY_LENGTH:
-        raise ValueError(f"q non può superare {MAX_QUERY_LENGTH} caratteri")
+        raise InvalidQueryError(f"q non può superare {MAX_QUERY_LENGTH} caratteri")
     if page < 1:
-        raise ValueError("page deve essere >= 1")
+        raise InvalidQueryError("page deve essere >= 1")
     if not 1 <= page_size <= MAX_PAGE_SIZE:
-        raise ValueError(f"page_size deve essere tra 1 e {MAX_PAGE_SIZE}")
+        raise InvalidQueryError(f"page_size deve essere tra 1 e {MAX_PAGE_SIZE}")
+    if (page - 1) * page_size > MAX_OFFSET:
+        raise InvalidQueryError("page troppo grande")
 
     # Stato del report calcolato nella stessa query (LEFT JOIN: al massimo un report per gara).
     status_col = func.coalesce(cast(Report.status, String), "none")
@@ -193,7 +215,7 @@ def list_tenders(
     if deadline_from is not None:
         conditions.append(Tender.submission_deadline >= _day_start_utc(deadline_from))
     if deadline_to is not None:
-        conditions.append(Tender.submission_deadline < _day_start_utc(deadline_to + timedelta(1)))
+        conditions.append(Tender.submission_deadline < _day_start_utc(_next_day(deadline_to)))
     if publication_from is not None:
         conditions.append(Tender.publication_date >= publication_from)
     if publication_to is not None:
@@ -315,7 +337,7 @@ def last_successful_run_date(session: Session) -> date | None:
 def list_runs(session: Session, limit: int = DEFAULT_RUNS_LIMIT) -> list[IngestionRun]:
     """Le ultime `limit` esecuzioni, dalla più recente (per `GET /runs`)."""
     if limit < 1:
-        raise ValueError("limit deve essere >= 1")
+        raise InvalidQueryError("limit deve essere >= 1")
     return list(
         session.scalars(
             select(IngestionRun)
