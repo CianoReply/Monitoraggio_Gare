@@ -55,3 +55,17 @@ deadline_ok_points = 1
 # Scadenza a meno di deadline_urgent_days giorni (o gia' passata): deadline_urgent_points (negativo).
 deadline_urgent_days = 5
 deadline_urgent_points = -1
+
+[documents]
+# Scarica solo i link diretti a questi tipi di file; gli altri (piattaforme di gara) si salvano
+# come link con stato not_accessible: il login non e' automatizzato.
+direct_file_extensions = [".pdf", ".zip"]
+# Dimensione massima di un file, in megabyte: oltre il file viene rifiutato.
+max_file_mb = 50
+# Tempo massimo di attesa per ogni richiesta, in secondi.
+request_timeout_seconds = 30
+# Tempo massimo complessivo per scaricare un file (redirect inclusi), in secondi: oltre, errore
+# temporaneo (il documento resta pending e si riprova alla chiamata successiva).
+total_timeout_seconds = 300
+# Massimo numero di reindirizzamenti seguiti per un link (ogni salto e' ricontrollato).
+max_redirects = 5

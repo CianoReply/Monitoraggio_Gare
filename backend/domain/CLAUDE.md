@@ -8,7 +8,7 @@
 - `repository.py`: `upsert_tender`, `list_tenders` (filtri e paginazione), `get_tender` (T2.1)
 - `filters.py`: una funzione per regola, esito "tenuta" o "scartata con motivo" (T2.2)
 - `scoring.compute_score(tender, config, now=None) -> int` e `scoring.evaluate_tender(tender, filter_result, config, now=None) -> TenderEvaluation` (T2.3)
-- gestione documenti (T2.4) e `report_schema.json` con le regole di verifica (T2.5)
+- `documents.process_tender_documents(session, tender, client=None) -> list[Document]` (T2.4) e `report_schema.json` con le regole di verifica (T2.5)
 
 ## Task del modulo
 T2.1 schema e migrazioni · T2.2 filtri · T2.3 punteggio · T2.4 documenti · T2.5 report · T5.1–T5.3 Skill `analisi-gara`
@@ -25,7 +25,6 @@ T2.1 schema e migrazioni · T2.2 filtri · T2.3 punteggio · T2.4 documenti · T
 
 ## Da completare
 - Taratura delle regole di punteggio con Giuseppe (T2.3, IN ATTESA UMANA).
-- Classificazione dei link ai documenti (T2.4).
 
 ## Database, migrazioni e seed (T2.1)
 - `DATABASE_URL` dall'ambiente (vedi `.env.example`); i test usano SQLite, produzione PostgreSQL.
@@ -53,3 +52,16 @@ T2.1 schema e migrazioni · T2.2 filtri · T2.3 punteggio · T2.4 documenti · T
 - `score_breakdown(...)` spiega i criteri. `evaluate_tender` calcola il voto SEMPRE (ADR-010): `is_relevant` = tenuta dai filtri e voto >= `relevance_threshold` (predefinita 3); `discard_reason` = motivo dei filtri.
 - Quando si ricalcola: a ogni upsert dell'avviso (nuovo o rettifica) in T1.5/T1.4, non ogni giorno. Il voto dipende dalla scadenza rispetto a `now`, quindi può diventare vecchio finché l'avviso non cambia.
 - Validazione con Giuseppe: `python -m backend.domain.scoring_sample --limit 20` oppure `--per-score 4` (campione per voto, anche i voti bassi), con `DATABASE_URL`.
+
+
+## Documenti di gara (T2.4)
+- `documents.process_tender_documents(session, tender, client=None, config=None, documents_dir=None) -> list[Document]`: la chiama il job (T1.5) per ogni gara salvata. Gara non rilevante: nessuna riga e nessun download. Rilevante: sempre almeno una riga in `documents`. Idempotente (nessun duplicato per gara e link). Fa solo `flush`.
+- Classificazione di `documents_url` (`classify_link`): link diretto a un file (estensioni `.pdf`, `.zip` in `config.toml` `[documents]`) -> download; pagina di una piattaforma di gara -> riga `not_accessible` con il link (il login non si automatizza, i documenti si scaricano a mano); nessun link o non http/https -> riga `not_accessible` senza url. Nelle fixture TED reali il caso normale è la piattaforma.
+- Download con httpx in streaming, massimo `max_file_mb` (50): controllo di `Content-Length` e conteggio dei byte ricevuti dopo l'eventuale decompressione; oltre il limite il file è rifiutato ("File troppo grande: ... (massimo 50 MB)") e non resta nessun file parziale. Sono rifiutati: solo status 200 vale come successo; pagine HTML/XHTML al posto del file (es. login); contenuti senza la firma attesa (`%PDF-` per i PDF, `PK` per gli ZIP). Tempo complessivo massimo `total_timeout_seconds` (300).
+- Sicurezza (SSRF): i link vengono da avvisi pubblici e non sono fidati. I redirect si seguono a mano (max `max_redirects`, anche con un client iniettato che li seguirebbe) e a ogni salto `check_public_url` accetta solo http/https verso host pubblici: sono rifiutati `localhost`, IP privati, loopback, link-local, riservati e multicast, anche quando un nome DNS li risolve (basta un indirizzo non pubblico). Rifiuto = `not_accessible`. Limite noto: il controllo risolve il nome con `getaddrinfo` e poi httpx lo risolve di nuovo per connettersi, quindi un DNS rebinding (risposte diverse nei due momenti) non è escluso. In produzione serve un blocco di rete in uscita verso gli indirizzi interni (firewall o regole del container/Docker, es. impedire al servizio di raggiungere la rete privata e l'endpoint dei metadati del cloud 169.254.169.254).
+- Stati: `downloaded`; `not_accessible` (piattaforma, nessun link, 4xx/204/3xx, URL non valido o non consentito, file troppo grande, contenuto non valido: non si riprova); `pending` (errore temporaneo: timeout, rete, protocollo remoto, 408/429/5xx, DNS, tempo complessivo scaduto, disco pieno o permessi: si riprova alla chiamata successiva). Un `downloaded` il cui file non esiste più si riscarica. Il motivo dell'errore va nel log (`logging`), non in tabella: `documents` non ha una colonna per il messaggio.
+- File in `$DOCUMENTS_DIR/<publication_number>/<id>_<nome>` (`DOCUMENTS_DIR`, predefinita `/data/documents`): il prefisso con l'id del documento evita collisioni, i nomi sono ripuliti da percorsi e caratteri speciali e accorciati a 200 caratteri mantenendo l'estensione. `url` e `name` del documento restano quelli del link dell'avviso anche se c'è stato un redirect.
+- Limiti noti, senza migrazioni: non c'è un vincolo UNIQUE(tender_id, url), quindi si presume un solo job alla volta; un documento `pending` si riprova a ogni chiamata, senza limite di tentativi.
+
+## Registro delle esecuzioni (T1.5)
+- In `repository.py` (solo `flush`): `start_run(session, run_date, now=None)`, `finish_run(session, run, status=success|failed, fetched_count, new_count, updated_count, relevant_count, error_message, now=None)`, `get_running_run`, `has_successful_run(session, run_date)`, `last_successful_run_date`, `list_runs(session, limit=20)` (più recenti prima, per `GET /runs`).

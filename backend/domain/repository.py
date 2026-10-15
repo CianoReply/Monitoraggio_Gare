@@ -16,7 +16,7 @@ from sqlalchemy import String, cast, func, or_, select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import ColumnElement
 
-from backend.domain.models import Report, ReportStatus, Tender, utcnow
+from backend.domain.models import IngestionRun, Report, ReportStatus, RunStatus, Tender, utcnow
 from backend.domain.schemas import TenderCreate, TenderEvaluation
 
 DEFAULT_PAGE_SIZE = 20
@@ -234,3 +234,87 @@ def list_tenders(
     ).all()
     items = [TenderRow(tender, status) for tender, status in rows]
     return TenderPage(items, total, page, page_size)
+
+
+# --- Registro delle esecuzioni (ingestion_runs; ADR-009) ---
+
+DEFAULT_RUNS_LIMIT = 20
+
+
+def start_run(session: Session, run_date: date, now: datetime | None = None) -> IngestionRun:
+    """Registra l'inizio dell'elaborazione del giorno `run_date` (stato `running`)."""
+    run = IngestionRun(run_date=run_date, started_at=now or utcnow(), status=RunStatus.RUNNING)
+    session.add(run)
+    session.flush()
+    return run
+
+
+def finish_run(
+    session: Session,
+    run: IngestionRun,
+    *,
+    status: RunStatus,
+    fetched_count: int = 0,
+    new_count: int = 0,
+    updated_count: int = 0,
+    relevant_count: int = 0,
+    error_message: str | None = None,
+    now: datetime | None = None,
+) -> IngestionRun:
+    """Chiude l'esecuzione con `success` o `failed`, salvando i conteggi e `finished_at`."""
+    if status not in (RunStatus.SUCCESS, RunStatus.FAILED):
+        raise ValueError("status deve essere success o failed")
+    counts = (fetched_count, new_count, updated_count, relevant_count)
+    if any(count < 0 for count in counts):
+        raise ValueError("i conteggi devono essere >= 0")
+    run.status = status
+    run.finished_at = now or utcnow()
+    run.fetched_count = fetched_count
+    run.new_count = new_count
+    run.updated_count = updated_count
+    run.relevant_count = relevant_count
+    run.error_message = error_message
+    session.flush()
+    return run
+
+
+def get_running_run(session: Session) -> IngestionRun | None:
+    """L'esecuzione `running` più recente, `None` se non ce ne sono."""
+    return session.scalar(
+        select(IngestionRun)
+        .where(IngestionRun.status == RunStatus.RUNNING)
+        .order_by(IngestionRun.started_at.desc(), IngestionRun.id.desc())
+        .limit(1)
+    )
+
+
+def has_successful_run(session: Session, run_date: date) -> bool:
+    """Vero se il giorno `run_date` ha almeno un'esecuzione `success`."""
+    return (
+        session.scalar(
+            select(IngestionRun.id)
+            .where(IngestionRun.run_date == run_date, IngestionRun.status == RunStatus.SUCCESS)
+            .limit(1)
+        )
+        is not None
+    )
+
+
+def last_successful_run_date(session: Session) -> date | None:
+    """Il `run_date` più recente con un'esecuzione `success`, `None` se non ce ne sono."""
+    return session.scalar(
+        select(func.max(IngestionRun.run_date)).where(IngestionRun.status == RunStatus.SUCCESS)
+    )
+
+
+def list_runs(session: Session, limit: int = DEFAULT_RUNS_LIMIT) -> list[IngestionRun]:
+    """Le ultime `limit` esecuzioni, dalla più recente (per `GET /runs`)."""
+    if limit < 1:
+        raise ValueError("limit deve essere >= 1")
+    return list(
+        session.scalars(
+            select(IngestionRun)
+            .order_by(IngestionRun.started_at.desc(), IngestionRun.id.desc())
+            .limit(limit)
+        )
+    )
