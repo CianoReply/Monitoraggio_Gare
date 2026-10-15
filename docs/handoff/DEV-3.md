@@ -18,6 +18,13 @@
 
 <!-- Note -->
 
+## 2026-10-15 – T4.2 Test end-to-end
+- Fatto: `backend/tests/test_e2e.py` (marker `e2e`, registrato in `conftest.py`) con i 4 scenari del piano: giorno normale, doppia esecuzione, rettifica (originale 437009-2026 con report verificato, rettifica 566426-2026: scadenza aggiornata e report `to_review` visibili dall'API), TED non raggiungibile (503 su tutti i tentativi: run `failed` con messaggio leggibile, nessuna gara toccata, il giorno dopo il recupero elabora anche il giorno fallito). TED è un `httpx.MockTransport` sul vero `TedClient` con le fixture reali; database migrato con Alembic su file; avvio con `POST /runs` e verifica con `GET /tenders`, `/tenders/{id}`, `/report`, `/runs`, `/stats`, `/deadlines`. Nuovo step "Test end-to-end (TED finto)" in `ci.yml` (`pytest -m e2e -q`).
+- Da fare: i passi umani su GitHub (CI e `@claude`, T3.6) e la prova di `docker compose up` (T0.7); su GitHub il criterio "i 4 scenari passano in CI" è IN ATTESA UMANA (in locale passano).
+- Decisioni: gli scenari 3 usa `run_daily_ingestion` per i giorni passati (06/25 e 08/17), perché `POST /runs` elabora solo i giorni mancanti fino a ieri; le attese di ritentativo sono finte (nessuna attesa reale).
+- Impatto sugli altri dev: chi cambia il client TED, il job o gli endpoint ora ha anche questi scenari che lo verificano.
+
+
 ## 2026-10-15 – T4.1 parte api: ciclo di vita dell'app
 - Fatto: `lifespan` di FastAPI in `backend/api/main.py` (configura il log JSON; con `ENABLE_SCHEDULER=true` avvia lo scheduler e lo ferma con `shutdown(wait=False)`); `ENABLE_SCHEDULER` e `INGESTION_SCHEDULE` in `.env.example` e nel servizio `api` del compose, che ora avvia uvicorn con `--workers 1`. Test in `test_api_lifespan.py`.
 - Da fare: T4.2 (test end-to-end, dopo T4.1 completo); i passi umani su GitHub (T3.6) e la prova di `docker compose up` (T0.7).

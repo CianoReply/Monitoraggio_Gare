@@ -51,6 +51,7 @@ def test_lint_job_checks_and_format_checks(ci: dict[str, Any]) -> None:
 def test_test_job_runs_contract_conformance_and_full_suite(ci: dict[str, Any]) -> None:
     commands = _run_commands(ci["jobs"]["test"])
     assert "pytest -m contract -q" in commands
+    assert "pytest -m e2e -q" in commands
     assert "pytest" in commands
 
 

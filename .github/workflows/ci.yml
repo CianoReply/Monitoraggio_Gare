@@ -48,6 +48,8 @@ jobs:
       - run: pip install -e ".[dev]"
       - name: Conformita' al contratto API
         run: pytest -m contract -q
+      - name: Test end-to-end (TED finto)
+        run: pytest -m e2e -q
       - name: Intera suite
         run: pytest
 
