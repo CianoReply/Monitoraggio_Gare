@@ -1,62 +1,17 @@
 """Dati di prova, ricavati dagli esempi di `docs/API_CONTRACT.yaml` (valori fittizi).
 
-Restano solo quelli degli endpoint non ancora collegati al dominio (T3.4, T3.5).
+Restano solo quelli degli endpoint non ancora collegati al dominio (T3.5).
 """
 
 from datetime import UTC, date, datetime, timedelta, timezone
 
 from backend.api.schemas import (
     Deadline,
-    Report,
-    ReportField,
     Run,
     Stats,
 )
 
 _ROME_SUMMER = timezone(timedelta(hours=2))
-
-AI_LABEL_DEFAULT = "Contenuto generato con IA – da revisionare"
-
-REPORT_101 = Report(
-    id=7,
-    tender_id=101,
-    summary=(
-        "Accordo quadro triennale per sviluppo e manutenzione evolutiva del sistema "
-        "informativo regionale. Importo a base di gara 2,4 milioni di euro. Requisiti di "
-        "fatturato specifico e certificazione ISO 27001."
-    ),
-    status="to_review",
-    generated_at=datetime(2026, 10, 14, 9, 15, tzinfo=UTC),
-    ai_label=AI_LABEL_DEFAULT,
-    fields=[
-        ReportField(
-            id=71,
-            report_id=7,
-            label="Importo a base di gara",
-            value="2.400.000 EUR",
-            original_value=None,
-            source_doc="Disciplinare.pdf",
-            source_page=3,
-            is_critical=True,
-            verification_status="to_verify",
-            reviewer=None,
-            reviewed_at=None,
-        ),
-        ReportField(
-            id=72,
-            report_id=7,
-            label="Scadenza offerte",
-            value="20/11/2026 ore 12:00",
-            original_value=None,
-            source_doc="Disciplinare.pdf",
-            source_page=1,
-            is_critical=False,
-            verification_status="to_verify",
-            reviewer=None,
-            reviewed_at=None,
-        ),
-    ],
-)
 
 DEADLINES: list[Deadline] = [
     Deadline(

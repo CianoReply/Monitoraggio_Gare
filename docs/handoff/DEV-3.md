@@ -18,6 +18,13 @@
 
 <!-- Note -->
 
+## 2026-10-15 – T3.3 Dettaglio, documenti e report
+- Fatto: `GET /tenders/{id}`, `GET /tenders/{id}/documents`, `GET` e `POST /tenders/{id}/report` leggono e scrivono tramite `backend/domain` (repository, relazioni, `domain.reports`); gli errori del dominio (`ReportError` e figli) sono mappati in `backend/api/errors.py` a 404/409/422 nel formato `{error, message}`; il commit lo fa l'API. Test in `backend/tests/test_api_detail.py`.
+- Da fare: T3.4 (revisione dei campi, in corso), T3.5 (scadenze, statistiche, esecuzioni), T4.2.
+- Decisioni: documenti letti dalla relazione `Tender.documents` (nessuna query nell'API); `report_status` della gara dalla relazione `Tender.report`; il corpo di `POST` passa al dominio con `exclude_unset` così `generated_at` assente resta assente. Il report "verified" del seed ha campi verified senza revisore (nota per DEV-2, non bloccante).
+- Impatto sugli altri dev: nessuno.
+
+
 ## 2026-10-15 – T0.7 Ambiente locale con Docker (file pronti, avvio reale DA VERIFICARE)
 - Fatto: `Dockerfile` (python:3.12-slim, utente non root), `docker-compose.yml` (servizi `db` PostgreSQL 16 con healthcheck e `api`, che applica `alembic -c backend/domain/alembic.ini upgrade head` e poi avvia uvicorn; porte solo su 127.0.0.1; volumi `db_data` e `documents`), `.dockerignore`, `.env.example` completato (POSTGRES_*, porte, CORS_ORIGINS) e sezione Docker in `docs/ONBOARDING.md`. `backend/tests/test_docker_setup.py` fa controlli statici. Con valore vuoto `CORS_ORIGINS` ora vale il predefinito (`backend/api/main.py`).
 - Verificato qui: `alembic upgrade head` su SQLite, `uvicorn` locale con `GET /health` 200 e `GET /tenders` 200. Docker non è installato su questa macchina: build, `docker compose up` e `/health` nel container sono IN ATTESA UMANA / DA VERIFICARE.
