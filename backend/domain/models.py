@@ -140,7 +140,7 @@ class Tender(Base):
     updated_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=utcnow, onupdate=utcnow)
 
     documents: Mapped[list[Document]] = relationship(
-        back_populates="tender", cascade="all, delete-orphan"
+        back_populates="tender", cascade="all, delete-orphan", order_by="Document.id"
     )
     report: Mapped[Report | None] = relationship(
         back_populates="tender", cascade="all, delete-orphan", uselist=False

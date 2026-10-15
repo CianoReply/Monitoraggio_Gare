@@ -89,6 +89,18 @@ class UnsafeUrlError(DocumentDownloadError):
     """L'indirizzo non è consentito (schema non http/https, host interno o non pubblico)."""
 
 
+def safe_url(url: str) -> str:
+    """URL senza credenziali né query string né frammento: è l'unica forma che si scrive nei log
+    e nei messaggi di errore (la query può contenere token o dati personali)."""
+    try:
+        parsed = urlparse(url)
+        host = parsed.hostname or ""
+        port = f":{parsed.port}" if parsed.port else ""
+    except ValueError:
+        return "(indirizzo non valido)"
+    return f"{parsed.scheme}://{host}{port}{parsed.path}" if host else "(indirizzo non valido)"
+
+
 def get_documents_dir() -> Path:
     """Cartella radice dei documenti: `DOCUMENTS_DIR` oppure `/data/documents`."""
     return Path(os.environ.get("DOCUMENTS_DIR", "").strip() or DEFAULT_DOCUMENTS_DIR)
@@ -142,9 +154,18 @@ def document_file_path(document: Document, tender: Tender, root: Path | None = N
 # --- Controllo dell'indirizzo (SSRF) ---
 
 
+# Reti che Python considera globali ma che portano a indirizzi interni o non raggiungibili:
+# NAT64 (64:ff9b::/96) traduce verso IPv4 arbitrari, comprese le reti private.
+_BLOCKED_NETWORKS = (ipaddress.ip_network("64:ff9b::/96"),)
+
+
 def _is_public(address: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
     if isinstance(address, ipaddress.IPv6Address) and address.ipv4_mapped is not None:
         address = address.ipv4_mapped
+    if any(
+        address in network for network in _BLOCKED_NETWORKS if network.version == address.version
+    ):
+        return False
     return address.is_global and not address.is_multicast
 
 
@@ -157,14 +178,16 @@ def check_public_url(url: str, resolver: Resolver | None = None) -> None:
     """
     parsed = urlparse(url)
     if parsed.scheme not in ("http", "https"):
-        raise UnsafeUrlError(f"Schema non consentito ({parsed.scheme or 'assente'}): {url}")
+        raise UnsafeUrlError(
+            f"Schema non consentito ({parsed.scheme or 'assente'}): {safe_url(url)}"
+        )
     try:
         host = parsed.hostname
         port = parsed.port or (443 if parsed.scheme == "https" else 80)
     except ValueError as exc:
-        raise UnsafeUrlError(f"Indirizzo non valido: {url}") from exc
+        raise UnsafeUrlError(f"Indirizzo non valido: {safe_url(url)}") from exc
     if not host:
-        raise UnsafeUrlError(f"Indirizzo senza host: {url}")
+        raise UnsafeUrlError(f"Indirizzo senza host: {safe_url(url)}")
     host = host.rstrip(".").lower()
     if host == "localhost" or host.endswith(".localhost"):
         raise UnsafeUrlError(f"Host interno non consentito ({host})")
@@ -234,7 +257,8 @@ def download_document(
     def check_time() -> None:
         if clock() - started > total_timeout:
             raise DocumentDownloadError(
-                f"Tempo massimo di download superato ({total_timeout:.0f} s): {url}", temporary=True
+                f"Tempo massimo di download superato ({total_timeout:.0f} s): {safe_url(url)}",
+                temporary=True,
             )
 
     partial = destination.with_name(destination.name + ".part")
@@ -251,12 +275,12 @@ def download_document(
                     location = response.headers.get("location")
                     if not location:
                         raise DocumentDownloadError(
-                            f"Reindirizzamento {status} senza destinazione per {current}"
+                            f"Reindirizzamento {status} senza destinazione per {safe_url(current)}"
                         )
                     next_url = urljoin(current, location)
                 elif status != 200:
                     raise DocumentDownloadError(
-                        f"Il server ha risposto {status} per {current}",
+                        f"Il server ha risposto {status} per {safe_url(current)}",
                         temporary=status >= 500 or status in TEMPORARY_STATUSES,
                     )
                 else:
@@ -266,20 +290,22 @@ def download_document(
                 partial.replace(destination)
                 return destination.stat().st_size
             current = next_url
-        raise DocumentDownloadError(f"Troppi reindirizzamenti (massimo {max_redirects}): {url}")
+        raise DocumentDownloadError(
+            f"Troppi reindirizzamenti (massimo {max_redirects}): {safe_url(url)}"
+        )
     except DocumentDownloadError:
         raise
     except (httpx.TimeoutException, httpx.NetworkError, httpx.RemoteProtocolError) as exc:
         raise DocumentDownloadError(
-            f"Download non riuscito per {url}: {exc}", temporary=True
+            f"Download non riuscito per {safe_url(url)}: {exc}", temporary=True
         ) from exc
     except (httpx.HTTPError, httpx.InvalidURL) as exc:
         # InvalidURL, UnsupportedProtocol, TooManyRedirects, errori di decodifica: permanenti
-        raise DocumentDownloadError(f"Download non riuscito per {url}: {exc}") from exc
+        raise DocumentDownloadError(f"Download non riuscito per {safe_url(url)}: {exc}") from exc
     except OSError as exc:
         # disco pieno o permessi: problema dell'ambiente, da ritentare dopo averlo sistemato
         temporary = isinstance(exc, PermissionError) or exc.errno == errno.ENOSPC
-        logger.error("Errore di archiviazione per %s in %s: %s", url, destination, exc)
+        logger.error("Errore di archiviazione per %s in %s: %s", safe_url(url), destination, exc)
         raise DocumentDownloadError(
             f"Impossibile salvare {destination}: {exc}", temporary=temporary
         ) from exc
@@ -297,7 +323,9 @@ def _save_response(
 ) -> None:
     content_type = response.headers.get("content-type", "").lower()
     if content_type.startswith(WEB_PAGE_TYPES):
-        raise DocumentDownloadError(f"Il link restituisce una pagina web, non un file: {url}")
+        raise DocumentDownloadError(
+            f"Il link restituisce una pagina web, non un file: {safe_url(url)}"
+        )
     declared = response.headers.get("content-length", "")
     if declared.isdigit() and int(declared) > max_bytes:
         raise DocumentTooLargeError(
@@ -400,6 +428,7 @@ def _download_into(
     http = client or httpx.Client(
         timeout=config.request_timeout_seconds,
         follow_redirects=False,
+        trust_env=False,  # niente proxy né certificati dall'ambiente (HTTP(S)_PROXY, SSL_CERT_FILE)
         headers={"User-Agent": USER_AGENT},
     )
     try:
@@ -415,7 +444,10 @@ def _download_into(
         )
     except DocumentDownloadError as exc:
         logger.warning(
-            "Documento %s della gara %s non scaricato: %s", url, tender.publication_number, exc
+            "Documento %s della gara %s non scaricato: %s",
+            safe_url(url),
+            tender.publication_number,
+            exc,
         )
         document.status = DocumentStatus.PENDING if exc.temporary else DocumentStatus.NOT_ACCESSIBLE
         document.local_path = None
