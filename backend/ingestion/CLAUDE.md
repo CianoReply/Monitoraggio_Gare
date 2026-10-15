@@ -12,9 +12,9 @@
 T1.1 studio API TED · T1.2 client · T1.3 parser · T1.4 deduplica e rettifiche · T1.5 job giornaliero · T1.6 registro esecuzioni
 
 ## Regole specifiche
-- Prima di toccare query o campi TED leggi `docs/TED_API_NOTES.md` (T1.1); finché non esiste, "DA VERIFICARE".
+- Prima di toccare query o campi TED leggi `docs/TED_API_NOTES.md` (T1.1).
 - Le ricerche nella documentazione TED si fanno con il subagent `ted-api-researcher`.
-- Il client usa httpx: timeout 30 s, 3 tentativi con attesa 1 s, 2 s, 4 s su errori 5xx o di rete, rispetto del rate limit.
+- Client (`ted_client.py`): httpx, paginazione `ITERATION`, timeout 30 s; su rete, 5xx e 429 la prima richiesta più 3 tentativi (attese 1, 2, 4 s); almeno 1 s tra due richieste.
 - Il parser non solleva mai eccezioni per un campo mancante: imposta `null` e registra un warning.
 - Normalizza: date ISO con fuso, importo decimale con valuta separata, CPV a 8 cifre, testo in italiano o in inglese.
 - Salva sempre il dato originale in `raw_data`.
