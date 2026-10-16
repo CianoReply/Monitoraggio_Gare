@@ -96,6 +96,10 @@ I tipi sono portabili tra PostgreSQL e SQLite (test): niente tipi specifici di u
 | `raw_data` | JSON | Dato originale TED, per rielaborazioni future |
 | `created_at` | datetime con fuso | Primo inserimento |
 | `updated_at` | datetime con fuso | Ultimo aggiornamento (deduplica o rettifica) |
+| `watch_status` | enum `none` / `watching` / `to_deepen` / `candidate` / `discarded` | Stato in osservazione dal frontend (ADR-016) |
+| `watched_at` | datetime con fuso, null | Ingresso in osservazione (ADR-016) |
+| `decision_status` | enum `discarded` / `monitored` / `deepened` / `candidate`, null | Decisione presa dal frontend (ADR-016) |
+| `decision_reason`, `decided_at`, `decided_by` | text / datetime con fuso / string, null | Motivo, momento e autore della decisione (ADR-016) |
 
 ### 4.2 `documents` – documenti di una gara
 
@@ -132,6 +136,7 @@ I tipi sono portabili tra PostgreSQL e SQLite (test): niente tipi specifici di u
 | `source_doc` | string | Documento da cui è estratto il valore |
 | `source_page` | integer, null | Pagina del documento |
 | `is_critical` | boolean | Importi, fatturati, riferimenti normativi, requisiti legali o contrattuali |
+| `group` | enum `key_info` / `requirements` | Gruppo del campo nel frontend; i campi critici sono requisiti (ADR-016) |
 | `verification_status` | enum `to_verify` / `verified` | Ogni campo nasce `to_verify` (etichetta UI "Da verificare"); diventa `verified` ("Verificato") con `confirm` o `correct` (T3.4). Lo stato del report dipende solo dai campi critici |
 | `reviewer` | string, null | Nome del revisore |
 | `reviewed_at` | datetime con fuso, null | Momento della revisione |

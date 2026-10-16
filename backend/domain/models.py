@@ -1,4 +1,4 @@
-"""Modelli SQLAlchemy delle 5 tabelle (docs/ARCHITECTURE.md, sezione 4).
+"""Modelli SQLAlchemy delle 5 tabelle (docs/ARCHITECTURE.md, sezione 4; aggiunte di ADR-016).
 
 I tipi sono portabili tra PostgreSQL e SQLite: JSON generico, enum come stringhe
 con vincolo CHECK (``native_enum=False``), nessun tipo specifico di un solo database.
@@ -87,6 +87,32 @@ class VerificationStatus(enum.StrEnum):
     VERIFIED = "verified"
 
 
+class WatchStatus(enum.StrEnum):
+    """Stato della gara nella lista "In osservazione" del frontend (migrazione 0002)."""
+
+    NONE = "none"
+    WATCHING = "watching"
+    TO_DEEPEN = "to_deepen"
+    CANDIDATE = "candidate"
+    DISCARDED = "discarded"
+
+
+class DecisionStatus(enum.StrEnum):
+    """Decisione presa sulla gara dal frontend (migrazione 0002)."""
+
+    DISCARDED = "discarded"
+    MONITORED = "monitored"
+    DEEPENED = "deepened"
+    CANDIDATE = "candidate"
+
+
+class FieldGroup(enum.StrEnum):
+    """Gruppo di un campo del report: informazioni chiave o requisiti (migrazione 0002)."""
+
+    KEY_INFO = "key_info"
+    REQUIREMENTS = "requirements"
+
+
 class RunStatus(enum.StrEnum):
     RUNNING = "running"
     SUCCESS = "success"
@@ -138,6 +164,17 @@ class Tender(Base):
     raw_data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=utcnow, onupdate=utcnow)
+    # Lavoro dell'utente sul frontend (migrazione 0002): osservazione e decisione.
+    watch_status: Mapped[WatchStatus] = mapped_column(
+        _enum(WatchStatus, "watch_status"), default=WatchStatus.NONE, server_default="none"
+    )
+    watched_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    decision_status: Mapped[DecisionStatus | None] = mapped_column(
+        _enum(DecisionStatus, "decision_status")
+    )
+    decision_reason: Mapped[str | None] = mapped_column(Text)
+    decided_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    decided_by: Mapped[str | None] = mapped_column(String(200))
 
     documents: Mapped[list[Document]] = relationship(
         back_populates="tender", cascade="all, delete-orphan", order_by="Document.id"
@@ -199,6 +236,9 @@ class ReportField(Base):
     source_doc: Mapped[str] = mapped_column(String(500))
     source_page: Mapped[int | None] = mapped_column(Integer)
     is_critical: Mapped[bool] = mapped_column(Boolean, default=False, server_default=sa_false())
+    group: Mapped[FieldGroup] = mapped_column(
+        _enum(FieldGroup, "field_group"), default=FieldGroup.KEY_INFO, server_default="key_info"
+    )
     verification_status: Mapped[VerificationStatus] = mapped_column(
         _enum(VerificationStatus, "verification_status"), default=VerificationStatus.TO_VERIFY
     )

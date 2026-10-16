@@ -21,7 +21,7 @@ from starlette.datastructures import Headers
 from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
 
-from backend.api import deps, reports, runs, stats, tenders
+from backend.api import deps, frontend, reports, runs, stats, tenders
 from backend.api.errors import register_error_handlers
 from backend.api.schemas import Health
 from backend.domain import repository
@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_CORS_ORIGINS = "http://localhost:3000,http://localhost:5173"
 DEFAULT_ALLOWED_HOSTS = "localhost,127.0.0.1,testserver"
-CORS_ALLOWED_HEADERS = ["Content-Type", "Accept"]
+CORS_ALLOWED_HEADERS = ["Content-Type", "Accept", "X-User-Name"]
 SHUTDOWN_WAIT_SECONDS = 5.0  # attesa massima del job manuale alla chiusura dell'app
 RESTART_ERROR_MESSAGE = "Esecuzione interrotta da un riavvio"
 MAX_INTERRUPTED_RUNS = 100
@@ -177,13 +177,13 @@ def create_app(session_factory: sessionmaker[Session] | None = None) -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=cors_origins(),
-        allow_methods=["GET", "POST", "PATCH"],
+        allow_methods=["GET", "POST", "PATCH", "PUT"],
         allow_headers=CORS_ALLOWED_HEADERS,
     )
     # Ultimo aggiunto = più esterno: gli host non ammessi sono rifiutati prima del resto.
     app.add_middleware(AllowedHostsMiddleware, allowed=allowed_hosts())
     register_error_handlers(app)
-    for module in (tenders, reports, stats, runs):
+    for module in (tenders, reports, stats, runs, frontend):
         app.include_router(module.router)
 
     @app.get("/health", operation_id="getHealth", summary="Verifica che il servizio sia attivo")

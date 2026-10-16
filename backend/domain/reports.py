@@ -45,6 +45,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from backend.domain.models import (
+    FieldGroup,
     Report,
     ReportField,
     ReportStatus,
@@ -330,6 +331,7 @@ def create_report(
                 source_doc=f.source_doc,
                 source_page=f.source_page,
                 is_critical=f.is_critical,
+                group=FieldGroup.REQUIREMENTS if f.is_critical else FieldGroup.KEY_INFO,
                 verification_status=VerificationStatus.TO_VERIFY,
             )
             for f in data.fields

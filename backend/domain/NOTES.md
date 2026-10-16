@@ -80,3 +80,7 @@ T2.1 schema e migrazioni · T2.2 filtri · T2.3 punteggio · T2.4 documenti · T
 - Limiti che il database rifiuterebbe diventano errori chiari: `estimated_value` < 10^16 (`Numeric(18,2)`), `source_page` <= 2147483647, lunghezze delle colonne, nessun carattere NUL nei testi (`TenderCreate`, report, `q`, `discard_reason`), date fuori intervallo e `page` troppo grande in `list_tenders` (`InvalidQueryError`, sottoclasse di `ValueError`: l'API cattura solo quella).
 - Limiti noti: si presume UN SOLO scrittore (un job alla volta, un worker); in caso di concorrenza `upsert_tender` può dare `IntegrityError` (unicità di `publication_number`) e `create_report` risponde 409 grazie al savepoint, ma `review_field` non usa lock (due revisioni simultanee sullo stesso report: vince l'ultima); se `documents_url` di una gara cambia, il documento del vecchio link resta (orfano) e se ne crea uno nuovo; il download accetta qualsiasi porta (solo host pubblici, http/https); il DNS rebinding non è escluso (serve il blocco di rete in uscita in produzione); `documents` non ha UNIQUE(tender_id, url).
 - Punto aperto per l'utente: dopo una rettifica la riverifica del report è parziale (`reset_report_to_review` lascia i campi `verified`).
+
+## Osservazione e decisioni (ADR-016)
+- `workflow.set_watch`, `set_decision`, `list_published_on`, `list_active_watch`, `list_decided`, `search`; solo `flush`.
+- Migrazione 0002: colonne `watch_status`, `watched_at`, `decision_*` in `tenders`, `group` in `report_fields` (critico = `requirements`).
