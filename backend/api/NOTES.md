@@ -37,3 +37,8 @@ Configura il log JSON; all'avvio chiude `failed` le esecuzioni rimaste `running`
 - `backend/tests/api_db.py`: `make_seeded_engine` (SQLite con `seed.py`; `file_backed=True` per i test con thread) e `make_app` (sostituisce `get_session`, `get_now`, `get_pipeline_deps`: TED finto, mai la rete).
 - Marker `contract` (conformità al contratto) ed `e2e` (4 scenari TED finto → job → database → API), registrati in `backend/tests/conftest.py`; la CI li esegue esplicitamente.
 - Con `with TestClient(app)` si prova il ciclo di vita; i test normali non lo avviano.
+
+## API per il frontend (`/api`, ADR-016)
+- `backend/api/frontend.py` implementa il §6 di `Monitoraggio_Gare_FE/HANDOFF.md`: `GET /api/monitoring/status`, `GET /api/tenders?published=today|watch=active|decided=true`, `GET /api/tenders/{id}`, `GET /api/search?q=`, `PUT /api/tenders/{id}/watch`, `POST /api/tenders/{id}/decision`, `PATCH /api/tenders/{id}/report/fields/{fieldId}`.
+- Fuori da `/docs` e da `docs/API_CONTRACT.yaml` (il test di parità resta valido). Logica nel dominio (`workflow.py`, `reports.review_field`).
+- Utente: intestazione `X-User-Name` (il frontend la invia), altrimenti `FRONTEND_DEFAULT_USER`. Test in `backend/tests/test_api_frontend.py`.

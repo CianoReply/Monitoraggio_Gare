@@ -21,6 +21,7 @@
 | ADR-013 | Configurazione in TOML invece di YAML | Accettata |
 | ADR-014 | Una rettifica aggiorna la riga della gara originale | Proposta |
 | ADR-015 | API senza autenticazione, solo per rete locale | Proposta |
+| ADR-016 | API per il frontend sotto `/api`, osservazione e decisioni | Accettata |
 
 ---
 
@@ -113,3 +114,9 @@
 - **Decisione (proposta):** nella prima versione l'API resta senza autenticazione ed è usata solo in locale (porte pubblicate su `127.0.0.1` nel compose, `ALLOWED_HOSTS`, un solo worker). Prima di qualsiasi esposizione su una rete condivisa serve un reverse proxy con autenticazione e il `reviewer` va ricavato dall'utente autenticato.
 - **Motivazione:** il progetto è un prototipo interno; l'autenticazione cambia il contratto e il frontend e va decisa con l'utente.
 - **Conseguenze:** limite documentato in `backend/api/CLAUDE.md` e in [ONBOARDING.md](ONBOARDING.md); da riesaminare prima del rilascio. Stato "Proposta" fino alla decisione dell'utente.
+
+## ADR-016 – API per il frontend sotto `/api`, osservazione e decisioni
+- **Contesto:** il frontend `Monitoraggio_Gare_FE` segue un proprio contratto (§6 del suo `HANDOFF.md`): gara completa in un'unica risposta, liste "oggi", "in osservazione" e "storico", ricerca, osservazione (`watch_status`) e decisioni, gruppo dei campi del report. Il BE non aveva osservazione, decisioni né gruppi.
+- **Decisione (richiesta dall'utente il 2026-10-16):** il BE espone un'API dedicata sotto `/api` (`backend/api/frontend.py`) che implementa quel contratto traducendo dal dominio; non compare in `/docs` né in `docs/API_CONTRACT.yaml`, che resta invariato. Migrazione 0002: `tenders.watch_status`, `watched_at`, `decision_status`, `decision_reason`, `decided_at`, `decided_by`; `report_fields.group` (`key_info` / `requirements`, i campi critici sono requisiti). Logica in `backend/domain/workflow.py`. Chi decide o rivede è l'intestazione `X-User-Name` (o `FRONTEND_DEFAULT_USER`), non un'identità verificata (ADR-015).
+- **Motivazione:** il frontend resta invariato nella logica e il contratto pubblico non cambia; osservazione e decisioni sono dati del sistema, non solo dell'interfaccia.
+- **Conseguenze:** "gare di oggi" = giorno elaborato dall'ultima esecuzione riuscita; date con ora in ora locale di Roma (`AAAA-MM-GGTHH:MM`); `estimated_value`, `submission_deadline` e `source_page` possono essere `null` (il frontend li gestisce). Da rivedere se il frontend passerà al contratto pubblico.
